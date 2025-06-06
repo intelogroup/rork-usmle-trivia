@@ -7,8 +7,13 @@ import DashboardStats from '@/components/home/DashboardStats';
 import LevelProgress from '@/components/home/LevelProgress';
 import QuickActions from '@/components/home/QuickActions';
 import WeeklyProgress from '@/components/home/WeeklyProgress';
+import WeakestSubjects from '@/components/home/WeakestSubjects';
+import ReviewCard from '@/components/home/ReviewCard';
 import { useUserLevel } from '@/hooks/useUserLevel';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useWeakestCategories } from '@/hooks/useWeakestCategories';
+import { useIncorrectQuestions } from '@/hooks/useIncorrectQuestions';
+import { useQuizStore } from '@/store/quiz/quizStore';
 import { Play } from 'lucide-react-native';
 
 export default function HomeScreen() {
@@ -17,6 +22,8 @@ export default function HomeScreen() {
   // Use hooks with error handling
   const levelData = useUserLevel();
   const statsData = useDashboardStats();
+  const { weakestCategories } = useWeakestCategories();
+  const { incorrectCount, isLoading: isIncorrectLoading, startReviewQuiz } = useIncorrectQuestions();
 
   // Prevent navigation before root layout is mounted
   useEffect(() => {
@@ -37,8 +44,8 @@ export default function HomeScreen() {
   const handleQuickQuiz = () => {
     try {
       // Implement quick quiz navigation or logic here
-      console.log('Quick Quiz pressed');
-      // For now, navigate to quiz tab as an example
+      console.log('Timed Challenge pressed');
+      // For now, navigate to quiz tab with preset parameters
       router.push('/(tabs)/quiz');
     } catch (error) {
       console.error('Quick quiz navigation error (silently bypassed):', error);
@@ -50,6 +57,15 @@ export default function HomeScreen() {
       router.push('/(tabs)/quiz');
     } catch (error) {
       console.error('Start quiz navigation error (silently bypassed):', error);
+    }
+  };
+
+  const handleReviewPress = async () => {
+    try {
+      await startReviewQuiz();
+      router.push('/(tabs)/quiz');
+    } catch (error) {
+      console.error('Review quiz navigation error (silently bypassed):', error);
     }
   };
 
@@ -105,9 +121,19 @@ export default function HomeScreen() {
           <View style={styles.startQuizIcon}>
             <Play size={20} color={Colors.dark.background} fill={Colors.dark.background} />
           </View>
-          <Text style={styles.startQuizText}>Start Quiz</Text>
+          <Text style={styles.startQuizText}>Start New Quiz</Text>
         </View>
       </TouchableOpacity>
+      
+      <WeakestSubjects weakestCategories={weakestCategories} />
+      
+      <ReviewCard 
+        onReviewPress={handleReviewPress} 
+        incorrectCount={incorrectCount} 
+        isLoading={isIncorrectLoading} 
+      />
+      
+      <QuickActions onQuickQuiz={handleQuickQuiz} />
       
       <DashboardStats 
         totalQuizzes={statsData.totalQuizzes} 
@@ -116,8 +142,6 @@ export default function HomeScreen() {
         totalTimeSpent={statsData.totalTimeSpent} 
         getStreakEmoji={statsData.getStreakEmoji} 
       />
-      
-      <QuickActions onQuickQuiz={handleQuickQuiz} />
       
       <WeeklyProgress weeklyProgress={statsData.weeklyProgress} />
     </ScrollView>

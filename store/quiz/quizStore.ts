@@ -39,6 +39,7 @@ interface QuizState {
   loadCategories: () => Promise<void>;
   checkQuestionAvailability: (categoryIds: string[], difficulty?: 'easy' | 'medium' | 'hard' | 'all') => Promise<number>;
   startQuiz: (categoryIds: string[], questionCount: number, difficulty?: 'easy' | 'medium' | 'hard' | 'all', mode?: QuizMode) => Promise<void>;
+  startTimedChallenge: () => Promise<void>;
   selectAnswer: (answerIndex: number) => void;
   submitAnswer: () => void;
   nextQuestion: () => void;
@@ -130,7 +131,7 @@ export const useQuizStore = create<QuizState>()(
 
           // Filter questions by categories and difficulty
           let filteredQuestions = validQuestions.filter(q => 
-            validCategoryIds.includes(q.category)
+            validCategoryIds.includes(q.category_id)
           );
 
           // Fix the difficulty filtering logic - check if difficulty is 'all' OR matches question difficulty
@@ -196,7 +197,7 @@ export const useQuizStore = create<QuizState>()(
 
           // Filter questions by categories and difficulty
           let filteredQuestions = validQuestions.filter(q => 
-            validCategoryIds.includes(q.category)
+            validCategoryIds.includes(q.category_id)
           );
 
           // Fix the difficulty filtering logic - check if difficulty is 'all' OR matches question difficulty
@@ -262,6 +263,76 @@ export const useQuizStore = create<QuizState>()(
         } catch (error: unknown) {
           console.error('Error starting quiz:', error);
           let errorMessage = 'Failed to start quiz';
+          if (error instanceof Error) {
+            errorMessage = error.message;
+          } else if (typeof error === 'string') {
+            errorMessage = error;
+          }
+          set({ 
+            isLoading: false, 
+            error: errorMessage
+          });
+        }
+      },
+
+      startTimedChallenge: async () => {
+        try {
+          set({ isLoading: true, error: null });
+          const validQuestions = Array.isArray(questions) ? questions : [];
+          
+          if (validQuestions.length === 0) {
+            throw new Error('No questions are available at the moment. Please try again later.');
+          }
+
+          // Get all category IDs
+          const categoryIds = get().categories.map(cat => cat.id);
+          
+          if (categoryIds.length === 0) {
+            throw new Error('No categories available for timed challenge.');
+          }
+
+          // Use all questions for timed challenge
+          const questionCount = Math.min(10, validQuestions.length);
+          
+          // Shuffle and limit questions
+          const shuffledQuestions = validQuestions
+            .sort(() => Math.random() - 0.5)
+            .slice(0, questionCount);
+
+          const session: QuizSession = {
+            id: Date.now().toString(),
+            user_id: 'temp-user',
+            category_id: categoryIds[0],
+            questions: shuffledQuestions,
+            answers: [], // Initialize empty answers array
+            currentQuestionIndex: 0,
+            score: 0,
+            total_questions: shuffledQuestions.length,
+            correct_answers: 0,
+            time_taken: 0,
+            mode: 'timed',
+            difficulty: 'all',
+            isCompleted: false,
+            isAnswerSubmitted: false,
+            selectedAnswer: undefined,
+            started_at: new Date().toISOString(),
+            completed_at: null,
+          };
+
+          // Set timer for timed mode
+          const timePerQuestion = 30;
+          
+          set({ 
+            currentSession: session, 
+            isLoading: false,
+            selectedAnswer: null,
+            timeRemaining: timePerQuestion,
+            isTimerActive: true
+          });
+
+        } catch (error: unknown) {
+          console.error('Error starting timed challenge:', error);
+          let errorMessage = 'Failed to start timed challenge';
           if (error instanceof Error) {
             errorMessage = error.message;
           } else if (typeof error === 'string') {

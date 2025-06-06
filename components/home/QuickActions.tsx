@@ -12,15 +12,15 @@ export default function QuickActions({ onQuickQuiz }: QuickActionsProps) {
   const actions = [
     {
       icon: Zap,
-      label: 'Quick Quiz',
+      label: 'Timed Challenge',
       onPress: onQuickQuiz,
       color: Colors.dark.primary,
       backgroundColor: 'rgba(30, 58, 138, 0.2)',
     },
     {
       icon: BookOpen,
-      label: 'Study Tips',
-      onPress: () => router.push('/study-tips'),
+      label: 'Browse Categories',
+      onPress: () => router.push('/(tabs)/quiz'),
       color: Colors.dark.success,
       backgroundColor: 'rgba(34, 197, 94, 0.2)',
     },
