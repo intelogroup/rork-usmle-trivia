@@ -1,6 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import { TouchableOpacity, Text, StyleSheet, View, Animated, Platform } from 'react-native';
 import Colors from '@/theme/colors';
+import Typography from '@/theme/typography';
+import { Dimensions, Spacing } from '@/theme/spacing';
 import { Check, X, Zap } from 'lucide-react-native';
 
 interface OptionButtonProps {
@@ -186,11 +188,11 @@ export default function OptionButton({
           <View style={styles.resultIcon}>
             {isCorrect ? (
               <View style={styles.correctIcon}>
-                <Check size={20} color={Colors.dark.background} />
+                <Check size={Dimensions.icon.sm} color={Colors.dark.background} />
               </View>
             ) : selected ? (
               <View style={styles.incorrectIcon}>
-                <X size={20} color={Colors.dark.background} />
+                <X size={Dimensions.icon.sm} color={Colors.dark.background} />
               </View>
             ) : null}
           </View>
@@ -198,7 +200,7 @@ export default function OptionButton({
 
         {selected && !showResult && (
           <View style={styles.selectedIndicator}>
-            <Zap size={16} color={Colors.dark.background} fill={Colors.dark.background} />
+            <Zap size={Dimensions.icon.xs} color={Colors.dark.background} fill={Colors.dark.background} />
           </View>
         )}
       </TouchableOpacity>
@@ -211,10 +213,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 12,
-    minHeight: 64,
+    padding: Spacing.lg,
+    borderRadius: Dimensions.borderRadius.lg,
+    marginBottom: Spacing.md,
+    minHeight: Dimensions.touchTarget.large, // 56px touch target for accessibility
   },
   labelContainer: {
     flexDirection: 'row',
@@ -228,7 +230,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.cardHighlight,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: Spacing.lg,
   },
   selectedIndexBadge: {
     backgroundColor: Colors.dark.background,
@@ -240,8 +242,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.background,
   },
   indexText: {
-    fontSize: 16,
-    fontWeight: '700',
+    ...Typography.styles.button,
+    fontSize: Typography.fontSize.sm,
     color: Colors.dark.text,
   },
   selectedIndexText: {
@@ -251,21 +253,21 @@ const styles = StyleSheet.create({
     color: Colors.dark.card,
   },
   labelText: {
-    fontSize: 16,
+    ...Typography.styles.body,
     color: Colors.dark.text,
     flex: 1,
-    lineHeight: 22,
+    lineHeight: Typography.lineHeight.normal * Typography.fontSize.base,
   },
   selectedLabelText: {
     color: Colors.dark.background,
-    fontWeight: '600',
+    fontWeight: Typography.fontWeight.semibold,
   },
   resultLabelText: {
     color: Colors.dark.background,
-    fontWeight: '600',
+    fontWeight: Typography.fontWeight.semibold,
   },
   resultIcon: {
-    marginLeft: 12,
+    marginLeft: Spacing.md,
   },
   correctIcon: {
     width: 32,
@@ -284,6 +286,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   selectedIndicator: {
-    marginLeft: 12,
+    marginLeft: Spacing.md,
   },
 });

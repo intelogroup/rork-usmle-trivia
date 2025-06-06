@@ -1,6 +1,8 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, View } from 'react-native';
 import Colors from '@/theme/colors';
+import Typography from '@/theme/typography';
+import { Dimensions } from '@/theme/spacing';
 
 interface ButtonProps {
   title: string;
@@ -94,26 +96,29 @@ export default function Button({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 12,
+    borderRadius: Dimensions.borderRadius.md,
     paddingVertical: 14,
     paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: Dimensions.button.medium, // Ensures 48px touch target
     shadowColor: Colors.dark.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   buttonSmall: {
     paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 10,
+    minHeight: Dimensions.button.small, // 40px touch target
+    borderRadius: Dimensions.borderRadius.sm,
   },
   buttonLarge: {
     paddingVertical: 18,
     paddingHorizontal: 28,
-    borderRadius: 14,
+    minHeight: Dimensions.button.large, // 56px touch target
+    borderRadius: Dimensions.borderRadius.lg,
   },
   buttonPrimary: {
     backgroundColor: Colors.dark.primary,
@@ -122,15 +127,16 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.secondary,
   },
   buttonOutline: {
-    backgroundColor: Colors.dark.cardHighlight,
-    borderWidth: 1.5,
+    backgroundColor: 'transparent',
+    borderWidth: 2,
     borderColor: Colors.dark.primary,
   },
   buttonTextVariant: {
     backgroundColor: 'transparent',
-    paddingHorizontal: 0,
+    paddingHorizontal: 8,
     shadowOpacity: 0,
     elevation: 0,
+    minHeight: Dimensions.touchTarget.small, // Maintains touch target
   },
   buttonDisabled: {
     opacity: 0.6,
@@ -145,25 +151,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   iconContainer: {
-    marginHorizontal: 4,
+    marginHorizontal: 6,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    letterSpacing: 0.5,
+    ...Typography.styles.button,
+    color: Colors.dark.text,
   },
   textSmall: {
-    fontSize: 14,
+    ...Typography.styles.buttonSmall,
   },
   textLarge: {
-    fontSize: 18,
-    letterSpacing: 0.75,
+    ...Typography.styles.buttonLarge,
   },
   textPrimary: {
-    color: Colors.dark.text,
+    color: Colors.dark.background,
   },
   textSecondary: {
-    color: Colors.dark.text,
+    color: Colors.dark.background,
   },
   textOutline: {
     color: Colors.dark.primary,

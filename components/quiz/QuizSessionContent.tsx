@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Platform, ScrollView } from 'react-native';
 import Colors from '@/theme/colors';
+import Typography from '@/theme/typography';
+import { Dimensions, Spacing } from '@/theme/spacing';
 import OptionButton from '@/components/OptionButton';
 import type { UsmleQuestion } from '@/lib/types/usmle';
 import { LinearGradient } from 'expo-linear-gradient';
-import Typography from '@/theme/typography';
-import Spacing from '@/theme/spacing';
-import { ThumbsUp, ThumbsDown, Lightbulb, CheckCircle, XCircle } from 'lucide-react-native';
+import { Lightbulb, CheckCircle, XCircle } from 'lucide-react-native';
 
 interface QuizSessionContentProps {
   question: UsmleQuestion;
@@ -230,8 +230,8 @@ export default function QuizSessionContent({
             >
               <View style={styles.feedbackIcon}>
                 {isCorrect ? 
-                  <CheckCircle size={28} color={Colors.dark.background} /> : 
-                  <XCircle size={28} color={Colors.dark.background} />
+                  <CheckCircle size={Dimensions.icon.lg} color={Colors.dark.background} /> : 
+                  <XCircle size={Dimensions.icon.lg} color={Colors.dark.background} />
                 }
               </View>
               <Text style={styles.feedbackEmoji}>{getRandomEmoji(isCorrect ? 'correct' : 'incorrect')}</Text>
@@ -261,12 +261,12 @@ export default function QuizSessionContent({
           </Animated.View>
         )}
 
-        {/* Explanation Section - Now at the bottom */}
+        {/* Explanation Section - Fixed positioning at bottom */}
         {isAnswerSubmitted && question.explanation && (
           <View style={styles.explanationSection}>
             <View style={styles.explanationHeader}>
-              <Lightbulb size={20} color={Colors.dark.primary} />
-              <Text style={styles.explanationTitle}>💡 Explanation</Text>
+              <Lightbulb size={Dimensions.icon.sm} color={Colors.dark.primary} />
+              <Text style={styles.explanationTitle}>Explanation</Text>
             </View>
             <View style={styles.explanationContainer}>
               <Text style={styles.explanationText}>{question.explanation}</Text>
@@ -275,7 +275,7 @@ export default function QuizSessionContent({
             {/* Additional learning tip */}
             <View style={styles.learningTip}>
               <Text style={styles.learningTipText}>
-                💭 Remember this concept for future questions!
+                Remember this concept for future questions!
               </Text>
             </View>
           </View>
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   questionContainer: {
-    borderRadius: 16,
+    borderRadius: Dimensions.borderRadius.lg,
     padding: Spacing.xl,
     marginBottom: Spacing.xl,
     elevation: 3,
@@ -307,11 +307,10 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   questionText: {
-    fontSize: Typography.fontSize.xl,
-    fontWeight: Typography.fontWeight.semibold,
+    ...Typography.styles.h4,
     color: Colors.dark.text,
-    lineHeight: 28,
     textAlign: 'center',
+    lineHeight: Typography.lineHeight.normal * Typography.fontSize.xl,
   },
   optionsContainer: {
     gap: Spacing.md,
@@ -322,7 +321,7 @@ const styles = StyleSheet.create({
     top: '35%',
     left: '50%',
     transform: [{ translateX: -120 }],
-    borderRadius: 24,
+    borderRadius: Dimensions.borderRadius['2xl'],
     alignItems: 'center',
     shadowColor: Colors.dark.shadow,
     shadowOffset: { width: 0, height: 12 },
@@ -335,7 +334,7 @@ const styles = StyleSheet.create({
   feedbackGradient: {
     flex: 1,
     width: '100%',
-    borderRadius: 24,
+    borderRadius: Dimensions.borderRadius['2xl'],
     alignItems: 'center',
     justifyContent: 'center',
     padding: Spacing.xl,
@@ -344,18 +343,17 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   feedbackEmoji: {
-    fontSize: 32,
+    fontSize: Typography.fontSize['4xl'],
     marginBottom: Spacing.sm,
   },
   feedbackText: {
-    fontSize: Typography.fontSize.xl,
-    fontWeight: Typography.fontWeight.bold,
+    ...Typography.styles.h4,
     color: Colors.dark.background,
     textAlign: 'center',
     marginBottom: Spacing.xs,
   },
   feedbackSubtext: {
-    fontSize: Typography.fontSize.sm,
+    ...Typography.styles.bodySmall,
     color: Colors.dark.background,
     textAlign: 'center',
     opacity: 0.9,
@@ -369,12 +367,11 @@ const styles = StyleSheet.create({
     zIndex: 1001,
   },
   celebrationEmoji: {
-    fontSize: 48,
+    fontSize: Typography.fontSize['5xl'],
     marginBottom: Spacing.xs,
   },
   celebrationText: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.bold,
+    ...Typography.styles.h3,
     color: Colors.dark.primary,
     textAlign: 'center',
   },
@@ -390,33 +387,32 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   explanationTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.bold,
+    ...Typography.styles.h4,
     color: Colors.dark.text,
     marginLeft: Spacing.sm,
   },
   explanationContainer: {
     backgroundColor: Colors.dark.card,
-    borderRadius: 16,
+    borderRadius: Dimensions.borderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.md,
     borderLeftWidth: 4,
     borderLeftColor: Colors.dark.primary,
   },
   explanationText: {
-    fontSize: Typography.fontSize.base,
+    ...Typography.styles.body,
     color: Colors.dark.text,
-    lineHeight: 24,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
   },
   learningTip: {
     backgroundColor: `${Colors.dark.primary}15`,
-    borderRadius: 12,
+    borderRadius: Dimensions.borderRadius.md,
     padding: Spacing.md,
     borderWidth: 1,
     borderColor: `${Colors.dark.primary}30`,
   },
   learningTipText: {
-    fontSize: Typography.fontSize.sm,
+    ...Typography.styles.bodySmall,
     color: Colors.dark.textSecondary,
     fontStyle: 'italic',
     textAlign: 'center',

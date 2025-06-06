@@ -1,15 +1,19 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet, TextInputProps } from 'react-native';
 import Colors from '@/theme/colors';
+import Typography from '@/theme/typography';
+import { Dimensions, Spacing } from '@/theme/spacing';
 
 interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
+  helperText?: string;
 }
 
 export default function Input({
   label,
   error,
+  helperText,
   style,
   ...props
 }: InputProps) {
@@ -23,40 +27,41 @@ export default function Input({
           error && styles.inputError,
           style,
         ]}
-        placeholderTextColor={Colors.dark.textSecondary}
+        placeholderTextColor={Colors.dark.textTertiary}
         {...props}
       />
       {error && <Text style={styles.errorText}>{error}</Text>}
+      {helperText && !error && <Text style={styles.helperText}>{helperText}</Text>}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
+    marginBottom: Spacing.lg,
     width: '100%',
   },
   label: {
-    fontSize: 16,
-    marginBottom: 10,
+    ...Typography.styles.bodySmall,
     color: Colors.dark.text,
-    fontWeight: '600',
-    letterSpacing: 0.5,
+    fontWeight: Typography.fontWeight.semibold,
+    marginBottom: Spacing.sm,
   },
   input: {
     backgroundColor: Colors.dark.card,
-    borderRadius: 12,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-    fontSize: 16,
+    borderRadius: Dimensions.borderRadius.md,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    minHeight: Dimensions.input, // Ensures 48px touch target
+    fontSize: Typography.fontSize.base,
     color: Colors.dark.text,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: Colors.dark.border,
     shadowColor: Colors.dark.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   inputError: {
     borderColor: Colors.dark.error,
@@ -65,12 +70,17 @@ const styles = StyleSheet.create({
   multiline: {
     minHeight: 120,
     textAlignVertical: 'top',
-    paddingTop: 16,
+    paddingTop: Spacing.lg,
   },
   errorText: {
+    ...Typography.styles.caption,
     color: Colors.dark.error,
-    fontSize: 14,
-    marginTop: 6,
-    letterSpacing: 0.25,
+    marginTop: Spacing.xs,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  helperText: {
+    ...Typography.styles.caption,
+    color: Colors.dark.textSecondary,
+    marginTop: Spacing.xs,
   },
 });

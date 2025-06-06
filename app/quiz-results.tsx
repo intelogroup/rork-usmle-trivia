@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, Animated, Platform } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import Colors from '@/theme/colors';
+import Typography from '@/theme/typography';
+import { Dimensions, Spacing } from '@/theme/spacing';
 import Button from '@/components/Button';
 import { Award, Home, RotateCcw, Share2, Clock, Target, AlertCircle, Trophy, Star, Zap, Crown } from 'lucide-react-native';
 import { achievements } from '@/mocks/achievements';
@@ -169,11 +171,11 @@ export default function QuizResultsScreen() {
           style={styles.gradient}
         >
           <View style={styles.errorContainer}>
-            <AlertCircle size={48} color={Colors.dark.textSecondary} />
-            <Text style={styles.errorText}>No Results Available 📊</Text>
-            <Text style={styles.errorSubtext}>Complete a quiz to see your amazing results! ✨</Text>
+            <AlertCircle size={Dimensions.icon.xl} color={Colors.dark.textSecondary} />
+            <Text style={styles.errorText}>No Results Available</Text>
+            <Text style={styles.errorSubtext}>Complete a quiz to see your amazing results!</Text>
             <Button
-              title="Start a Quiz 🚀"
+              title="Start a Quiz"
               onPress={() => router.push('/(tabs)/quiz')}
               style={styles.loginButton}
             />
@@ -192,26 +194,26 @@ export default function QuizResultsScreen() {
   const unlockedAchievement = percentage >= 80 ? achievements[1] : null;
   
   const getResultMessage = () => {
-    if (percentage >= 90) return "Outstanding! 🏆";
-    if (percentage >= 80) return "Excellent! 🌟";
-    if (percentage >= 70) return "Great job! 👏";
-    if (percentage >= 50) return "Good effort! 💪";
-    return "Keep practicing! 📚";
+    if (percentage >= 90) return "Outstanding!";
+    if (percentage >= 80) return "Excellent!";
+    if (percentage >= 70) return "Great job!";
+    if (percentage >= 50) return "Good effort!";
+    return "Keep practicing!";
   };
   
   const getResultDescription = () => {
-    if (percentage >= 90) return "You're absolutely crushing it! 🔥";
-    if (percentage >= 80) return "You're mastering the material! ⚡";
-    if (percentage >= 70) return "You're making fantastic progress! 🚀";
-    if (percentage >= 50) return "You're building a solid foundation! 🏗️";
-    return "Every expert was once a beginner! 🌱";
+    if (percentage >= 90) return "You're absolutely crushing it!";
+    if (percentage >= 80) return "You're mastering the material!";
+    if (percentage >= 70) return "You're making fantastic progress!";
+    if (percentage >= 50) return "You're building a solid foundation!";
+    return "Every expert was once a beginner!";
   };
 
   const getScoreIcon = () => {
-    if (percentage >= 90) return <Crown size={48} color={Colors.dark.background} />;
-    if (percentage >= 80) return <Trophy size={48} color={Colors.dark.background} />;
-    if (percentage >= 70) return <Star size={48} color={Colors.dark.background} />;
-    return <Zap size={48} color={Colors.dark.background} />;
+    if (percentage >= 90) return <Crown size={Dimensions.icon.xl} color={Colors.dark.background} />;
+    if (percentage >= 80) return <Trophy size={Dimensions.icon.xl} color={Colors.dark.background} />;
+    if (percentage >= 70) return <Star size={Dimensions.icon.xl} color={Colors.dark.background} />;
+    return <Zap size={Dimensions.icon.xl} color={Colors.dark.background} />;
   };
   
   const handleRetakeQuiz = () => {
@@ -287,7 +289,7 @@ export default function QuizResultsScreen() {
               {getScoreIcon()}
               <Text style={styles.scoreText}>{percentage}%</Text>
               <Text style={styles.scoreDetail}>
-                {score}/{total} correct ✅
+                {score}/{total} correct
               </Text>
             </LinearGradient>
             
@@ -296,8 +298,8 @@ export default function QuizResultsScreen() {
             
             {mode === 'timed' && (
               <View style={styles.modeInfoContainer}>
-                <Clock size={16} color={Colors.dark.textSecondary} />
-                <Text style={styles.modeInfoText}>Timed Challenge Completed! ⏱️</Text>
+                <Clock size={Dimensions.icon.xs} color={Colors.dark.textSecondary} />
+                <Text style={styles.modeInfoText}>Timed Challenge Completed!</Text>
               </View>
             )}
           </Animated.View>
@@ -314,7 +316,7 @@ export default function QuizResultsScreen() {
               ]}
             >
               <Text style={styles.celebrationText}>
-                {percentage >= 90 ? "Perfect Score! 🎯" : "Fantastic Work! 🔥"}
+                {percentage >= 90 ? "Perfect Score!" : "Fantastic Work!"}
               </Text>
             </Animated.View>
           )}
@@ -323,8 +325,8 @@ export default function QuizResultsScreen() {
             {categoryPerformance.length > 0 && (
               <View style={styles.performanceContainer}>
                 <View style={styles.sectionHeader}>
-                  <Target size={20} color={Colors.dark.text} />
-                  <Text style={styles.sectionTitle}>Performance Breakdown 📊</Text>
+                  <Target size={Dimensions.icon.sm} color={Colors.dark.text} />
+                  <Text style={styles.sectionTitle}>Performance Breakdown</Text>
                 </View>
                 
                 {categoryPerformance.map((category) => (
@@ -332,8 +334,7 @@ export default function QuizResultsScreen() {
                     <View style={styles.categoryHeader}>
                       <Text style={styles.categoryName}>{category.categoryName}</Text>
                       <Text style={styles.categoryScore}>
-                        {category.correct}/{category.total} ({category.percentage}%) 
-                        {category.percentage >= 80 ? ' 🌟' : category.percentage >= 60 ? ' 👍' : ' 📚'}
+                        {category.correct}/{category.total} ({category.percentage}%)
                       </Text>
                     </View>
                     <ProgressBar 
@@ -353,8 +354,8 @@ export default function QuizResultsScreen() {
             {unlockedAchievement && (
               <View style={styles.achievementContainer}>
                 <View style={styles.sectionHeader}>
-                  <Award size={20} color={Colors.dark.text} />
-                  <Text style={styles.sectionTitle}>Achievement Unlocked! 🏆</Text>
+                  <Award size={Dimensions.icon.sm} color={Colors.dark.text} />
+                  <Text style={styles.sectionTitle}>Achievement Unlocked!</Text>
                 </View>
                 <AchievementCard 
                   achievement={{
@@ -368,10 +369,10 @@ export default function QuizResultsScreen() {
             {!isAuthenticated && (
               <View style={styles.loginPrompt}>
                 <Text style={styles.loginPromptText}>
-                  🔐 Log in to save your progress and unlock achievements! ✨
+                  Log in to save your progress and unlock achievements!
                 </Text>
                 <Button
-                  title="Log In 🚀"
+                  title="Log In"
                   onPress={() => router.push('/login')}
                   style={styles.loginPromptButton}
                 />
@@ -380,10 +381,11 @@ export default function QuizResultsScreen() {
             
             <View style={styles.actionButtons}>
               <Button
-                title="Share Results 📤"
+                title="Share Results"
                 onPress={handleShare}
                 variant="outline"
                 style={styles.actionButton}
+                icon={<Share2 size={Dimensions.icon.sm} color={Colors.dark.primary} />}
               />
             </View>
           </Animated.View>
@@ -391,15 +393,17 @@ export default function QuizResultsScreen() {
         
         <View style={styles.footer}>
           <Button
-            title="Try Again 🔄"
+            title="Try Again"
             onPress={handleRetakeQuiz}
             variant="outline"
             style={styles.footerButton}
+            icon={<RotateCcw size={Dimensions.icon.sm} color={Colors.dark.primary} />}
           />
           <Button
-            title="Home 🏠"
+            title="Home"
             onPress={handleGoHome}
             style={styles.footerButton}
+            icon={<Home size={Dimensions.icon.sm} color={Colors.dark.background} />}
           />
         </View>
       </LinearGradient>
@@ -428,18 +432,18 @@ const styles = StyleSheet.create({
   },
   confettiEmoji: {
     position: 'absolute',
-    fontSize: 32,
+    fontSize: Typography.fontSize['4xl'],
   },
   scrollContent: {
-    padding: 20,
+    padding: Spacing.xl,
     paddingBottom: 100,
   },
   resultContainer: {
     backgroundColor: Colors.dark.card,
-    borderRadius: 20,
-    padding: 32,
+    borderRadius: Dimensions.borderRadius.xl,
+    padding: Spacing['4xl'],
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: Spacing['2xl'],
     borderWidth: 1,
     borderColor: Colors.dark.border,
     elevation: 8,
@@ -457,7 +461,7 @@ const styles = StyleSheet.create({
     borderRadius: 70,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: Spacing.xl,
     elevation: 8,
     shadowColor: Colors.dark.primary,
     shadowOffset: {
@@ -468,120 +472,117 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
   },
   scoreText: {
-    color: Colors.dark.background,
+    ...Typography.styles.h1,
     fontSize: 42,
-    fontWeight: 'bold',
-    marginTop: 8,
+    color: Colors.dark.background,
+    marginTop: Spacing.sm,
   },
   scoreDetail: {
+    ...Typography.styles.bodySmall,
     color: Colors.dark.background,
-    fontSize: 14,
     opacity: 0.9,
-    fontWeight: '600',
+    fontWeight: Typography.fontWeight.semibold,
   },
   resultMessage: {
+    ...Typography.styles.h2,
     color: Colors.dark.text,
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
     textAlign: 'center',
   },
   resultDescription: {
+    ...Typography.styles.body,
     color: Colors.dark.textSecondary,
-    fontSize: 16,
     textAlign: 'center',
-    marginBottom: 20,
-    lineHeight: 24,
+    marginBottom: Spacing.xl,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
   },
   celebrationMessage: {
     backgroundColor: `${Colors.dark.primary}20`,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 24,
+    borderRadius: Dimensions.borderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing['2xl'],
     alignItems: 'center',
     borderWidth: 2,
     borderColor: Colors.dark.primary,
   },
   celebrationText: {
+    ...Typography.styles.h3,
     color: Colors.dark.primary,
-    fontSize: 20,
-    fontWeight: 'bold',
     textAlign: 'center',
   },
   modeInfoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.dark.background,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 12,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: Dimensions.borderRadius.xl,
+    marginTop: Spacing.md,
   },
   modeInfoText: {
+    ...Typography.styles.bodySmall,
     color: Colors.dark.textSecondary,
-    fontSize: 14,
-    marginLeft: 8,
-    fontWeight: '600',
+    marginLeft: Spacing.sm,
+    fontWeight: Typography.fontWeight.semibold,
   },
   performanceContainer: {
     backgroundColor: Colors.dark.card,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
+    borderRadius: Dimensions.borderRadius.lg,
+    padding: Spacing.xl,
+    marginBottom: Spacing['2xl'],
     borderWidth: 1,
     borderColor: Colors.dark.border,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: Spacing.lg,
   },
   sectionTitle: {
+    ...Typography.styles.h4,
     color: Colors.dark.text,
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 8,
+    marginLeft: Spacing.sm,
   },
   categoryPerformance: {
-    marginBottom: 16,
+    marginBottom: Spacing.lg,
   },
   categoryHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   categoryName: {
+    ...Typography.styles.body,
     color: Colors.dark.text,
-    fontSize: 16,
-    fontWeight: '600',
+    fontWeight: Typography.fontWeight.semibold,
     flex: 1,
   },
   categoryScore: {
+    ...Typography.styles.bodySmall,
     color: Colors.dark.textSecondary,
-    fontSize: 14,
-    fontWeight: '600',
+    fontWeight: Typography.fontWeight.semibold,
   },
   achievementContainer: {
     backgroundColor: Colors.dark.card,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
+    borderRadius: Dimensions.borderRadius.lg,
+    padding: Spacing.xl,
+    marginBottom: Spacing['2xl'],
     borderWidth: 1,
     borderColor: Colors.dark.border,
   },
   actionButtons: {
-    marginBottom: 16,
+    marginBottom: Spacing.lg,
   },
   actionButton: {
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   footer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    padding: 20,
+    padding: Spacing.xl,
     backgroundColor: Colors.dark.background,
     borderTopWidth: 1,
     borderTopColor: Colors.dark.border,
@@ -590,47 +591,46 @@ const styles = StyleSheet.create({
   },
   footerButton: {
     flex: 1,
-    marginHorizontal: 8,
+    marginHorizontal: Spacing.sm,
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: Spacing.xl,
   },
   errorText: {
+    ...Typography.styles.h3,
     color: Colors.dark.text,
-    fontSize: 20,
     textAlign: 'center',
-    marginBottom: 12,
-    fontWeight: 'bold',
+    marginBottom: Spacing.md,
   },
   errorSubtext: {
+    ...Typography.styles.body,
     color: Colors.dark.textSecondary,
-    fontSize: 16,
     textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 24,
+    marginBottom: Spacing['2xl'],
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
   },
   loginButton: {
-    marginTop: 16,
+    marginTop: Spacing.lg,
     width: 200,
   },
   loginPrompt: {
     backgroundColor: Colors.dark.card,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
+    borderRadius: Dimensions.borderRadius.lg,
+    padding: Spacing.xl,
+    marginBottom: Spacing['2xl'],
     borderWidth: 1,
     borderColor: Colors.dark.border,
     alignItems: 'center',
   },
   loginPromptText: {
+    ...Typography.styles.body,
     color: Colors.dark.text,
-    fontSize: 16,
     textAlign: 'center',
-    marginBottom: 16,
-    lineHeight: 24,
+    marginBottom: Spacing.lg,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
   },
   loginPromptButton: {
     width: 200,

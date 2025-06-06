@@ -1,3 +1,5 @@
+import { UsmleQuestion } from './usmle';
+
 export interface Question {
   id: string;
   question_text: string;
@@ -17,7 +19,7 @@ export interface QuizSession {
   id: string;
   user_id: string;
   category_id: string;
-  questions: UsmleQuestion[]; // Updated to use UsmleQuestion instead of Question
+  questions: UsmleQuestion[];
   answers: number[];
   currentQuestionIndex: number;
   score: number;
@@ -53,6 +55,3 @@ export interface Category {
   created_at: string;
   updated_at: string;
 }
-
-// Import UsmleQuestion to resolve the error
-import { UsmleQuestion } from './usmle';
