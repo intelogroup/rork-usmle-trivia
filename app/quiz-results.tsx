@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, SafeAreaView, ScrollView, Animated, Platform } 
 import { Stack, useRouter } from 'expo-router';
 import Colors from '@/theme/colors';
 import Button from '@/components/Button';
-import { Award, Home, RotateCcw, Share2, Clock, BarChart2, Brain, Target } from 'lucide-react-native';
+import { Award, Home, RotateCcw, Share2, Clock, Target } from 'lucide-react-native';
 import { achievements } from '@/mocks/achievements';
 import AchievementCard from '@/components/AchievementCard';
 import { useQuizStore } from '@/store/quiz/quizStore';
@@ -280,7 +280,7 @@ export default function QuizResultsScreen() {
                 onPress={handleShare}
                 variant="outline"
                 style={styles.actionButton}
-                icon={Share2}
+                icon={<Share2 size={16} color={Colors.dark.text} />}
               />
             </View>
           </Animated.View>
@@ -292,13 +292,13 @@ export default function QuizResultsScreen() {
             onPress={handleRetakeQuiz}
             variant="outline"
             style={styles.footerButton}
-            icon={RotateCcw}
+            icon={<RotateCcw size={16} color={Colors.dark.text} />}
           />
           <Button
             title="Go to Home"
             onPress={handleGoHome}
             style={styles.footerButton}
-            icon={Home}
+            icon={<Home size={16} color={Colors.dark.text} />}
           />
         </View>
       </LinearGradient>

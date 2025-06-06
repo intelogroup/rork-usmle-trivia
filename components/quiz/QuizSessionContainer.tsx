@@ -8,6 +8,7 @@ import { useQuizStore } from '@/store/quiz/quizStore';
 import { useQuizTimer } from '@/hooks/useQuizTimer';
 import { useRouter } from 'expo-router';
 import Button from '@/components/Button';
+import { UsmleQuestion } from '@/lib/types/usmle';
 
 interface QuizSessionContainerProps {
   categoryId?: string;
@@ -211,7 +212,7 @@ export default function QuizSessionContainer({
     }
 
     const validQuestions = Array.isArray(currentSession.questions) ? currentSession.questions : [];
-    const currentQuestion = validQuestions[currentSession.currentQuestionIndex];
+    const currentQuestion = validQuestions[currentSession.currentQuestionIndex] as UsmleQuestion;
     
     if (!currentQuestion) {
       return (
