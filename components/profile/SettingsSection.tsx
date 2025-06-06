@@ -23,8 +23,22 @@ export default function SettingsSection({ onShare }: SettingsSectionProps) {
         {
           text: 'Sign Out',
           style: 'destructive',
-          onPress: () => {
-            logout(); // Simply call the logout action from the store
+          onPress: async () => {
+            try {
+              // Simply call the logout action from the store
+              // The root layout will automatically handle the navigation
+              // when isAuthenticated becomes false
+              await logout();
+              console.log('Logout completed - root layout should handle navigation');
+            } catch (error: unknown) {
+              const errorMessage = error instanceof Error ? error.message : 'Unknown logout error';
+              console.error('Logout error:', errorMessage);
+              // Even if logout fails, show success message since local state is cleared
+              Alert.alert(
+                'Signed Out',
+                'You have been signed out successfully. Your local session has been cleared.'
+              );
+            }
           },
         },
       ]

@@ -409,9 +409,14 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
 
         // Attempt to sign out from Supabase, but don't let it block state cleanup
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-          console.error('Error during Supabase signOut:', error.message);
+        try {
+          const { error } = await supabase.auth.signOut();
+          if (error) {
+            console.error('Error during Supabase signOut:', error.message);
+          }
+        } catch (signOutError: unknown) {
+          const errorMessage = signOutError instanceof Error ? signOutError.message : 'Unknown sign out error';
+          console.error('Supabase signOut failed:', errorMessage);
         }
 
         // ALWAYS clear the local state to log the user out of the app
@@ -433,7 +438,7 @@ export const useAuthStore = create<AuthState>()(
           console.error('Storage cleanup error:', errorMessage);
         }
 
-        console.log('Local auth state cleared.');
+        console.log('Local auth state cleared - user should be redirected to login');
       },
 
       updateProfile: async (updates: Partial<UserProfile>) => {

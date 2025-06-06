@@ -101,6 +101,11 @@ function MainAppLayout() {
   const colorScheme = useColorScheme();
   const { isAuthenticated } = useAuthStore();
 
+  // Log authentication state changes for debugging
+  useEffect(() => {
+    console.log('MainAppLayout: isAuthenticated changed to:', isAuthenticated);
+  }, [isAuthenticated]);
+
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
