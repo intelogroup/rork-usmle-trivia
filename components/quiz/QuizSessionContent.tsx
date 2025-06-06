@@ -32,6 +32,20 @@ export default function QuizSessionContent({
   const optionsOpacity = useRef(new Animated.Value(1)).current;
   const celebrationOpacity = useRef(new Animated.Value(0)).current;
   const celebrationScale = useRef(new Animated.Value(0.5)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Reset slide animation for new question
+    slideAnim.setValue(Platform.OS !== 'web' ? 100 : 0);
+    if (Platform.OS !== 'web') {
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 80,
+        friction: 8,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [question]);
 
   useEffect(() => {
     if (isAnswerSubmitted && selectedAnswer !== null) {
@@ -46,81 +60,100 @@ export default function QuizSessionContent({
       }).start();
 
       // Show main feedback animation
-      Animated.parallel([
-        Animated.timing(feedbackOpacity, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-        Animated.spring(feedbackScale, {
-          toValue: 1,
-          tension: 80,
-          friction: 6,
-          useNativeDriver: true,
-        }),
-        Animated.spring(feedbackTranslateY, {
-          toValue: 0,
-          tension: 80,
-          friction: 6,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      // Show celebration animation for correct answers
-      if (isCorrect) {
-        setTimeout(() => {
-          Animated.parallel([
-            Animated.timing(celebrationOpacity, {
-              toValue: 1,
-              duration: 300,
-              useNativeDriver: true,
-            }),
-            Animated.spring(celebrationScale, {
-              toValue: 1,
-              tension: 100,
-              friction: 8,
-              useNativeDriver: true,
-            }),
-          ]).start();
-
-          // Hide celebration after 2 seconds
-          setTimeout(() => {
-            Animated.parallel([
-              Animated.timing(celebrationOpacity, {
-                toValue: 0,
-                duration: 300,
-                useNativeDriver: true,
-              }),
-              Animated.timing(celebrationScale, {
-                toValue: 0.5,
-                duration: 300,
-                useNativeDriver: true,
-              }),
-            ]).start();
-          }, 2000);
-        }, 500);
-      }
-
-      // Hide main feedback after 3 seconds
-      setTimeout(() => {
+      if (Platform.OS !== 'web') {
         Animated.parallel([
           Animated.timing(feedbackOpacity, {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+          Animated.spring(feedbackScale, {
+            toValue: 1,
+            tension: 80,
+            friction: 6,
+            useNativeDriver: true,
+          }),
+          Animated.spring(feedbackTranslateY, {
             toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(feedbackScale, {
-            toValue: 0.3,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(feedbackTranslateY, {
-            toValue: -50,
-            duration: 300,
+            tension: 80,
+            friction: 6,
             useNativeDriver: true,
           }),
         ]).start();
-      }, 3000);
+
+        // Show celebration animation for correct answers
+        if (isCorrect) {
+          setTimeout(() => {
+            Animated.parallel([
+              Animated.timing(celebrationOpacity, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+              }),
+              Animated.spring(celebrationScale, {
+                toValue: 1,
+                tension: 100,
+                friction: 8,
+                useNativeDriver: true,
+              }),
+            ]).start();
+
+            // Hide celebration after 2 seconds
+            setTimeout(() => {
+              Animated.parallel([
+                Animated.timing(celebrationOpacity, {
+                  toValue: 0,
+                  duration: 300,
+                  useNativeDriver: true,
+                }),
+                Animated.timing(celebrationScale, {
+                  toValue: 0.5,
+                  duration: 300,
+                  useNativeDriver: true,
+                }),
+              ]).start();
+            }, 2000);
+          }, 500);
+        }
+
+        // Hide main feedback after 3 seconds
+        setTimeout(() => {
+          Animated.parallel([
+            Animated.timing(feedbackOpacity, {
+              toValue: 0,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+            Animated.timing(feedbackScale, {
+              toValue: 0.3,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+            Animated.timing(feedbackTranslateY, {
+              toValue: -50,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+          ]).start();
+        }, 3000);
+      } else {
+        feedbackOpacity.setValue(1);
+        feedbackScale.setValue(1);
+        feedbackTranslateY.setValue(0);
+        if (isCorrect) {
+          celebrationOpacity.setValue(1);
+          celebrationScale.setValue(1);
+          setTimeout(() => {
+            celebrationOpacity.setValue(0);
+            celebrationScale.setValue(0.5);
+          }, 2000);
+        }
+        setTimeout(() => {
+          feedbackOpacity.setValue(0);
+          feedbackScale.setValue(0.3);
+          feedbackTranslateY.setValue(-50);
+        }, 3000);
+      }
     } else {
       // Reset animations
       feedbackOpacity.setValue(0);
@@ -142,105 +175,112 @@ export default function QuizSessionContent({
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <LinearGradient
-        colors={[Colors.dark.card, Colors.dark.background]}
-        style={styles.questionContainer}
-      >
-        <Text style={styles.questionText}>{question.question_text}</Text>
-      </LinearGradient>
-      
-      <Animated.View 
+      <Animated.View
         style={[
-          styles.optionsContainer,
-          { opacity: optionsOpacity }
+          styles.contentWrapper,
+          { transform: [{ translateX: slideAnim }] },
         ]}
       >
-        {question.options.map((option, index) => (
-          <OptionButton
-            key={index}
-            label={option.text}
-            index={index}
-            selected={selectedAnswer === index}
-            onPress={() => onOptionPress(index)}
-            disabled={isAnswerSubmitted}
-            isCorrect={isAnswerSubmitted ? index === correctAnswerIndex : null}
-            showResult={isAnswerSubmitted}
-          />
-        ))}
-      </Animated.View>
-
-      {/* Main Feedback Animation */}
-      {Platform.OS !== 'web' && isAnswerSubmitted && selectedAnswer !== null && (
-        <Animated.View
+        <LinearGradient
+          colors={[Colors.dark.card, Colors.dark.background]}
+          style={styles.questionContainer}
+        >
+          <Text style={styles.questionText}>{question.question_text}</Text>
+        </LinearGradient>
+        
+        <Animated.View 
           style={[
-            styles.feedbackContainer,
-            {
-              opacity: feedbackOpacity,
-              transform: [
-                { scale: feedbackScale },
-                { translateY: feedbackTranslateY }
-              ],
-            },
+            styles.optionsContainer,
+            { opacity: optionsOpacity }
           ]}
         >
-          <LinearGradient
-            colors={isCorrect ? 
-              [Colors.dark.success, `${Colors.dark.success}90`] : 
-              [Colors.dark.error, `${Colors.dark.error}90`]}
-            style={styles.feedbackGradient}
+          {question.options.map((option, index) => (
+            <OptionButton
+              key={index}
+              label={option.text}
+              index={index}
+              selected={selectedAnswer === index}
+              onPress={() => onOptionPress(index)}
+              disabled={isAnswerSubmitted}
+              isCorrect={isAnswerSubmitted ? index === correctAnswerIndex : null}
+              showResult={isAnswerSubmitted}
+            />
+          ))}
+        </Animated.View>
+
+        {/* Main Feedback Animation */}
+        {isAnswerSubmitted && selectedAnswer !== null && (
+          <Animated.View
+            style={[
+              styles.feedbackContainer,
+              {
+                opacity: feedbackOpacity,
+                transform: [
+                  { scale: feedbackScale },
+                  { translateY: feedbackTranslateY }
+                ],
+              },
+            ]}
           >
-            <View style={styles.feedbackIcon}>
-              {isCorrect ? 
-                <CheckCircle size={28} color={Colors.dark.background} /> : 
-                <XCircle size={28} color={Colors.dark.background} />
-              }
+            <LinearGradient
+              colors={isCorrect ? 
+                [Colors.dark.success, `${Colors.dark.success}90`] : 
+                [Colors.dark.error, `${Colors.dark.error}90`]}
+              style={styles.feedbackGradient}
+            >
+              <View style={styles.feedbackIcon}>
+                {isCorrect ? 
+                  <CheckCircle size={28} color={Colors.dark.background} /> : 
+                  <XCircle size={28} color={Colors.dark.background} />
+                }
+              </View>
+              <Text style={styles.feedbackEmoji}>{getRandomEmoji(isCorrect ? 'correct' : 'incorrect')}</Text>
+              <Text style={styles.feedbackText}>
+                {isCorrect ? 'Excellent!' : 'Not quite!'}
+              </Text>
+              <Text style={styles.feedbackSubtext}>
+                {isCorrect ? 'You nailed it!' : 'Keep learning!'}
+              </Text>
+            </LinearGradient>
+          </Animated.View>
+        )}
+
+        {/* Celebration Animation for Correct Answers */}
+        {isAnswerSubmitted && isCorrect && (
+          <Animated.View
+            style={[
+              styles.celebrationContainer,
+              {
+                opacity: celebrationOpacity,
+                transform: [{ scale: celebrationScale }],
+              },
+            ]}
+          >
+            <Text style={styles.celebrationEmoji}>🎉</Text>
+            <Text style={styles.celebrationText}>Amazing!</Text>
+          </Animated.View>
+        )}
+
+        {/* Explanation Section - Now at the bottom */}
+        {isAnswerSubmitted && question.explanation && (
+          <View style={styles.explanationSection}>
+            <View style={styles.explanationHeader}>
+              <Lightbulb size={20} color={Colors.dark.primary} />
+              <Text style={styles.explanationTitle}>💡 Explanation</Text>
             </View>
-            <Text style={styles.feedbackEmoji}>{getRandomEmoji(isCorrect ? 'correct' : 'incorrect')}</Text>
-            <Text style={styles.feedbackText}>
-              {isCorrect ? 'Excellent!' : 'Not quite!'}
-            </Text>
-            <Text style={styles.feedbackSubtext}>
-              {isCorrect ? 'You nailed it!' : 'Keep learning!'}
-            </Text>
-          </LinearGradient>
-        </Animated.View>
-      )}
-
-      {/* Celebration Animation for Correct Answers */}
-      {Platform.OS !== 'web' && isAnswerSubmitted && isCorrect && (
-        <Animated.View
-          style={[
-            styles.celebrationContainer,
-            {
-              opacity: celebrationOpacity,
-              transform: [{ scale: celebrationScale }],
-            },
-          ]}
-        >
-          <Text style={styles.celebrationEmoji}>🎉</Text>
-          <Text style={styles.celebrationText}>Amazing!</Text>
-        </Animated.View>
-      )}
-
-      {/* Explanation Section - Now at the bottom */}
-      {isAnswerSubmitted && question.explanation && (
-        <View style={styles.explanationSection}>
-          <View style={styles.explanationHeader}>
-            <Lightbulb size={20} color={Colors.dark.primary} />
-            <Text style={styles.explanationTitle}>💡 Explanation</Text>
+            <View style={styles.explanationContainer}>
+              <Text style={styles.explanationText}>{question.explanation}</Text>
+            </View>
+            
+            {/* Additional learning tip */}
+            <View style={styles.learningTip}>
+              <Text style={styles.learningTipText}>
+                💭 Remember this concept for future questions!
+              </Text>
+            </View>
           </View>
-          <View style={styles.explanationContainer}>
-            <Text style={styles.explanationText}>{question.explanation}</Text>
-          </View>
-          
-          {/* Additional learning tip */}
-          <View style={styles.learningTip}>
-            <Text style={styles.learningTipText}>
-              💭 Remember this concept for future questions!
-            </Text>
-          </View>
-        </View>
-      )}
+        )}
+      </Animated.View>
     </ScrollView>
   );
 }
@@ -249,6 +289,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: Spacing.xl,
+  },
+  contentWrapper: {
+    flex: 1,
   },
   questionContainer: {
     borderRadius: 16,

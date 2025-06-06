@@ -78,8 +78,8 @@ export default function QuizSetupScreen() {
         quizMode
       );
 
-      // Navigate to quiz session
-      router.push('/quiz-session');
+      // Navigate to countdown screen before quiz session
+      router.push('/quiz-countdown');
     } catch (err) {
       console.error('Error starting quiz:', err);
     }

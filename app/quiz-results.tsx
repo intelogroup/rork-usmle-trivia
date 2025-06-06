@@ -303,7 +303,7 @@ export default function QuizResultsScreen() {
           </Animated.View>
 
           {/* Celebration Message for High Scores */}
-          {Platform.OS !== 'web' && percentage >= 80 && (
+          {percentage >= 80 && (
             <Animated.View
               style={[
                 styles.celebrationMessage,
