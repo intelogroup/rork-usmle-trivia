@@ -19,6 +19,10 @@ interface Category {
   updated_at: string;
 }
 
+interface CategoryWithCount extends UsmleCategory {
+  questionCount: number;
+}
+
 interface QuizSession {
   id: string;
   user_id: string;
@@ -42,6 +46,7 @@ interface QuizSession {
 interface QuizState {
   // Categories
   categories: UsmleCategory[];
+  categoriesWithCounts: CategoryWithCount[];
   isLoadingCategories: boolean;
   categoriesError: string | null;
   
@@ -49,7 +54,7 @@ interface QuizState {
   currentSession: QuizSession | null;
   isLoading: boolean;
   error: string | null;
-  selectedAnswer: number; // Changed from number | null to number
+  selectedAnswer: number;
   timeRemaining: number | null;
   isTimerActive: boolean;
   
@@ -59,6 +64,7 @@ interface QuizState {
   
   // Actions
   loadCategories: () => Promise<void>;
+  loadCategoriesWithQuestionCount: () => Promise<void>;
   checkQuestionAvailability: (categoryIds: string[], difficulty?: 'easy' | 'medium' | 'hard' | 'all') => Promise<number>;
   startQuiz: (categoryIds: string[], questionCount: number, difficulty?: 'easy' | 'medium' | 'hard' | 'all', mode?: QuizMode) => Promise<void>;
   startTimedChallenge: () => Promise<void>;
@@ -79,6 +85,7 @@ export const useQuizStore = create<QuizState>()(
     (set, get) => ({
       // Categories state
       categories: [],
+      categoriesWithCounts: [],
       isLoadingCategories: false,
       categoriesError: null,
       
@@ -86,7 +93,7 @@ export const useQuizStore = create<QuizState>()(
       currentSession: null,
       isLoading: false,
       error: null,
-      selectedAnswer: -1, // Changed from null to -1
+      selectedAnswer: -1,
       timeRemaining: null,
       isTimerActive: false,
       
@@ -136,6 +143,38 @@ export const useQuizStore = create<QuizState>()(
           set({ 
             categories: validCategories,
             categoriesError: null, // Don't show error to user, just use mock data
+            isLoadingCategories: false 
+          });
+        }
+      },
+
+      loadCategoriesWithQuestionCount: async () => {
+        set({ isLoadingCategories: true, categoriesError: null });
+        
+        try {
+          const validCategories = Array.isArray(usmle_categories) ? usmle_categories : [];
+          const validQuestions = Array.isArray(usmle_questions) ? usmle_questions : [];
+
+          // Count questions for each category
+          const categoriesWithCounts = validCategories.map(category => {
+            const questionCount = validQuestions.filter(q => q.category_id === category.id).length;
+            return {
+              ...category,
+              questionCount
+            };
+          });
+
+          set({ 
+            categoriesWithCounts,
+            categories: validCategories,
+            isLoadingCategories: false 
+          });
+        } catch (error: unknown) {
+          console.error('Error loading categories with counts:', error);
+          set({ 
+            categoriesWithCounts: [],
+            categories: [],
+            categoriesError: 'Failed to load categories',
             isLoadingCategories: false 
           });
         }
@@ -198,9 +237,9 @@ export const useQuizStore = create<QuizState>()(
             currentSession: {
               ...currentSession,
               isAnswerSubmitted: true,
-              selectedAnswer: -1, // Use -1 instead of undefined
+              selectedAnswer: -1,
             },
-            selectedAnswer: -1 // Reset store selectedAnswer to -1
+            selectedAnswer: -1
           });
         }
       },
@@ -270,7 +309,7 @@ export const useQuizStore = create<QuizState>()(
             difficulty: difficulty || 'all',
             isCompleted: false,
             isAnswerSubmitted: false,
-            selectedAnswer: -1, // Use -1 instead of undefined
+            selectedAnswer: -1,
             started_at: new Date().toISOString(),
             completed_at: null,
           };
@@ -281,7 +320,7 @@ export const useQuizStore = create<QuizState>()(
           set({ 
             currentSession: session, 
             isLoading: false,
-            selectedAnswer: -1, // Use -1 instead of null
+            selectedAnswer: -1,
             timeRemaining: timePerQuestion,
             isTimerActive: mode === 'timed'
           });
@@ -340,7 +379,7 @@ export const useQuizStore = create<QuizState>()(
             difficulty: 'all',
             isCompleted: false,
             isAnswerSubmitted: false,
-            selectedAnswer: -1, // Use -1 instead of undefined
+            selectedAnswer: -1,
             started_at: new Date().toISOString(),
             completed_at: null,
           };
@@ -351,7 +390,7 @@ export const useQuizStore = create<QuizState>()(
           set({ 
             currentSession: session, 
             isLoading: false,
-            selectedAnswer: -1, // Use -1 instead of null
+            selectedAnswer: -1,
             timeRemaining: timePerQuestion,
             isTimerActive: true
           });
@@ -430,7 +469,7 @@ export const useQuizStore = create<QuizState>()(
               isCompleted: true,
               completed_at: new Date().toISOString(),
             },
-            selectedAnswer: -1, // Use -1 instead of null
+            selectedAnswer: -1,
             timeRemaining: null,
             isTimerActive: false,
           });
@@ -446,9 +485,9 @@ export const useQuizStore = create<QuizState>()(
               ...currentSession,
               currentQuestionIndex: nextIndex,
               isAnswerSubmitted: false,
-              selectedAnswer: -1, // Use -1 instead of undefined
+              selectedAnswer: -1,
             },
-            selectedAnswer: -1, // Use -1 instead of null
+            selectedAnswer: -1,
             timeRemaining: timePerQuestion,
             isTimerActive: currentSession.mode === 'timed',
           });
@@ -464,9 +503,9 @@ export const useQuizStore = create<QuizState>()(
             ...currentSession,
             currentQuestionIndex: currentSession.currentQuestionIndex - 1,
             isAnswerSubmitted: false,
-            selectedAnswer: -1, // Use -1 instead of undefined
+            selectedAnswer: -1,
           },
-          selectedAnswer: -1, // Use -1 instead of null
+          selectedAnswer: -1,
           isTimerActive: false,
         });
       },
@@ -476,7 +515,7 @@ export const useQuizStore = create<QuizState>()(
           currentSession: null,
           isLoading: false,
           error: null,
-          selectedAnswer: -1, // Use -1 instead of null
+          selectedAnswer: -1,
           timeRemaining: null,
           isTimerActive: false,
           availableQuestionCount: 0,

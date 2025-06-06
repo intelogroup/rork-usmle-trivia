@@ -124,7 +124,7 @@ export default function HomeScreen() {
             <View style={styles.startQuizIcon}>
               <Play size={22} color={Colors.dark.background} fill={Colors.dark.background} />
             </View>
-            <Text style={styles.startQuizText}>Start New Quiz</Text>
+            <Text style={styles.startQuizText}>Browse Categories</Text>
           </View>
         </LinearGradient>
       </TouchableOpacity>
