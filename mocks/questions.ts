@@ -1310,7 +1310,7 @@ export const questions: Question[] = [
       'Turkey'
     ],
     correct: 2,
-    explanation: 'Petra is a famous archaeological site in Jordan's southwestern desert, dating to around 300 B.C.',
+    explanation: "Petra is a famous archaeological site in Jordan's southwestern desert, dating to around 300 B.C.",
     category: 'general_knowledge',
     difficulty: 'medium',
     created_at: new Date().toISOString(),
