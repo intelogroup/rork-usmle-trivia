@@ -141,7 +141,7 @@ export const questions: Question[] = [
     updated_at: new Date().toISOString(),
   },
 
-  // Pharmacology Questions (6 questions)
+  // Pharmacology Questions (7 questions)
   {
     id: 'q9',
     question: "Which of the following diuretics works by inhibiting the Na-K-2Cl cotransporter in the thick ascending loop of Henle?",
@@ -238,8 +238,24 @@ export const questions: Question[] = [
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
+  {
+    id: 'q82',
+    question: "What is the primary mechanism of action for statin drugs?",
+    options: [
+      'Inhibiting bile acid reabsorption',
+      'Decreasing triglyceride synthesis',
+      'Inhibiting HMG-CoA reductase',
+      'Increasing lipoprotein lipase activity'
+    ],
+    correct: 2,
+    explanation: 'Statins work by inhibiting HMG-CoA reductase, which is the rate-limiting enzyme in hepatic cholesterol synthesis.',
+    category: 'pharmacology',
+    difficulty: 'medium',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
 
-  // Pathology Questions (6 questions)
+  // Pathology Questions (7 questions)
   {
     id: 'q15',
     question: "What is the most common type of lung cancer?",
@@ -331,6 +347,22 @@ export const questions: Question[] = [
     ],
     correct: 1,
     explanation: 'HER2/neu is overexpressed in about 20-25% of breast cancers and is associated with more aggressive disease.',
+    category: 'pathology',
+    difficulty: 'hard',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'q81',
+    question: "A patient with a history of alcoholism presents with confusion, ophthalmoplegia, and ataxia. This clinical triad is characteristic of which deficiency?",
+    options: [
+      'Niacin (B3) deficiency',
+      'Cobalamin (B12) deficiency',
+      'Folate (B9) deficiency',
+      'Thiamine (B1) deficiency'
+    ],
+    correct: 3,
+    explanation: 'The classic triad of Wernicke encephalopathy is confusion, ophthalmoplegia, and ataxia, caused by a deficiency in Thiamine (Vitamin B1).',
     category: 'pathology',
     difficulty: 'hard',
     created_at: new Date().toISOString(),
@@ -533,7 +565,7 @@ export const questions: Question[] = [
     updated_at: new Date().toISOString(),
   },
 
-  // Anatomy Questions (6 questions)
+  // Anatomy Questions (7 questions)
   {
     id: 'q33',
     question: "Which nerve innervates the diaphragm?",
@@ -627,6 +659,22 @@ export const questions: Question[] = [
     explanation: 'The vertebrobasilar system (vertebral and basilar arteries) supplies blood to the brain stem.',
     category: 'anatomy',
     difficulty: 'medium',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'q80',
+    question: "Which type of blood vessel carries oxygenated blood away from the heart?",
+    options: [
+      'Vein',
+      'Artery',
+      'Capillary',
+      'Venule'
+    ],
+    correct: 1,
+    explanation: 'Arteries are blood vessels that carry oxygen-rich blood from the heart to all other parts of the body, with the exception of the pulmonary artery.',
+    category: 'anatomy',
+    difficulty: 'easy',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -1215,6 +1263,88 @@ export const questions: Question[] = [
     explanation: 'Metformin is contraindicated in severe kidney disease due to the risk of lactic acidosis.',
     category: 'nephrology',
     difficulty: 'medium',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+
+  // General Knowledge Questions (5 questions)
+  {
+    id: 'q75',
+    question: "Which of the following is the largest planet in our solar system?",
+    options: [
+      'Earth',
+      'Mars',
+      'Jupiter',
+      'Saturn'
+    ],
+    correct: 2,
+    explanation: 'Jupiter is the largest planet, with a diameter of about 143,000 kilometers, more than 11 times the diameter of Earth.',
+    category: 'general_knowledge',
+    difficulty: 'easy',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'q76',
+    question: "Who is credited with inventing the World Wide Web?",
+    options: [
+      'Steve Jobs',
+      'Bill Gates',
+      'Tim Berners-Lee',
+      'Vint Cerf'
+    ],
+    correct: 2,
+    explanation: 'Tim Berners-Lee, a British scientist, invented the World Wide Web (WWW) in 1989 while working at CERN.',
+    category: 'general_knowledge',
+    difficulty: 'medium',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'q77',
+    question: "In which country would you find the ancient city of Petra?",
+    options: [
+      'Egypt',
+      'Greece',
+      'Jordan',
+      'Turkey'
+    ],
+    correct: 2,
+    explanation: 'Petra is a famous archaeological site in Jordan's southwestern desert, dating to around 300 B.C.',
+    category: 'general_knowledge',
+    difficulty: 'medium',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'q78',
+    question: "What is the hardest known natural material?",
+    options: [
+      'Gold',
+      'Iron',
+      'Quartz',
+      'Diamond'
+    ],
+    correct: 3,
+    explanation: 'Diamond is the hardest known natural material, rating 10 on the Mohs scale of hardness.',
+    category: 'general_knowledge',
+    difficulty: 'easy',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'q79',
+    question: "The ancient Roman legal principle 'ignorantia juris non excusat' means what in English?",
+    options: [
+      'Ignorance of the law excuses no one',
+      'The law is ignorant of excuses',
+      'Ignorance of the jury is no excuse',
+      'The law does not excuse jurisdiction'
+    ],
+    correct: 0,
+    explanation: 'The principle means that a person who is unaware of a law may not escape liability for violating that law merely because they were unaware of its content.',
+    category: 'general_knowledge',
+    difficulty: 'hard',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
