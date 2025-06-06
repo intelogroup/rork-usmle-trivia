@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import Colors from '@/theme/colors';
 import { useQuizStore } from '@/store/quiz/quizStore';
 import { useAuthStore } from '@/store/auth/authStore';
-import CategorySelection from '@/components/quiz/CategorySelection';
+import HierarchicalCategorySelector from '@/components/quiz/HierarchicalCategorySelector';
 import QuizSettings from '@/components/quiz/QuizSettings';
 import AuthPrompt from '@/components/quiz/AuthPrompt';
 import QuizStartButton from '@/components/quiz/QuizStartButton';
@@ -130,7 +130,7 @@ export default function QuizScreen() {
 
           <AuthPrompt isAuthenticated={isAuthenticated} />
           
-          <CategorySelection
+          <HierarchicalCategorySelector
             categories={validCategories}
             selectedCategories={validSelectedCategories}
             onToggleCategory={toggleCategory}

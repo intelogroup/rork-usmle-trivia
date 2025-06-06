@@ -25,7 +25,7 @@ interface UserAchievementWithDetails {
     requirement_value: number;
     points: number;
     rarity: string;
-  };
+  } | null; // Allow for null in case the join fails or data is missing
 }
 
 export function useProfileStats() {

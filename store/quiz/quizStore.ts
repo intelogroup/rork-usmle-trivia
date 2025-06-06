@@ -2,10 +2,11 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/lib/supabase';
-import { categories } from '@/mocks/categories';
-import { questions } from '@/mocks/questions';
-import type { Question } from '@/mocks/questions';
+import { usmle_categories } from '@/mocks/usmle_categories';
+import { usmle_questions } from '@/mocks/usmle_questions';
+import type { UsmleQuestion } from '@/lib/types/usmle';
 import type { QuizMode } from '@/lib/types/quiz';
+import type { UsmleCategory } from '@/lib/types/usmle';
 
 interface Category {
   id: string;
@@ -22,7 +23,7 @@ interface QuizSession {
   id: string;
   user_id: string;
   category_id: string;
-  questions: Question[];
+  questions: UsmleQuestion[];
   answers: number[];
   currentQuestionIndex: number;
   score: number;
@@ -40,7 +41,7 @@ interface QuizSession {
 
 interface QuizState {
   // Categories
-  categories: Category[];
+  categories: UsmleCategory[];
   isLoadingCategories: boolean;
   categoriesError: string | null;
   
@@ -118,17 +119,20 @@ export const useQuizStore = create<QuizState>()(
               color: cat.color,
               created_at: cat.created_at,
               updated_at: cat.updated_at,
+              parent_id: cat.parent_id || null,
+              grouping: cat.grouping || 'Subject',
+              questionCount: cat.question_count || 0,
             }));
             set({ categories: mappedCategories, isLoadingCategories: false });
           } else {
             // Fallback to mock data if no data in Supabase
-            const validCategories = Array.isArray(categories) ? categories : [];
+            const validCategories = Array.isArray(usmle_categories) ? usmle_categories : [];
             set({ categories: validCategories, isLoadingCategories: false });
           }
         } catch (error: unknown) {
           console.error('Error loading categories, using mock data:', error);
           // Use mock data as fallback
-          const validCategories = Array.isArray(categories) ? categories : [];
+          const validCategories = Array.isArray(usmle_categories) ? usmle_categories : [];
           set({ 
             categories: validCategories,
             categoriesError: null, // Don't show error to user, just use mock data
@@ -143,7 +147,7 @@ export const useQuizStore = create<QuizState>()(
         try {
           // Ensure we have valid arrays to work with
           const validCategoryIds = Array.isArray(categoryIds) ? categoryIds : [];
-          const validQuestions = Array.isArray(questions) ? questions : [];
+          const validQuestions = Array.isArray(usmle_questions) ? usmle_questions : [];
 
           if (validCategoryIds.length === 0) {
             set({ availableQuestionCount: 0, isCheckingAvailability: false });
@@ -206,7 +210,7 @@ export const useQuizStore = create<QuizState>()(
 
           // Ensure we have valid arrays to work with
           const validCategoryIds = Array.isArray(categoryIds) ? categoryIds : [];
-          const validQuestions = Array.isArray(questions) ? questions : [];
+          const validQuestions = Array.isArray(usmle_questions) ? usmle_questions : [];
 
           if (validCategoryIds.length === 0) {
             throw new Error('Please select at least one category to start the quiz.');
@@ -299,7 +303,7 @@ export const useQuizStore = create<QuizState>()(
       startTimedChallenge: async () => {
         try {
           set({ isLoading: true, error: null });
-          const validQuestions = Array.isArray(questions) ? questions : [];
+          const validQuestions = Array.isArray(usmle_questions) ? usmle_questions : [];
           
           if (validQuestions.length === 0) {
             throw new Error('No questions are available at the moment. Please try again later.');
@@ -388,7 +392,8 @@ export const useQuizStore = create<QuizState>()(
         
         if (!currentQuestion) return;
         
-        const isCorrect = selectedAnswer === currentQuestion.correct_answer;
+        const isCorrect = selectedAnswer !== undefined && 
+          currentQuestion.options[selectedAnswer]?.id === currentQuestion.correct_option_id;
 
         // Update answers array
         const newAnswers = [...(Array.isArray(currentSession.answers) ? currentSession.answers : [])];
