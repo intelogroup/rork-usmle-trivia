@@ -523,7 +523,7 @@ export const useQuizStore = create<QuizState>()(
       name: 'quiz-storage',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
-        currentSession: state.currentSession,
+        currentSession: state.currentSession || null,
       }),
     }
   )
