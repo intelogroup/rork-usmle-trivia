@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
   },
   countdownNumber: {
-    fontSize: Typography.fontSize['5xl'],
+    fontSize: Typography.fontSize['6xl'],
     fontWeight: Typography.fontWeight.bold,
     color: Colors.dark.primary,
     textAlign: 'center',
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   goText: {
-    fontSize: Typography.fontSize['5xl'],
+    fontSize: Typography.fontSize['6xl'],
     fontWeight: Typography.fontWeight.bold,
     color: Colors.dark.primary,
     textAlign: 'center',

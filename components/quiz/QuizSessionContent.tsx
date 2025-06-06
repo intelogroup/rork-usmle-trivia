@@ -29,7 +29,6 @@ export default function QuizSessionContent({
   const feedbackOpacity = useRef(new Animated.Value(0)).current;
   const feedbackScale = useRef(new Animated.Value(0.3)).current;
   const feedbackTranslateY = useRef(new Animated.Value(-50)).current;
-  const optionsOpacity = useRef(new Animated.Value(1)).current;
   const celebrationOpacity = useRef(new Animated.Value(0)).current;
   const celebrationScale = useRef(new Animated.Value(0.5)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
@@ -56,13 +55,6 @@ export default function QuizSessionContent({
     if (isAnswerSubmitted && selectedAnswer !== null) {
       const correctAnswerIndex = question.options.findIndex(opt => opt.id === question.correct_option_id);
       const isCorrect = selectedAnswer === correctAnswerIndex;
-
-      // Dim options slightly
-      Animated.timing(optionsOpacity, {
-        toValue: 0.7,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
 
       // Show main feedback animation
       if (Platform.OS !== 'web') {
@@ -183,7 +175,6 @@ export default function QuizSessionContent({
       feedbackOpacity.setValue(0);
       feedbackScale.setValue(0.3);
       feedbackTranslateY.setValue(-50);
-      optionsOpacity.setValue(1);
       celebrationOpacity.setValue(0);
       celebrationScale.setValue(0.5);
       explanationOpacity.setValue(0);
@@ -214,12 +205,7 @@ export default function QuizSessionContent({
           <Text style={styles.questionText}>{question.question_text}</Text>
         </LinearGradient>
         
-        <Animated.View 
-          style={[
-            styles.optionsContainer,
-            { opacity: optionsOpacity }
-          ]}
-        >
+        <View style={styles.optionsContainer}>
           {question.options.map((option, index) => (
             <OptionButton
               key={index}
@@ -232,7 +218,7 @@ export default function QuizSessionContent({
               showResult={isAnswerSubmitted}
             />
           ))}
-        </Animated.View>
+        </View>
 
         {/* Main Feedback Animation */}
         {isAnswerSubmitted && selectedAnswer !== null && (
@@ -401,7 +387,7 @@ const styles = StyleSheet.create({
     zIndex: 1001,
   },
   celebrationEmoji: {
-    fontSize: Typography.fontSize['5xl'],
+    fontSize: Typography.fontSize['6xl'],
     marginBottom: Spacing.xs,
   },
   celebrationText: {
@@ -410,7 +396,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   explanationSection: {
-    marginTop: Spacing['2xl'],
+    marginTop: Spacing['3xl'],
     paddingTop: Spacing.xl,
     borderTopWidth: 1,
     borderTopColor: Colors.dark.border,

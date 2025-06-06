@@ -9,6 +9,8 @@ import { useQuizTimer } from '@/hooks/useQuizTimer';
 import { useRouter } from 'expo-router';
 import Button from '@/components/Button';
 import { UsmleQuestion } from '@/lib/types/usmle';
+import Typography from '@/theme/typography';
+import { Spacing } from '@/theme/spacing';
 
 interface QuizSessionContainerProps {
   categoryId?: string;
@@ -259,7 +261,7 @@ export default function QuizSessionContainer({
     : null;
 
   // Get category name for header
-  const categoryName = currentSession ? getCategoryName(currentSession.category_id) : undefined;
+  const categoryName = currentSession ? getCategoryName(currentSession.category_id) : 'Quiz';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -305,60 +307,58 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
-    padding: 16,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: Spacing.xl,
   },
   loadingText: {
+    ...Typography.styles.h4,
     color: Colors.dark.text,
-    fontSize: 18,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   loadingSubtext: {
+    ...Typography.styles.body,
     color: Colors.dark.textSecondary,
-    fontSize: 14,
     textAlign: 'center',
   },
   errorText: {
+    ...Typography.styles.h4,
     color: Colors.dark.text,
-    fontSize: 18,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   errorSubtext: {
+    ...Typography.styles.body,
     color: Colors.dark.textSecondary,
-    fontSize: 14,
     textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 20,
+    marginBottom: Spacing.xl,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
   },
   completedText: {
+    ...Typography.styles.h2,
     color: Colors.dark.text,
-    fontSize: 24,
-    fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   scoreText: {
+    ...Typography.styles.bodyLarge,
     color: Colors.dark.textSecondary,
-    fontSize: 18,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   redirectText: {
+    ...Typography.styles.body,
     color: Colors.dark.textSecondary,
-    fontSize: 14,
     textAlign: 'center',
     fontStyle: 'italic',
   },
   buttonContainer: {
     flexDirection: 'row',
-    gap: 12,
+    gap: Spacing.md,
   },
   retryButton: {
     minWidth: 100,
