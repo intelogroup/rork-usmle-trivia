@@ -20,10 +20,14 @@ export default function QuizSessionScreen() {
       <Stack.Screen 
         options={{ 
           title: 'Quiz Session',
-          headerBackTitle: 'Back',
+          headerBackTitle: 'Exit Quiz',
           headerTintColor: Colors.dark.text,
           headerStyle: {
             backgroundColor: Colors.dark.background,
+          },
+          headerShadowVisible: false,
+          headerBackTitleStyle: {
+            color: Colors.dark.error,
           },
         }} 
       />

@@ -9,7 +9,8 @@ import QuizSettings from '@/components/quiz/QuizSettings';
 import AuthPrompt from '@/components/quiz/AuthPrompt';
 import QuizStartButton from '@/components/quiz/QuizStartButton';
 import type { QuizMode } from '@/lib/types/quiz';
-import { AlertTriangle } from 'lucide-react-native';
+import { AlertTriangle, Brain } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function QuizScreen() {
   const router = useRouter();
@@ -33,7 +34,6 @@ export default function QuizScreen() {
     loadCategories();
   }, [loadCategories]);
 
-  // Check question availability when settings change
   useEffect(() => {
     const checkAvailability = async () => {
       if (selectedCategories.length > 0) {
@@ -42,7 +42,6 @@ export default function QuizScreen() {
           difficulty === 'all' ? undefined : difficulty
         );
         
-        // Validate question count
         if (count === 0) {
           setValidationError('No questions available for the selected criteria. Please adjust your selections.');
         } else if (count < questionCount) {
@@ -55,7 +54,7 @@ export default function QuizScreen() {
       }
     };
 
-    const timeoutId = setTimeout(checkAvailability, 300); // Debounce
+    const timeoutId = setTimeout(checkAvailability, 300);
     return () => clearTimeout(timeoutId);
   }, [selectedCategories, difficulty, questionCount, checkQuestionAvailability]);
   
@@ -70,23 +69,19 @@ export default function QuizScreen() {
   };
   
   const startQuiz = () => {
-    // Clear any previous validation errors
     setValidationError(null);
     
-    // Ensure questionCount is always a valid number
     const validQuestionCount = Number(questionCount) || 10;
     const finalQuestionCount = Math.max(1, Math.min(50, validQuestionCount));
     
     let categoriesToUse = Array.isArray(selectedCategories) ? selectedCategories : [];
     const validCategories = Array.isArray(categories) ? categories : [];
     
-    // Auto-select first category if none selected
     if (categoriesToUse.length === 0 && validCategories.length > 0) {
       categoriesToUse = [validCategories[0].id];
       setSelectedCategories(categoriesToUse);
     }
 
-    // Final validation before starting
     if (categoriesToUse.length === 0) {
       setValidationError('Please select at least one category to start the quiz.');
       return;
@@ -108,11 +103,9 @@ export default function QuizScreen() {
     });
   };
   
-  // Ensure categories is always an array for the component
   const validCategories = Array.isArray(categories) ? categories : [];
   const validSelectedCategories = Array.isArray(selectedCategories) ? selectedCategories : [];
   
-  // Check if start button should be disabled
   const isStartDisabled = isLoadingCategories || 
                          isCheckingAvailability || 
                          validationError !== null ||
@@ -120,51 +113,64 @@ export default function QuizScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.contentContainer}>
-        <AuthPrompt isAuthenticated={isAuthenticated} />
-        
-        <CategorySelection
-          categories={validCategories}
-          selectedCategories={validSelectedCategories}
-          onToggleCategory={toggleCategory}
-          isLoading={isLoadingCategories}
-        />
-        
-        <QuizSettings
-          questionCount={questionCount}
-          onQuestionCountChange={setQuestionCount}
-          quizMode={quizMode}
-          onQuizModeChange={setQuizMode}
-          difficulty={difficulty}
-          onDifficultyChange={setDifficulty}
-        />
-
-        {/* Question availability info */}
-        {validSelectedCategories.length > 0 && !isCheckingAvailability && availableQuestionCount > 0 && (
-          <View style={styles.availabilityInfo}>
-            <Text style={styles.availabilityText}>
-              {availableQuestionCount} questions available
+      <LinearGradient
+        colors={[Colors.dark.background, `${Colors.dark.primary}10`]}
+        style={styles.gradient}
+      >
+        <ScrollView contentContainerStyle={styles.contentContainer}>
+          <View style={styles.header}>
+            <View style={styles.iconContainer}>
+              <Brain size={32} color={Colors.dark.primary} />
+            </View>
+            <Text style={styles.title}>Start a Quiz</Text>
+            <Text style={styles.subtitle}>
+              Customize your quiz experience
             </Text>
           </View>
-        )}
 
-        {/* Validation error */}
-        {validationError && (
-          <View style={styles.errorContainer}>
-            <AlertTriangle size={16} color={Colors.dark.error || '#ff6b6b'} />
-            <Text style={styles.errorText}>{validationError}</Text>
-          </View>
-        )}
-      </ScrollView>
-      
-      <QuizStartButton
-        onPress={startQuiz}
-        disabled={isStartDisabled}
-        selectedCategoriesCount={validSelectedCategories.length}
-        questionCount={questionCount}
-        availableQuestionCount={availableQuestionCount}
-        isCheckingAvailability={isCheckingAvailability}
-      />
+          <AuthPrompt isAuthenticated={isAuthenticated} />
+          
+          <CategorySelection
+            categories={validCategories}
+            selectedCategories={validSelectedCategories}
+            onToggleCategory={toggleCategory}
+            isLoading={isLoadingCategories}
+          />
+          
+          <QuizSettings
+            questionCount={questionCount}
+            onQuestionCountChange={setQuestionCount}
+            quizMode={quizMode}
+            onQuizModeChange={setQuizMode}
+            difficulty={difficulty}
+            onDifficultyChange={setDifficulty}
+          />
+
+          {validSelectedCategories.length > 0 && !isCheckingAvailability && availableQuestionCount > 0 && (
+            <View style={styles.availabilityInfo}>
+              <Text style={styles.availabilityText}>
+                {availableQuestionCount} questions available
+              </Text>
+            </View>
+          )}
+
+          {validationError && (
+            <View style={styles.errorContainer}>
+              <AlertTriangle size={16} color={Colors.dark.error} />
+              <Text style={styles.errorText}>{validationError}</Text>
+            </View>
+          )}
+        </ScrollView>
+        
+        <QuizStartButton
+          onPress={startQuiz}
+          disabled={isStartDisabled}
+          selectedCategoriesCount={validSelectedCategories.length}
+          questionCount={questionCount}
+          availableQuestionCount={availableQuestionCount}
+          isCheckingAvailability={isCheckingAvailability}
+        />
+      </LinearGradient>
     </View>
   );
 }
@@ -174,9 +180,36 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.dark.background,
   },
+  gradient: {
+    flex: 1,
+  },
   contentContainer: {
     padding: 16,
     paddingBottom: 120,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  iconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: `${Colors.dark.primary}20`,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: Colors.dark.text,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: Colors.dark.textSecondary,
+    textAlign: 'center',
   },
   availabilityInfo: {
     backgroundColor: `${Colors.dark.primary}15`,
@@ -192,17 +225,17 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   errorContainer: {
-    backgroundColor: `${Colors.dark.error || '#ff6b6b'}15`,
+    backgroundColor: `${Colors.dark.error}15`,
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
     flexDirection: 'row',
     alignItems: 'flex-start',
     borderLeftWidth: 3,
-    borderLeftColor: Colors.dark.error || '#ff6b6b',
+    borderLeftColor: Colors.dark.error,
   },
   errorText: {
-    color: Colors.dark.error || '#ff6b6b',
+    color: Colors.dark.error,
     fontSize: 14,
     marginLeft: 8,
     flex: 1,

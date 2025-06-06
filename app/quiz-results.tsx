@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Animated, Platform } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import Colors from '@/theme/colors';
 import Button from '@/components/Button';
-import { Award, Home, RotateCcw, Share2, Clock, BarChart2 } from 'lucide-react-native';
+import { Award, Home, RotateCcw, Share2, Clock, BarChart2, Brain, Target } from 'lucide-react-native';
 import { achievements } from '@/mocks/achievements';
 import AchievementCard from '@/components/AchievementCard';
 import { useQuizStore } from '@/store/quiz/quizStore';
@@ -11,6 +11,7 @@ import ProgressBar from '@/components/ProgressBar';
 import type { Question } from '@/lib/types/quiz';
 import { useAuthStore } from '@/store/auth/authStore';
 import { categories } from '@/mocks/categories';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function QuizResultsScreen() {
   const router = useRouter();
@@ -24,6 +25,11 @@ export default function QuizResultsScreen() {
     total: number;
     percentage: number;
   }[]>([]);
+
+  // Animation values
+  const scoreScale = useRef(new Animated.Value(0.5)).current;
+  const scoreOpacity = useRef(new Animated.Value(0)).current;
+  const detailsOpacity = useRef(new Animated.Value(0)).current;
   
   useEffect(() => {
     if (!currentSession || !currentSession.questions || !currentSession.answers) return;
@@ -58,6 +64,36 @@ export default function QuizResultsScreen() {
     }));
     
     setCategoryPerformance(performance);
+
+    // Animate score reveal
+    if (Platform.OS !== 'web') {
+      Animated.sequence([
+        Animated.parallel([
+          Animated.spring(scoreScale, {
+            toValue: 1,
+            tension: 50,
+            friction: 7,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scoreOpacity, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.timing(detailsOpacity, {
+          toValue: 1,
+          duration: 500,
+          delay: 500,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      // Instant animation for web
+      scoreScale.setValue(1);
+      scoreOpacity.setValue(1);
+      detailsOpacity.setValue(1);
+    }
   }, [currentSession]);
 
   const getCategoryName = (categoryId: string) => {
@@ -78,15 +114,21 @@ export default function QuizResultsScreen() {
             },
           }} 
         />
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>No Results Available</Text>
-          <Text style={styles.errorSubtext}>Complete a quiz to see your results</Text>
-          <Button
-            title="Start a Quiz"
-            onPress={() => router.push('/(tabs)/quiz')}
-            style={styles.loginButton}
-          />
-        </View>
+        <LinearGradient
+          colors={[Colors.dark.background, `${Colors.dark.primary}10`]}
+          style={styles.gradient}
+        >
+          <View style={styles.errorContainer}>
+            <Brain size={48} color={Colors.dark.textSecondary} />
+            <Text style={styles.errorText}>No Results Available</Text>
+            <Text style={styles.errorSubtext}>Complete a quiz to see your results</Text>
+            <Button
+              title="Start a Quiz"
+              onPress={() => router.push('/(tabs)/quiz')}
+              style={styles.loginButton}
+            />
+          </View>
+        </LinearGradient>
       </SafeAreaView>
     );
   }
@@ -141,106 +183,124 @@ export default function QuizResultsScreen() {
         }} 
       />
       
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.resultContainer}>
-          <View style={styles.scoreCircle}>
-            <Text style={styles.scoreText}>{percentage}%</Text>
-            <Text style={styles.scoreDetail}>
-              {score}/{total} correct
-            </Text>
-          </View>
-          
-          <Text style={styles.resultMessage}>{getResultMessage()}</Text>
-          <Text style={styles.resultDescription}>{getResultDescription()}</Text>
-          
-          {mode === 'timed' && (
-            <View style={styles.modeInfoContainer}>
-              <Clock size={16} color={Colors.dark.textSecondary} />
-              <Text style={styles.modeInfoText}>Timed Quiz</Text>
-            </View>
-          )}
-        </View>
-        
-        {categoryPerformance.length > 0 && (
-          <View style={styles.performanceContainer}>
-            <View style={styles.sectionHeader}>
-              <BarChart2 size={20} color={Colors.dark.text} />
-              <Text style={styles.sectionTitle}>Performance by Category</Text>
+      <LinearGradient
+        colors={[Colors.dark.background, `${Colors.dark.primary}10`]}
+        style={styles.gradient}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <Animated.View 
+            style={[
+              styles.resultContainer,
+              {
+                opacity: scoreOpacity,
+                transform: [{ scale: scoreScale }],
+              },
+            ]}
+          >
+            <View style={styles.scoreCircle}>
+              <Text style={styles.scoreText}>{percentage}%</Text>
+              <Text style={styles.scoreDetail}>
+                {score}/{total} correct
+              </Text>
             </View>
             
-            {categoryPerformance.map((category) => (
-              <View key={category.categoryId} style={styles.categoryPerformance}>
-                <View style={styles.categoryHeader}>
-                  <Text style={styles.categoryName}>{category.categoryName}</Text>
-                  <Text style={styles.categoryScore}>
-                    {category.correct}/{category.total}
-                  </Text>
+            <Text style={styles.resultMessage}>{getResultMessage()}</Text>
+            <Text style={styles.resultDescription}>{getResultDescription()}</Text>
+            
+            {mode === 'timed' && (
+              <View style={styles.modeInfoContainer}>
+                <Clock size={16} color={Colors.dark.textSecondary} />
+                <Text style={styles.modeInfoText}>Timed Quiz</Text>
+              </View>
+            )}
+          </Animated.View>
+          
+          <Animated.View style={{ opacity: detailsOpacity }}>
+            {categoryPerformance.length > 0 && (
+              <View style={styles.performanceContainer}>
+                <View style={styles.sectionHeader}>
+                  <Target size={20} color={Colors.dark.text} />
+                  <Text style={styles.sectionTitle}>Performance by Category</Text>
                 </View>
-                <ProgressBar 
-                  progress={category.percentage / 100}
-                  height={6}
-                  fillColor={
-                    category.percentage >= 80 ? Colors.dark.success :
-                    category.percentage >= 60 ? Colors.dark.primary :
-                    Colors.dark.error
-                  }
+                
+                {categoryPerformance.map((category) => (
+                  <View key={category.categoryId} style={styles.categoryPerformance}>
+                    <View style={styles.categoryHeader}>
+                      <Text style={styles.categoryName}>{category.categoryName}</Text>
+                      <Text style={styles.categoryScore}>
+                        {category.correct}/{category.total}
+                      </Text>
+                    </View>
+                    <ProgressBar 
+                      progress={category.percentage / 100}
+                      height={6}
+                      fillColor={
+                        category.percentage >= 80 ? Colors.dark.success :
+                        category.percentage >= 60 ? Colors.dark.primary :
+                        Colors.dark.error
+                      }
+                    />
+                  </View>
+                ))}
+              </View>
+            )}
+            
+            {unlockedAchievement && (
+              <View style={styles.achievementContainer}>
+                <View style={styles.sectionHeader}>
+                  <Award size={20} color={Colors.dark.text} />
+                  <Text style={styles.sectionTitle}>Achievement Unlocked!</Text>
+                </View>
+                <AchievementCard 
+                  achievement={{
+                    ...unlockedAchievement,
+                    unlocked: true
+                  }} 
                 />
               </View>
-            ))}
-          </View>
-        )}
-        
-        {unlockedAchievement && (
-          <View style={styles.achievementContainer}>
-            <View style={styles.sectionHeader}>
-              <Award size={20} color={Colors.dark.text} />
-              <Text style={styles.sectionTitle}>Achievement Unlocked!</Text>
+            )}
+            
+            {!isAuthenticated && (
+              <View style={styles.loginPrompt}>
+                <Text style={styles.loginPromptText}>
+                  Log in to track your progress and earn achievements!
+                </Text>
+                <Button
+                  title="Log In"
+                  onPress={() => router.push('/login')}
+                  style={styles.loginPromptButton}
+                />
+              </View>
+            )}
+            
+            <View style={styles.actionButtons}>
+              <Button
+                title="Share Results"
+                onPress={handleShare}
+                variant="outline"
+                style={styles.actionButton}
+                icon={Share2}
+              />
             </View>
-            <AchievementCard 
-              achievement={{
-                ...unlockedAchievement,
-                unlocked: true
-              }} 
-            />
-          </View>
-        )}
+          </Animated.View>
+        </ScrollView>
         
-        {!isAuthenticated && (
-          <View style={styles.loginPrompt}>
-            <Text style={styles.loginPromptText}>
-              Log in to track your progress and earn achievements!
-            </Text>
-            <Button
-              title="Log In"
-              onPress={() => router.push('/login')}
-              style={styles.loginPromptButton}
-            />
-          </View>
-        )}
-        
-        <View style={styles.actionButtons}>
+        <View style={styles.footer}>
           <Button
-            title="Share Results"
-            onPress={handleShare}
+            title="Retake Quiz"
+            onPress={handleRetakeQuiz}
             variant="outline"
-            style={styles.actionButton}
+            style={styles.footerButton}
+            icon={RotateCcw}
+          />
+          <Button
+            title="Go to Home"
+            onPress={handleGoHome}
+            style={styles.footerButton}
+            icon={Home}
           />
         </View>
-      </ScrollView>
-      
-      <View style={styles.footer}>
-        <Button
-          title="Retake Quiz"
-          onPress={handleRetakeQuiz}
-          variant="outline"
-          style={styles.footerButton}
-        />
-        <Button
-          title="Go to Home"
-          onPress={handleGoHome}
-          style={styles.footerButton}
-        />
-      </View>
+      </LinearGradient>
     </SafeAreaView>
   );
 }
@@ -250,18 +310,29 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.dark.background,
   },
+  gradient: {
+    flex: 1,
+  },
   scrollContent: {
     padding: 20,
-    paddingBottom: 100, // Extra space for footer
+    paddingBottom: 100,
   },
   resultContainer: {
     backgroundColor: Colors.dark.card,
-    borderRadius: 12,
-    padding: 20,
+    borderRadius: 16,
+    padding: 24,
     alignItems: 'center',
     marginBottom: 24,
     borderWidth: 1,
     borderColor: Colors.dark.border,
+    elevation: 2,
+    shadowColor: Colors.dark.shadow,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   scoreCircle: {
     width: 120,
@@ -271,6 +342,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
+    elevation: 4,
+    shadowColor: Colors.dark.primary,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
   },
   scoreText: {
     color: Colors.dark.background,
@@ -310,7 +389,12 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   performanceContainer: {
+    backgroundColor: Colors.dark.card,
+    borderRadius: 16,
+    padding: 20,
     marginBottom: 24,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -325,11 +409,6 @@ const styles = StyleSheet.create({
   },
   categoryPerformance: {
     marginBottom: 16,
-    backgroundColor: Colors.dark.card,
-    borderRadius: 8,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
   },
   categoryHeader: {
     flexDirection: 'row',
@@ -347,7 +426,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   achievementContainer: {
+    backgroundColor: Colors.dark.card,
+    borderRadius: 16,
+    padding: 20,
     marginBottom: 24,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
   },
   actionButtons: {
     marginBottom: 16,
@@ -395,8 +479,8 @@ const styles = StyleSheet.create({
   },
   loginPrompt: {
     backgroundColor: Colors.dark.card,
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 16,
+    padding: 20,
     marginBottom: 24,
     borderWidth: 1,
     borderColor: Colors.dark.border,

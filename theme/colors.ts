@@ -13,6 +13,18 @@ const Colors = {
     warning: '#F59E0B',
     error: '#DC2626',
     shadow: '#000000',
+    // New analytics-specific colors
+    chart: {
+      primary: '#1E3A8A',
+      secondary: '#3B82F6',
+      tertiary: '#60A5FA',
+      quaternary: '#93C5FD',
+      success: '#059669',
+      warning: '#F59E0B',
+      error: '#DC2626',
+      grid: '#E5E7EB',
+      text: '#687076',
+    },
   },
   dark: {
     text: '#ECEDEE',
@@ -21,14 +33,24 @@ const Colors = {
     card: '#1F2937',
     cardHighlight: '#374151',
     border: '#374151',
-    primary: '#1E3A8A', // Navy blue
-    secondary: '#3B82F6',
+    primary: '#3B82F6', // Changed to a brighter blue for better contrast
+    secondary: '#60A5FA',
     accent: '#10B981',
     success: '#059669',
     warning: '#F59E0B',
     error: '#DC2626',
     shadow: '#000000',
+    // New analytics-specific colors
+    chart: {
+      primary: '#3B82F6',
+      secondary: '#60A5FA',
+      tertiary: '#93C5FD',
+      quaternary: '#BFDBFE',
+      success: '#34D399',
+      warning: '#FBBF24',
+      error: '#F87171',
+      grid: '#374151',
+      text: '#9BA1A6',
+    },
   },
 };
-
-export default Colors;

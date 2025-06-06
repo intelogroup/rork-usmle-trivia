@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import Colors from '@/theme/colors';
 import OptionButton from '@/components/OptionButton';
 import type { Question } from '@/lib/types/quiz';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface QuizSessionContentProps {
   question: Question;
@@ -24,9 +25,17 @@ export default function QuizSessionContent({
 }: QuizSessionContentProps) {
   const feedbackOpacity = useRef(new Animated.Value(0)).current;
   const feedbackScale = useRef(new Animated.Value(0.5)).current;
+  const optionsOpacity = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     if (isAnswerSubmitted && selectedAnswer !== null) {
+      // Fade out options slightly
+      Animated.timing(optionsOpacity, {
+        toValue: 0.6,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+
       // Show feedback animation
       Animated.parallel([
         Animated.timing(feedbackOpacity, {
@@ -58,9 +67,10 @@ export default function QuizSessionContent({
         ]).start();
       }, 2000);
     } else {
-      // Reset animation values
+      // Reset animations
       feedbackOpacity.setValue(0);
       feedbackScale.setValue(0.5);
+      optionsOpacity.setValue(1);
     }
   }, [isAnswerSubmitted, selectedAnswer]);
 
@@ -77,11 +87,19 @@ export default function QuizSessionContent({
 
   return (
     <View style={styles.container}>
-      <View style={styles.questionContainer}>
+      <LinearGradient
+        colors={[Colors.dark.card, Colors.dark.background]}
+        style={styles.questionContainer}
+      >
         <Text style={styles.questionText}>{questionText}</Text>
-      </View>
+      </LinearGradient>
       
-      <View style={styles.optionsContainer}>
+      <Animated.View 
+        style={[
+          styles.optionsContainer,
+          { opacity: optionsOpacity }
+        ]}
+      >
         {question.options.map((option, index) => (
           <OptionButton
             key={index}
@@ -94,10 +112,10 @@ export default function QuizSessionContent({
             showResult={isAnswerSubmitted}
           />
         ))}
-      </View>
+      </Animated.View>
 
       {/* Feedback Animation */}
-      {isAnswerSubmitted && selectedAnswer !== null && (
+      {Platform.OS !== 'web' && isAnswerSubmitted && selectedAnswer !== null && (
         <Animated.View
           style={[
             styles.feedbackContainer,
@@ -131,12 +149,17 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   questionContainer: {
-    backgroundColor: Colors.dark.card,
     borderRadius: 16,
     padding: 24,
     marginBottom: 24,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
+    elevation: 2,
+    shadowColor: Colors.dark.shadow,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   questionText: {
     fontSize: 18,
