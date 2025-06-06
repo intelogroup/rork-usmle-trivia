@@ -7,27 +7,28 @@ import { LinearGradient } from 'expo-linear-gradient';
 import LevelProgress from '@/components/home/LevelProgress';
 import WeakestSubjects from '@/components/home/WeakestSubjects';
 import ReviewCard from '@/components/home/ReviewCard';
-import UnifiedDashboard from '@/components/home/UnifiedDashboard';
+import DashboardStats from '@/components/home/DashboardStats';
+import QuickActions from '@/components/home/QuickActions';
+import WeeklyProgress from '@/components/home/WeeklyProgress';
 import { useUserLevel } from '@/hooks/useUserLevel';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useWeakestCategories } from '@/hooks/useWeakestCategories';
 import { useIncorrectQuestions } from '@/hooks/useIncorrectQuestions';
 import { useQuizStore } from '@/store/quiz/quizStore';
 import { Play } from 'lucide-react-native';
+import Typography from '@/theme/typography';
+import Spacing from '@/theme/spacing';
 
 export default function HomeScreen() {
   const { user, profile, isLoading, isAuthenticated } = useAuthStore();
   
-  // Use hooks with error handling
   const levelData = useUserLevel();
   const statsData = useDashboardStats();
   const { weakestCategories } = useWeakestCategories();
   const { incorrectCount, isLoading: isIncorrectLoading, startReviewQuiz } = useIncorrectQuestions();
 
-  // Prevent navigation before root layout is mounted
   useEffect(() => {
     if (!isAuthenticated && !isLoading) {
-      // Delay navigation to ensure root layout is mounted
       const timeoutId = setTimeout(() => {
         try {
           router.replace('/login');
@@ -42,9 +43,7 @@ export default function HomeScreen() {
 
   const handleQuickQuiz = () => {
     try {
-      // Implement quick quiz navigation or logic here
       console.log('Timed Challenge pressed');
-      // For now, navigate to quiz tab with preset parameters
       router.push('/(tabs)/quiz');
     } catch (error) {
       console.error('Quick quiz navigation error (silently bypassed):', error);
@@ -68,7 +67,6 @@ export default function HomeScreen() {
     }
   };
 
-  // Show loading while auth is initializing (but not for too long)
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -78,7 +76,6 @@ export default function HomeScreen() {
     );
   }
 
-  // Don't render anything if no user (should redirect to login)
   if (!user || !isAuthenticated) {
     return (
       <View style={styles.loadingContainer}>
@@ -88,7 +85,6 @@ export default function HomeScreen() {
     );
   }
 
-  // Safe username extraction with fallbacks
   const getDisplayName = () => {
     try {
       return profile?.username || 
@@ -143,15 +139,17 @@ export default function HomeScreen() {
         isLoading={isIncorrectLoading} 
       />
       
-      <UnifiedDashboard
+      <DashboardStats
         totalQuizzes={statsData.totalQuizzes}
         averageScore={statsData.averageScore}
         currentStreak={statsData.currentStreak}
         totalTimeSpent={statsData.totalTimeSpent}
         getStreakEmoji={statsData.getStreakEmoji}
-        weeklyProgress={statsData.weeklyProgress}
-        onQuickQuiz={handleQuickQuiz}
       />
+
+      <QuickActions onQuickQuiz={handleQuickQuiz} />
+      
+      <WeeklyProgress weeklyProgress={statsData.weeklyProgress} />
     </ScrollView>
   );
 }
@@ -162,30 +160,30 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.background,
   },
   contentContainer: {
-    padding: 20,
+    padding: Spacing.xl,
   },
   welcomeSection: {
-    marginBottom: 24,
+    marginBottom: Spacing['2xl'],
   },
   greeting: {
-    fontSize: 16,
+    fontSize: Typography.fontSize.base,
     color: Colors.dark.textSecondary,
-    marginBottom: 4,
+    marginBottom: Spacing.xs,
   },
   username: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: Typography.fontSize['3xl'],
+    fontWeight: Typography.fontWeight.bold,
     color: Colors.dark.text,
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: Typography.fontSize.base,
     color: Colors.dark.textSecondary,
   },
   startQuizButtonContainer: {
     borderRadius: 16,
     overflow: 'hidden',
-    marginBottom: 24,
+    marginBottom: Spacing['2xl'],
     elevation: 4,
     shadowColor: Colors.dark.primary,
     shadowOffset: { width: 0, height: 4 },
@@ -194,7 +192,7 @@ const styles = StyleSheet.create({
   },
   startQuizButton: {
     borderRadius: 16,
-    padding: 18,
+    padding: Spacing.lg,
   },
   startQuizContent: {
     flexDirection: 'row',
@@ -202,11 +200,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   startQuizIcon: {
-    marginRight: 12,
+    marginRight: Spacing.md,
   },
   startQuizText: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
     color: Colors.dark.background,
   },
   loadingContainer: {
@@ -214,17 +212,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.dark.background,
-    padding: 20,
+    padding: Spacing.xl,
   },
   loadingText: {
     color: Colors.dark.text,
-    fontSize: 18,
+    fontSize: Typography.fontSize.lg,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   loadingSubtext: {
     color: Colors.dark.textSecondary,
-    fontSize: 14,
+    fontSize: Typography.fontSize.base,
     textAlign: 'center',
   },
 });

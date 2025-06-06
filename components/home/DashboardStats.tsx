@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Colors from '@/theme/colors';
 import { Clock, Target, Zap, Trophy } from 'lucide-react-native';
+import Typography from '@/theme/typography';
+import Spacing from '@/theme/spacing';
 
 interface DashboardStatsProps {
   totalQuizzes: number;
@@ -78,24 +80,24 @@ export default function DashboardStats({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
+    marginBottom: Spacing.xl,
   },
   title: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
     color: Colors.dark.text,
-    marginBottom: 10,
+    marginBottom: Spacing.sm,
   },
   grid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 8,
+    gap: Spacing.sm,
   },
   statCard: {
     flex: 1,
     backgroundColor: Colors.dark.card,
     borderRadius: 12,
-    padding: 10,
+    padding: Spacing.sm,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.dark.border,
@@ -107,19 +109,19 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6,
+    marginBottom: Spacing.xs,
   },
   statValue: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.bold,
     color: Colors.dark.text,
     marginBottom: 2,
     textAlign: 'center',
   },
   statLabel: {
-    fontSize: 10,
+    fontSize: Typography.fontSize.xs,
     color: Colors.dark.textSecondary,
-    fontWeight: '500',
+    fontWeight: Typography.fontWeight.medium,
     textAlign: 'center',
   },
 });

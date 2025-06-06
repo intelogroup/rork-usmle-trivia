@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import Colors from '@/theme/colors';
 import { Zap, BookOpen, Trophy, Target } from 'lucide-react-native';
+import Typography from '@/theme/typography';
+import Spacing from '@/theme/spacing';
 
 interface QuickActionsProps {
   onQuickQuiz: () => void;
@@ -62,24 +64,24 @@ export default function QuickActions({ onQuickQuiz }: QuickActionsProps) {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
+    marginBottom: Spacing.xl,
   },
   title: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
     color: Colors.dark.text,
-    marginBottom: 10,
+    marginBottom: Spacing.sm,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: Spacing.sm,
   },
   actionCard: {
     flex: 1,
     minWidth: '47%',
     borderRadius: 12,
-    padding: 12,
+    padding: Spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -87,10 +89,10 @@ const styles = StyleSheet.create({
     minHeight: 60,
   },
   actionLabel: {
-    fontSize: 12,
+    fontSize: Typography.fontSize.sm,
     color: Colors.dark.text,
-    fontWeight: '600',
-    marginTop: 6,
+    fontWeight: Typography.fontWeight.semibold,
+    marginTop: Spacing.xs,
     textAlign: 'center',
   },
 });
