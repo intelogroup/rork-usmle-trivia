@@ -18,7 +18,6 @@ export default function QuizSetupScreen() {
   const { categoryId } = useLocalSearchParams<{ categoryId: string }>();
   const { 
     categoriesWithCounts,
-    startQuiz,
     isLoading,
     error,
     checkQuestionAvailability,
@@ -71,17 +70,19 @@ export default function QuizSetupScreen() {
     }
 
     try {
-      await startQuiz(
-        [categoryId],
-        finalQuestionCount,
-        difficulty === 'all' ? undefined : difficulty,
-        quizMode
-      );
-
-      // Navigate to countdown screen before quiz session
-      router.push('/quiz-countdown');
+      // Navigate to countdown screen with quiz parameters
+      router.push({
+        pathname: '/quiz-countdown',
+        params: {
+          categoryId: categoryId,
+          count: finalQuestionCount.toString(),
+          mode: quizMode,
+          difficulty: difficulty,
+        },
+      });
     } catch (err) {
       console.error('Error starting quiz:', err);
+      setValidationError('Failed to start quiz. Please try again.');
     }
   };
 

@@ -28,7 +28,7 @@ export default function QuizIntroAnimation() {
 
   const navigateToQuizSession = () => {
     // Pass through all the quiz parameters
-    router.push({
+    router.replace({
       pathname: '/quiz-session',
       params: params,
     });

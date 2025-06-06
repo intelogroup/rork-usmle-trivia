@@ -6,7 +6,7 @@ import QuizSessionContent from '@/components/quiz/QuizSessionContent';
 import QuizSessionFooter from '@/components/quiz/QuizSessionFooter';
 import { useQuizStore } from '@/store/quiz/quizStore';
 import { useQuizTimer } from '@/hooks/useQuizTimer';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import Button from '@/components/Button';
 import { UsmleQuestion } from '@/lib/types/usmle';
 import Typography from '@/theme/typography';
@@ -28,6 +28,7 @@ export default function QuizSessionContainer({
   difficulty = 'all',
 }: QuizSessionContainerProps) {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const { 
     currentSession, 
     isLoading, 
@@ -48,21 +49,27 @@ export default function QuizSessionContainer({
   // Initialize timer for timed mode
   const timer = useQuizTimer(30, false);
 
+  // Get parameters from URL if not passed as props
+  const finalCategoryId = categoryId || (params.categoryId as string);
+  const finalCount = count || parseInt((params.count as string) || '10', 10);
+  const finalMode = mode || (params.mode as string) || 'standard';
+  const finalDifficulty = difficulty || (params.difficulty as string) || 'all';
+
   useEffect(() => {
     if (!currentSession) {
       // Start quiz with provided parameters
       const validCategories = Array.isArray(categories) ? categories : [];
-      const categoryIds = validCategories.length > 0 ? validCategories : (categoryId ? [categoryId] : ['general']);
-      const validCount = Math.max(1, Math.min(50, Number(count) || 10));
+      const categoryIds = validCategories.length > 0 ? validCategories : (finalCategoryId ? [finalCategoryId] : ['general']);
+      const validCount = Math.max(1, Math.min(50, finalCount));
       
       startQuiz(
         categoryIds, 
         validCount, 
-        difficulty === 'all' ? undefined : difficulty as 'easy' | 'medium' | 'hard', 
-        mode as any
+        finalDifficulty === 'all' ? undefined : finalDifficulty as 'easy' | 'medium' | 'hard', 
+        finalMode as any
       );
     }
-  }, [currentSession, categoryId, categories, count, difficulty, mode, startQuiz]);
+  }, [currentSession, finalCategoryId, categories, finalCount, finalDifficulty, finalMode, startQuiz]);
 
   // Handle timer for timed mode
   useEffect(() => {
@@ -97,11 +104,11 @@ export default function QuizSessionContainer({
         params: {
           score: currentSession.score.toString(),
           total: validQuestions.length.toString(),
-          mode: mode,
+          mode: finalMode,
         },
       });
     }
-  }, [currentSession, router, mode]);
+  }, [currentSession, router, finalMode]);
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (!currentSession || currentSession.isAnswerSubmitted) return;
@@ -130,14 +137,14 @@ export default function QuizSessionContainer({
     timer.pauseTimer();
     resetQuiz();
     const validCategories = Array.isArray(categories) ? categories : [];
-    const categoryIds = validCategories.length > 0 ? validCategories : (categoryId ? [categoryId] : ['general']);
-    const validCount = Math.max(1, Math.min(50, Number(count) || 10));
+    const categoryIds = validCategories.length > 0 ? validCategories : (finalCategoryId ? [finalCategoryId] : ['general']);
+    const validCount = Math.max(1, Math.min(50, finalCount));
     
     startQuiz(
       categoryIds, 
       validCount, 
-      difficulty === 'all' ? undefined : difficulty as 'easy' | 'medium' | 'hard', 
-      mode as any
+      finalDifficulty === 'all' ? undefined : finalDifficulty as 'easy' | 'medium' | 'hard', 
+      finalMode as any
     );
   };
 
@@ -272,7 +279,7 @@ export default function QuizSessionContainer({
             totalQuestions={validQuestions.length}
             progress={progress}
             timeRemaining={currentSession.mode === 'timed' ? timer.timeRemaining : undefined}
-            mode={mode || 'standard'}
+            mode={finalMode || 'standard'}
             categoryName={categoryName}
           />
         )}
