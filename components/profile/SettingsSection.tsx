@@ -26,30 +26,20 @@ export default function SettingsSection({ onShare }: SettingsSectionProps) {
           style: 'destructive',
           onPress: async () => {
             try {
-              console.log('Starting logout process...');
               await logout();
-              console.log('Logout completed, navigating to login...');
-              
-              // Use replace to prevent going back to authenticated screens
-              router.replace('/login');
+              // Navigate to home tab after successful logout
+              router.replace('/(tabs)');
             } catch (error) {
-              console.error('Logout error:', error);
-              
-              // Show user-friendly error message
+              const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
               Alert.alert(
-                'Sign Out Error',
-                'There was a problem signing out. Please try again.',
+                'Sign Out Failed',
+                `Could not sign out completely. ${errorMessage}`,
                 [
                   {
-                    text: 'Try Again',
-                    onPress: handleLogout,
-                  },
-                  {
-                    text: 'Force Sign Out',
-                    style: 'destructive',
+                    text: 'OK',
                     onPress: () => {
-                      // Force navigation to login even if logout fails
-                      router.replace('/login');
+                      // Even on failure, the state is cleared, so we should still navigate
+                      router.replace('/(tabs)');
                     },
                   },
                 ]

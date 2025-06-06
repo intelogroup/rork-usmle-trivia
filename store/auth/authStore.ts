@@ -405,28 +405,23 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
+        console.log('Logging out user');
+        set({ isLoading: true, error: null });
+
         try {
-          console.log('Logging out user');
-          set({ isLoading: true, error: null });
-          
-          // First, sign out from Supabase with timeout
-          const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('Logout timeout')), 8000);
-          });
-
-          const signOutPromise = supabase.auth.signOut();
-          
-          try {
-            const { error } = await Promise.race([signOutPromise, timeoutPromise]) as any;
-            if (error) {
-              console.error('Supabase signout error (continuing with local cleanup):', error);
-            }
-          } catch (timeoutError: unknown) {
-            const errorMessage = timeoutError instanceof Error ? timeoutError.message : 'Unknown timeout error';
-            console.error('Supabase signout timeout (continuing with local cleanup):', errorMessage);
+          const { error } = await supabase.auth.signOut();
+          if (error) {
+            console.error('Supabase signout error:', error);
+            throw error;
           }
-
-          // Clear local state regardless of Supabase response
+          console.log('Supabase signout successful');
+        } catch (error: unknown) {
+          console.error('Supabase signout error:', error);
+          // Re-throw to allow UI to handle navigation in its own catch block
+          throw error; 
+        } finally {
+          // This 'finally' block ensures state is cleared even if signOut fails
+          console.log('Clearing local session and profile state');
           set({ 
             user: null, 
             session: null, 
@@ -444,19 +439,6 @@ export const useAuthStore = create<AuthState>()(
             const errorMessage = storageError instanceof Error ? storageError.message : 'Unknown storage error';
             console.error('Storage cleanup error:', errorMessage);
           }
-          
-        } catch (logoutError: unknown) {
-          const errorMessage = logoutError instanceof Error ? logoutError.message : 'Unknown logout error';
-          console.error('Logout error:', errorMessage);
-          // Clear local state even if there's an error
-          set({ 
-            user: null, 
-            session: null, 
-            profile: null,
-            isAuthenticated: false,
-            isLoading: false,
-            error: null
-          });
         }
       },
 
@@ -467,9 +449,14 @@ export const useAuthStore = create<AuthState>()(
 
           console.log('Updating profile with:', updates);
 
+          const updatedProfile = {
+            ...updates,
+            updated_at: new Date().toISOString(),
+          };
+
           const { data, error } = await supabase
             .from('profiles')
-            .update(updates)
+            .update(updatedProfile)
             .eq('id', profile.id)
             .select()
             .single();

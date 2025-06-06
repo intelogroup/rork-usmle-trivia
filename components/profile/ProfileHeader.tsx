@@ -1,7 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TextInput } from 'react-native';
 import Colors from '@/theme/colors';
-import { Camera, Edit3 } from 'lucide-react-native';
+import { Camera, Edit3, X, Check } from 'lucide-react-native';
+import { useAuthStore } from '@/store/auth/authStore';
 import type { User } from '@supabase/supabase-js';
 import type { UserProfile } from '@/lib/types/auth';
 
@@ -11,14 +12,46 @@ interface ProfileHeaderProps {
 }
 
 export default function ProfileHeader({ user, profile }: ProfileHeaderProps) {
+  const { updateProfile } = useAuthStore();
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editedUsername, setEditedUsername] = useState(profile?.username || '');
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const handleEditProfile = () => {
-    // TODO: Implement edit profile functionality
-    console.log('Edit profile');
+    setEditedUsername(profile?.username || '');
+    setIsEditModalVisible(true);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!editedUsername.trim()) {
+      Alert.alert('Error', 'Username cannot be empty');
+      return;
+    }
+
+    if (editedUsername === profile?.username) {
+      setIsEditModalVisible(false);
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      await updateProfile({ username: editedUsername.trim() });
+      setIsEditModalVisible(false);
+      Alert.alert('Success', 'Profile updated successfully!');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      Alert.alert('Error', 'Failed to update profile. Please try again.');
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const handleChangeAvatar = () => {
-    // TODO: Implement avatar change functionality
-    console.log('Change avatar');
+    Alert.alert(
+      'Change Avatar',
+      'Avatar upload feature coming soon!',
+      [{ text: 'OK' }]
+    );
   };
 
   const displayName = profile?.username || user.user_metadata?.username || user.email?.split('@')[0] || 'User';
@@ -26,41 +59,97 @@ export default function ProfileHeader({ user, profile }: ProfileHeaderProps) {
   const level = profile?.level || 1;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.avatarContainer}>
-        {user.user_metadata?.avatar_url ? (
-          <Image source={{ uri: user.user_metadata.avatar_url }} style={styles.avatar} />
-        ) : (
-          <View style={styles.avatarPlaceholder}>
-            <Text style={styles.avatarText}>
-              {displayName.charAt(0).toUpperCase()}
-            </Text>
+    <>
+      <View style={styles.container}>
+        <View style={styles.avatarContainer}>
+          {user.user_metadata?.avatar_url ? (
+            <Image source={{ uri: user.user_metadata.avatar_url }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatarPlaceholder}>
+              <Text style={styles.avatarText}>
+                {displayName.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          )}
+          <TouchableOpacity style={styles.cameraButton} onPress={handleChangeAvatar}>
+            <Camera size={16} color={Colors.dark.text} />
+          </TouchableOpacity>
+          <View style={styles.levelBadge}>
+            <Text style={styles.levelText}>LVL {level}</Text>
           </View>
-        )}
-        <TouchableOpacity style={styles.cameraButton} onPress={handleChangeAvatar}>
-          <Camera size={16} color={Colors.dark.text} />
-        </TouchableOpacity>
-        <View style={styles.levelBadge}>
-          <Text style={styles.levelText}>LVL {level}</Text>
+        </View>
+
+        <View style={styles.userInfo}>
+          <View style={styles.nameContainer}>
+            <Text style={styles.username}>{displayName}</Text>
+            <TouchableOpacity onPress={handleEditProfile} style={styles.editButton}>
+              <Edit3 size={18} color={Colors.dark.textSecondary} />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.email}>{user.email}</Text>
+          <Text style={styles.joinDate}>
+            Joined {new Date(joinDate).toLocaleDateString('en-US', {
+              month: 'long',
+              year: 'numeric'
+            })}
+          </Text>
         </View>
       </View>
 
-      <View style={styles.userInfo}>
-        <View style={styles.nameContainer}>
-          <Text style={styles.username}>{displayName}</Text>
-          <TouchableOpacity onPress={handleEditProfile} style={styles.editButton}>
-            <Edit3 size={18} color={Colors.dark.textSecondary} />
-          </TouchableOpacity>
+      {/* Edit Profile Modal */}
+      <Modal
+        visible={isEditModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsEditModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Profile</Text>
+              <TouchableOpacity 
+                onPress={() => setIsEditModalVisible(false)}
+                style={styles.closeButton}
+              >
+                <X size={24} color={Colors.dark.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Username</Text>
+              <TextInput
+                style={styles.textInput}
+                value={editedUsername}
+                onChangeText={setEditedUsername}
+                placeholder="Enter username"
+                placeholderTextColor={Colors.dark.textSecondary}
+                autoFocus
+                maxLength={30}
+              />
+            </View>
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity 
+                style={styles.cancelButton}
+                onPress={() => setIsEditModalVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.saveButton, isUpdating && styles.saveButtonDisabled]}
+                onPress={handleSaveProfile}
+                disabled={isUpdating}
+              >
+                <Check size={16} color={Colors.dark.background} />
+                <Text style={styles.saveButtonText}>
+                  {isUpdating ? 'Saving...' : 'Save'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-        <Text style={styles.email}>{user.email}</Text>
-        <Text style={styles.joinDate}>
-          Joined {new Date(joinDate).toLocaleDateString('en-US', {
-            month: 'long',
-            year: 'numeric'
-          })}
-        </Text>
-      </View>
-    </View>
+      </Modal>
+    </>
   );
 }
 
@@ -167,5 +256,88 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 10,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  modalContent: {
+    backgroundColor: Colors.dark.card,
+    borderRadius: 20,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: Colors.dark.text,
+  },
+  closeButton: {
+    padding: 4,
+  },
+  inputContainer: {
+    marginBottom: 24,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.dark.text,
+    marginBottom: 8,
+  },
+  textInput: {
+    backgroundColor: Colors.dark.cardHighlight,
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    color: Colors.dark.text,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: Colors.dark.cardHighlight,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.dark.textSecondary,
+  },
+  saveButton: {
+    flex: 1,
+    backgroundColor: Colors.dark.primary,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  saveButtonDisabled: {
+    opacity: 0.6,
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.dark.background,
   },
 });

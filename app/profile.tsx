@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, Share, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, Share, Platform, TouchableOpacity, Alert } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 import Colors from '@/theme/colors';
@@ -14,7 +14,16 @@ import DatabaseTestButton from '@/components/DatabaseTestButton';
 
 export default function ProfileScreen() {
   const { user, profile, isAuthenticated } = useAuthStore();
-  const { achievements, questionsAnswered, perfectScores, categoriesCompleted, isLoading } = useProfileStats();
+  const { 
+    achievements, 
+    questionsAnswered, 
+    perfectScores, 
+    categoriesCompleted, 
+    totalQuizzes,
+    averageAccuracy,
+    isLoading,
+    error 
+  } = useProfileStats();
   const [timeFilter, setTimeFilter] = useState<'week' | 'month' | 'all'>('week');
 
   // Utility functions
@@ -51,10 +60,14 @@ export default function ProfileScreen() {
     if (!profile) return;
     
     try {
-      const message = `Check out my quiz progress! 🎯\n` +
-        `📊 Total Quizzes: ${profile.total_quizzes}\n` +
-        `🎯 Accuracy: ${profile.total_quizzes > 0 ? Math.round((profile.correct_answers / profile.total_quizzes) * 100) : 0}%\n` +
-        `🔥 Current Streak: ${profile.current_streak} ${getStreakEmoji()}\n` +
+      const message = `Check out my quiz progress! 🎯
+` +
+        `📊 Total Quizzes: ${totalQuizzes}
+` +
+        `🎯 Accuracy: ${averageAccuracy}%
+` +
+        `🔥 Current Streak: ${profile.current_streak} ${getStreakEmoji()}
+` +
         `🏆 Level: ${profile.level}`;
 
       if (Platform.OS === 'web') {
@@ -65,7 +78,7 @@ export default function ProfileScreen() {
           });
         } else {
           await navigator.clipboard.writeText(message);
-          console.log('Progress copied to clipboard!');
+          Alert.alert('Success', 'Progress copied to clipboard!');
         }
       } else {
         await Share.share({
@@ -75,6 +88,7 @@ export default function ProfileScreen() {
       }
     } catch (error) {
       console.error('Error sharing:', error);
+      Alert.alert('Error', 'Failed to share progress. Please try again.');
     }
   };
 
@@ -141,9 +155,29 @@ export default function ProfileScreen() {
     );
   }
 
-  const totalQuizzes = profile?.total_quizzes || 0;
-  const correctAnswers = profile?.correct_answers || 0;
-  const averageAccuracy = totalQuizzes > 0 ? Math.round((correctAnswers / totalQuizzes) * 100) : 0;
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Stack.Screen 
+          options={{ 
+            title: 'Profile',
+            headerStyle: { backgroundColor: Colors.dark.background },
+            headerTintColor: Colors.dark.text,
+          }} 
+        />
+        <View style={styles.loadingContainer}>
+          <Text style={styles.errorText}>Error loading profile: {error}</Text>
+          <TouchableOpacity 
+            style={styles.retryButton} 
+            onPress={() => window.location.reload()}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   const currentStreak = profile?.current_streak || 0;
   const unlockedAchievements = achievements.filter(a => a.unlocked).length;
 
@@ -246,10 +280,29 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 20,
   },
   loadingText: {
     fontSize: 16,
     color: Colors.dark.textSecondary,
+    textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 16,
+    color: Colors.dark.error,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: Colors.dark.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: Colors.dark.background,
+    fontSize: 16,
+    fontWeight: '600',
   },
   bottomSpacing: {
     height: 32,

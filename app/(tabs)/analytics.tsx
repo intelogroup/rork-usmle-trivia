@@ -69,7 +69,7 @@ export default function AnalyticsScreen() {
           dateFilter = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
       }
 
-      // Build and execute the filtered query
+      // Build and execute the filtered query - FIX: Use the filtered query
       const { data: sessions, error } = await supabase
         .from('quiz_sessions')
         .select('*')
@@ -92,7 +92,7 @@ export default function AnalyticsScreen() {
       const totalQuestions = validSessions.reduce((sum, session) => sum + (session.total_questions || 0), 0);
       const averageTimePerQuestion = totalQuestions > 0 ? Math.round(totalTimeSpent / totalQuestions) : 30;
 
-      // Calculate category breakdown
+      // Calculate category breakdown with proper category names
       const categoryBreakdown: { [key: string]: { name: string; count: number } } = {};
       
       // First, get all categories to map IDs to names
@@ -282,24 +282,29 @@ export default function AnalyticsScreen() {
             <Text style={styles.sectionTitle}>Category Performance</Text>
           </View>
           {Object.entries(analytics.categoryBreakdown).length > 0 ? (
-            Object.entries(analytics.categoryBreakdown).map(([categoryId, data]) => (
-              <View key={categoryId} style={styles.categoryItem}>
-                <View style={styles.categoryHeader}>
-                  <Text style={styles.categoryName}>{data.name}</Text>
-                  <Text style={styles.categoryCount}>{data.count} quizzes</Text>
+            Object.entries(analytics.categoryBreakdown)
+              .sort(([,a], [,b]) => b.count - a.count) // Sort by count descending
+              .map(([categoryId, data]) => (
+                <View key={categoryId} style={styles.categoryItem}>
+                  <View style={styles.categoryHeader}>
+                    <Text style={styles.categoryName}>{data.name}</Text>
+                    <Text style={styles.categoryCount}>{data.count} quizzes</Text>
+                  </View>
+                  <View style={styles.progressBarContainer}>
+                    <View 
+                      style={[
+                        styles.progressBar,
+                        { width: `${Math.min(data.count / analytics.totalSessions * 100, 100)}%` }
+                      ]} 
+                    />
+                  </View>
                 </View>
-                <View style={styles.progressBarContainer}>
-                  <View 
-                    style={[
-                      styles.progressBar,
-                      { width: `${Math.min(data.count / analytics.totalSessions * 100, 100)}%` }
-                    ]} 
-                  />
-                </View>
-              </View>
-            ))
+              ))
           ) : (
-            <Text style={styles.noDataText}>No category data available for this period</Text>
+            <View style={styles.noDataContainer}>
+              <Text style={styles.noDataText}>No category data available for this period</Text>
+              <Text style={styles.noDataSubtext}>Complete some quizzes to see your category breakdown</Text>
+            </View>
           )}
         </View>
         
@@ -556,10 +561,22 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semibold,
   },
+  noDataContainer: {
+    backgroundColor: Colors.dark.cardHighlight,
+    borderRadius: 12,
+    padding: Spacing.xl,
+    alignItems: 'center',
+  },
   noDataText: {
     fontSize: Typography.fontSize.base,
+    color: Colors.dark.text,
+    textAlign: 'center',
+    marginBottom: Spacing.xs,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  noDataSubtext: {
+    fontSize: Typography.fontSize.sm,
     color: Colors.dark.textSecondary,
     textAlign: 'center',
-    fontStyle: 'italic',
   },
 });
