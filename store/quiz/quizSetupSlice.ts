@@ -61,7 +61,7 @@ export const createQuizSetupSlice: StateCreator<QuizSetupState> = (set, get) => 
           description: cat.description,
           question_count: cat.question_count || 0,
           icon: cat.icon,
-          color: cat.color,
+          color: cat.color || '#6366f1',
           created_at: cat.created_at,
           updated_at: cat.updated_at,
           parent_id: cat.parent_id || null,
