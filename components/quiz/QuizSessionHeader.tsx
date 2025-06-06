@@ -1,213 +1,57 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
+import { View, Text, StyleSheet } from 'react-native';
 import Colors from '@/theme/colors';
-import ProgressBar from '@/components/ProgressBar';
-import QuizTimer from './QuizTimer';
-import { X, Target, Zap } from 'lucide-react-native';
 import Typography from '@/theme/typography';
-import Spacing from '@/theme/spacing';
-import { Dimensions } from '@/theme/spacing';
+import { Spacing } from '@/theme/spacing';
+import QuestionProgressDots from './QuestionProgressDots';
 
 interface QuizSessionHeaderProps {
   currentQuestion: number;
   totalQuestions: number;
-  progress: number;
-  timeRemaining?: number;
-  mode?: string;
-  categoryName?: string;
+  correctAnswers: number[];
+  categoryName: string;
 }
 
 export default function QuizSessionHeader({
   currentQuestion,
   totalQuestions,
-  progress,
-  timeRemaining,
-  mode,
+  correctAnswers,
   categoryName,
 }: QuizSessionHeaderProps) {
-  const handleClose = () => {
-    router.back();
-  };
-
-  const isTimedMode = mode === 'timed';
-
-  const getModeText = () => {
-    switch (mode) {
-      case 'timed': return 'Timed Challenge';
-      case 'practice': return 'Practice Mode';
-      default: return 'Standard Quiz';
-    }
-  };
-
-  const getMotivationText = () => {
-    if (progress < 0.3) return "You've got this!";
-    if (progress < 0.7) return "Great progress!";
-    return "Almost there!";
-  };
-
   return (
     <View style={styles.container}>
-      {/* Top Row: Category/Title and Close Button */}
-      <View style={styles.topRow}>
-        <View style={styles.titleSection}>
-          {categoryName && (
-            <Text style={styles.categoryText} numberOfLines={1}>
-              {categoryName}
-            </Text>
-          )}
-          <Text style={styles.modeText}>
-            {getModeText()}
-          </Text>
-        </View>
-        
-        <TouchableOpacity 
-          style={styles.closeButton} 
-          onPress={handleClose}
-          accessibilityLabel="Close quiz"
-          accessibilityRole="button"
-        >
-          <X size={20} color={Colors.dark.text} />
-        </TouchableOpacity>
+      <View style={styles.header}>
+        <Text style={styles.questionNumber}>
+          Question {currentQuestion + 1} of {totalQuestions}
+        </Text>
+        <Text style={styles.category}>{categoryName}</Text>
       </View>
-
-      {/* Middle Row: Question Counter and Timer */}
-      <View style={styles.middleRow}>
-        <View style={styles.questionInfo}>
-          <Text style={styles.questionCounter}>
-            Question {currentQuestion} of {totalQuestions}
-          </Text>
-          <Text style={styles.progressText}>
-            {Math.round(progress * 100)}% Complete
-          </Text>
-        </View>
-        
-        {isTimedMode && timeRemaining !== undefined && (
-          <QuizTimer 
-            timeRemaining={timeRemaining} 
-            isWarning={timeRemaining <= 10}
-          />
-        )}
-      </View>
-      
-      {/* Progress Bar */}
-      <View style={styles.progressContainer}>
-        <ProgressBar 
-          progress={progress} 
-          height={8} 
-          fillColor={Colors.dark.primary}
-          backgroundColor={Colors.dark.cardHighlight}
-        />
-      </View>
-
-      {/* Motivation Badge */}
-      <View style={styles.motivationContainer}>
-        <View style={styles.motivationBadge}>
-          <Target size={14} color={Colors.dark.primary} />
-          <Text style={styles.motivationText}>
-            {getMotivationText()}
-          </Text>
-        </View>
-      </View>
+      <QuestionProgressDots
+        totalQuestions={totalQuestions}
+        currentIndex={currentQuestion}
+        correctAnswers={correctAnswers}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.dark.background,
-    paddingTop: Spacing.sm,
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border,
-    elevation: 4,
-    shadowColor: Colors.dark.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    marginBottom: Spacing.lg,
   },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: Spacing.md,
-  },
-  titleSection: {
-    flex: 1,
-    marginRight: Spacing.md,
-  },
-  categoryText: {
-    fontSize: Typography.fontSize.xl,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.dark.text,
-    marginBottom: 2,
-  },
-  modeText: {
-    fontSize: Typography.fontSize.base,
-    color: Colors.dark.textSecondary,
-    fontWeight: Typography.fontWeight.semibold,
-  },
-  closeButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: Colors.dark.card,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: Colors.dark.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  middleRow: {
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.md,
-  },
-  questionInfo: {
-    flex: 1,
-  },
-  questionCounter: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.dark.text,
-    marginBottom: 2,
-  },
-  progressText: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.dark.textSecondary,
-    fontWeight: Typography.fontWeight.semibold,
-  },
-  progressContainer: {
-    marginTop: Spacing.xs,
     marginBottom: Spacing.sm,
   },
-  motivationContainer: {
-    alignItems: 'center',
+  questionNumber: {
+    ...Typography.styles.bodySmall,
+    color: Colors.dark.textSecondary,
   },
-  motivationBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: `${Colors.dark.primary}15`,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: Dimensions.borderRadius.xl,
-    borderWidth: 1,
-    borderColor: `${Colors.dark.primary}30`,
-  },
-  motivationText: {
-    fontSize: Typography.fontSize.xs,
+  category: {
+    ...Typography.styles.bodySmall,
+    fontWeight: Typography.fontWeight.semibold,
     color: Colors.dark.primary,
-    fontWeight: Typography.fontWeight.bold,
-    marginLeft: Spacing.xs,
   },
 });

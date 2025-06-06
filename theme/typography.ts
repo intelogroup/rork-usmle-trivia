@@ -9,6 +9,7 @@ export const Typography = {
     '3xl': 28,
     '4xl': 32,
     '5xl': 36,
+    '6xl': 48,
   },
   fontWeight: {
     light: '300' as const,

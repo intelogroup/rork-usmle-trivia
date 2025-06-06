@@ -1,18 +1,19 @@
-import React, { useRef, useEffect } from 'react';
-import { TouchableOpacity, Text, StyleSheet, View, Animated, Platform } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Platform } from 'react-native';
 import Colors from '@/theme/colors';
 import Typography from '@/theme/typography';
 import { Dimensions, Spacing } from '@/theme/spacing';
-import { Check, X, Zap } from 'lucide-react-native';
+import { CheckCircle, XCircle } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface OptionButtonProps {
   label: string;
   index: number;
   selected: boolean;
   onPress: () => void;
-  disabled?: boolean;
-  isCorrect?: boolean | null;
-  showResult?: boolean;
+  disabled: boolean;
+  isCorrect: boolean | null;
+  showResult: boolean;
 }
 
 export default function OptionButton({
@@ -20,300 +21,181 @@ export default function OptionButton({
   index,
   selected,
   onPress,
-  disabled = false,
-  isCorrect = null,
-  showResult = false,
+  disabled,
+  isCorrect,
+  showResult,
 }: OptionButtonProps) {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  const glowAnim = useRef(new Animated.Value(0)).current;
-  const shakeAnim = useRef(new Animated.Value(0)).current;
-  const borderGlowAnim = useRef(new Animated.Value(0)).current;
+  const animatedBorder = useRef(new Animated.Value(selected ? 1 : 0)).current;
+  const animatedOpacity = useRef(new Animated.Value(showResult ? 0.5 : 1)).current;
+  const shakeAnimation = useRef(new Animated.Value(0)).current;
+  const pulseAnimation = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    if (showResult && Platform.OS !== 'web') {
-      if (isCorrect === true) {
-        // Correct answer glow animation
-        Animated.loop(
-          Animated.sequence([
-            Animated.timing(glowAnim, {
-              toValue: 1,
-              duration: 800,
-              useNativeDriver: false,
-            }),
-            Animated.timing(glowAnim, {
-              toValue: 0.3,
-              duration: 800,
-              useNativeDriver: false,
-            }),
-          ])
-        ).start();
-
-        // Border glow for correct answer
-        Animated.timing(borderGlowAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: false,
-        }).start();
-      } else if (isCorrect === false && selected) {
-        // Incorrect answer shake animation
-        Animated.sequence([
-          Animated.timing(shakeAnim, {
-            toValue: 10,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-          Animated.timing(shakeAnim, {
-            toValue: -10,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-          Animated.timing(shakeAnim, {
-            toValue: 10,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-          Animated.timing(shakeAnim, {
-            toValue: 0,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      }
+    if (selected) {
+      Animated.timing(animatedBorder, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
     } else {
-      glowAnim.setValue(0);
-      shakeAnim.setValue(0);
-      borderGlowAnim.setValue(0);
+      Animated.timing(animatedBorder, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
     }
-  }, [showResult, isCorrect, selected]);
+  }, [selected]);
 
-  const handlePress = () => {
-    if (Platform.OS !== 'web') {
-      Animated.sequence([
-        Animated.timing(scaleAnim, {
-          toValue: 0.95,
-          duration: 100,
+  useEffect(() => {
+    if (showResult && isCorrect !== null) {
+      if (!isCorrect) {
+        if (Platform.OS !== 'web') {
+          Animated.sequence([
+            Animated.timing(shakeAnimation, {
+              toValue: 10,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+            Animated.timing(shakeAnimation, {
+              toValue: -10,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+            Animated.timing(shakeAnimation, {
+              toValue: 10,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+            Animated.timing(shakeAnimation, {
+              toValue: 0,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+          ]).start();
+        }
+        Animated.timing(animatedOpacity, {
+          toValue: 0.5,
+          duration: 300,
           useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
+        }).start();
+      } else {
+        Animated.timing(animatedOpacity, {
           toValue: 1,
-          duration: 100,
+          duration: 300,
           useNativeDriver: true,
-        }),
-      ]).start();
+        }).start();
+        if (Platform.OS !== 'web') {
+          Animated.loop(
+            Animated.sequence([
+              Animated.timing(pulseAnimation, {
+                toValue: 1.1,
+                duration: 800,
+                useNativeDriver: true,
+              }),
+              Animated.timing(pulseAnimation, {
+                toValue: 1,
+                duration: 800,
+                useNativeDriver: true,
+              }),
+            ]),
+            { iterations: 3 }
+          ).start();
+        }
+      }
     }
-    onPress();
-  };
+  }, [showResult, isCorrect]);
 
-  const getOptionLabel = () => {
-    const labels = ['A', 'B', 'C', 'D', 'E'];
-    return labels[index] || String.fromCharCode(65 + index);
-  };
+  const borderColor = animatedBorder.interpolate({
+    inputRange: [0, 1],
+    outputRange: [Colors.dark.border, Colors.dark.primary],
+  });
 
-  const getBackgroundColor = () => {
-    if (!showResult) return selected ? Colors.dark.primary : Colors.dark.card;
-    
-    if (isCorrect === true) return Colors.dark.success;
-    if (isCorrect === false && selected) return Colors.dark.error;
-    return Colors.dark.card;
-  };
+  const borderWidth = animatedBorder.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 2],
+  });
 
-  const getBorderColor = () => {
-    if (!showResult) return selected ? Colors.dark.primary : Colors.dark.border;
-    
-    if (isCorrect === true) return Colors.dark.success;
-    if (isCorrect === false && selected) return Colors.dark.error;
-    return Colors.dark.border;
-  };
-
-  const getBorderWidth = () => {
-    if (showResult && isCorrect === true) return 3;
-    if (showResult && isCorrect === false && selected) return 3;
-    return selected ? 2 : 1;
-  };
-
-  const getGlowStyle = () => {
-    if (showResult && isCorrect === true && Platform.OS !== 'web') {
-      return {
-        shadowColor: Colors.dark.success,
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: glowAnim,
-        shadowRadius: 12,
-        elevation: 8,
-      };
+  const getBackground = () => {
+    if (showResult && isCorrect !== null) {
+      if (isCorrect) {
+        return (
+          <LinearGradient
+            colors={[Colors.dark.success, `${Colors.dark.success}CC`]}
+            style={styles.gradientBackground}
+          />
+        );
+      } else if (selected) {
+        return (
+          <LinearGradient
+            colors={[Colors.dark.error, `${Colors.dark.error}CC`]}
+            style={styles.gradientBackground}
+          />
+        );
+      }
     }
-    return {};
-  };
-
-  const getAnimatedBorderStyle = () => {
-    if (showResult && isCorrect === true && Platform.OS !== 'web') {
-      return {
-        borderColor: borderGlowAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [Colors.dark.success, '#00FF88'],
-        }),
-      };
-    }
-    return { borderColor: getBorderColor() };
+    return null;
   };
 
   return (
     <Animated.View
       style={[
-        {
-          transform: [
-            { scale: scaleAnim },
-            { translateX: shakeAnim }
-          ],
-        },
-        getGlowStyle(),
+        styles.container,
+        { opacity: animatedOpacity },
+        showResult && !isCorrect && selected && { borderColor: Colors.dark.error, borderWidth: 2 },
+        showResult && isCorrect && { borderColor: Colors.dark.success, borderWidth: 2 },
+        Platform.OS !== 'web' && { transform: [{ translateX: shakeAnimation }, { scale: pulseAnimation }] },
       ]}
     >
-      <Animated.View
+      <TouchableOpacity
         style={[
-          styles.container,
-          { 
-            backgroundColor: getBackgroundColor(),
-            borderWidth: getBorderWidth(),
-          },
-          getAnimatedBorderStyle(),
+          styles.button,
+          { borderColor, borderWidth },
         ]}
+        onPress={onPress}
+        disabled={disabled}
+        activeOpacity={0.8}
       >
-        <TouchableOpacity
-          style={styles.touchable}
-          onPress={handlePress}
-          disabled={disabled}
-          activeOpacity={0.8}
-        >
-          <View style={styles.labelContainer}>
-            <View style={[
-              styles.indexBadge,
-              selected && !showResult ? styles.selectedIndexBadge : null,
-              isCorrect === true ? styles.correctIndexBadge : null,
-              isCorrect === false && selected ? styles.incorrectIndexBadge : null,
-            ]}>
-              <Text style={[
-                styles.indexText,
-                selected && !showResult ? styles.selectedIndexText : null,
-                isCorrect !== null ? styles.resultIndexText : null,
-              ]}>
-                {getOptionLabel()}
-              </Text>
-            </View>
-            <Text style={[
-              styles.labelText,
-              selected && !showResult ? styles.selectedLabelText : null,
-              isCorrect !== null ? styles.resultLabelText : null,
-            ]}>
-              {label}
-            </Text>
+        {getBackground()}
+        <Text style={styles.label}>{label}</Text>
+        {showResult && isCorrect !== null && (
+          <View style={styles.iconContainer}>
+            {isCorrect ? (
+              <CheckCircle size={Dimensions.icon.sm} color={Colors.dark.background} />
+            ) : selected ? (
+              <XCircle size={Dimensions.icon.sm} color={Colors.dark.background} />
+            ) : null}
           </View>
-          
-          {showResult && isCorrect !== null && (
-            <View style={styles.resultIcon}>
-              {isCorrect ? (
-                <View style={styles.correctIcon}>
-                  <Check size={Dimensions.icon.sm} color={Colors.dark.background} />
-                </View>
-              ) : selected ? (
-                <View style={styles.incorrectIcon}>
-                  <X size={Dimensions.icon.sm} color={Colors.dark.background} />
-                </View>
-              ) : null}
-            </View>
-          )}
-
-          {selected && !showResult && (
-            <View style={styles.selectedIndicator}>
-              <Zap size={Dimensions.icon.xs} color={Colors.dark.background} fill={Colors.dark.background} />
-            </View>
-          )}
-        </TouchableOpacity>
-      </Animated.View>
+        )}
+      </TouchableOpacity>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: Dimensions.borderRadius.lg,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
+    borderRadius: Dimensions.borderRadius.md,
     overflow: 'hidden',
   },
-  touchable: {
+  button: {
+    backgroundColor: Colors.dark.cardHighlight,
+    padding: Spacing.lg,
+    borderRadius: Dimensions.borderRadius.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: Spacing.lg,
-    minHeight: Dimensions.touchTarget.large,
+    minHeight: Dimensions.touchTarget.medium,
   },
-  labelContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
+  gradientBackground: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: -1,
   },
-  indexBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.dark.cardHighlight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: Spacing.lg,
-  },
-  selectedIndexBadge: {
-    backgroundColor: Colors.dark.background,
-  },
-  correctIndexBadge: {
-    backgroundColor: Colors.dark.background,
-  },
-  incorrectIndexBadge: {
-    backgroundColor: Colors.dark.background,
-  },
-  indexText: {
-    ...Typography.styles.button,
-    fontSize: Typography.fontSize.sm,
-    color: Colors.dark.text,
-  },
-  selectedIndexText: {
-    color: Colors.dark.primary,
-  },
-  resultIndexText: {
-    color: Colors.dark.card,
-  },
-  labelText: {
+  label: {
     ...Typography.styles.body,
     color: Colors.dark.text,
     flex: 1,
-    lineHeight: Typography.lineHeight.normal * Typography.fontSize.base,
   },
-  selectedLabelText: {
-    color: Colors.dark.background,
-    fontWeight: Typography.fontWeight.semibold,
-  },
-  resultLabelText: {
-    color: Colors.dark.background,
-    fontWeight: Typography.fontWeight.semibold,
-  },
-  resultIcon: {
-    marginLeft: Spacing.md,
-  },
-  correctIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.dark.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  incorrectIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.dark.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  selectedIndicator: {
-    marginLeft: Spacing.md,
+  iconContainer: {
+    marginLeft: Spacing.sm,
   },
 });

@@ -1,413 +1,176 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Animated, Platform } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Animated, Platform, TouchableOpacity, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
 import Colors from '@/theme/colors';
 import Typography from '@/theme/typography';
-import { Dimensions, Spacing } from '@/theme/spacing';
-import Button from '@/components/Button';
-import { Award, Home, RotateCcw, Share2, Clock, Target, AlertCircle, Trophy, Star, Zap, Crown } from 'lucide-react-native';
-import { achievements } from '@/mocks/achievements';
-import AchievementCard from '@/components/AchievementCard';
-import { useQuizStore } from '@/store/quiz/quizStore';
-import ProgressBar from '@/components/ProgressBar';
-import { useAuthStore } from '@/store/auth/authStore';
+import { Spacing, Dimensions } from '@/theme/spacing';
+import { ArrowLeft, Share2, Home } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { UsmleQuestion } from '@/lib/types/usmle';
+import ResultsSummary from '@/components/quiz/ResultsSummary';
+import { useQuizStore } from '@/store/quiz/quizStore';
 
-export default function QuizResultsScreen() {
+export default function QuizResults() {
   const router = useRouter();
-  const { currentSession, resetQuiz } = useQuizStore();
-  const { isAuthenticated } = useAuthStore();
-  
-  const [categoryPerformance, setCategoryPerformance] = useState<{
-    categoryId: string;
-    categoryName: string;
-    correct: number;
-    total: number;
-    percentage: number;
-  }[]>([]);
+  const { currentSession } = useQuizStore();
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const celebrationScale = useRef(new Animated.Value(0.5)).current;
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
-  // Animation values
-  const scoreScale = useRef(new Animated.Value(0.3)).current;
-  const scoreOpacity = useRef(new Animated.Value(0)).current;
-  const detailsOpacity = useRef(new Animated.Value(0)).current;
-  const celebrationScale = useRef(new Animated.Value(0)).current;
-  const celebrationOpacity = useRef(new Animated.Value(0)).current;
-  const confettiAnim = useRef(new Animated.Value(0)).current;
-  
+  const score = currentSession?.score || 0;
+  const totalQuestions = currentSession?.total_questions || 1;
+  const percentage = (score / totalQuestions) * 100;
+  const isHighScore = percentage > 80;
+
   useEffect(() => {
-    if (!currentSession || !currentSession.questions || !currentSession.answers) return;
-    
-    // Calculate performance by category
-    const categoryMap = new Map<string, { name: string, correct: number, total: number }>();
-    
-    currentSession.questions.forEach((question: UsmleQuestion, index: number) => {
-      const categoryId = question.category_id;
-      const categoryName = getCategoryName(categoryId);
-      const userAnswerIndex = currentSession.answers[index];
-      const isCorrect = userAnswerIndex !== -1 && 
-        userAnswerIndex >= 0 &&
-        userAnswerIndex < question.options.length &&
-        question.options[userAnswerIndex]?.id === question.correct_option_id;
-      
-      if (!categoryMap.has(categoryId)) {
-        categoryMap.set(categoryId, { name: categoryName, correct: 0, total: 0 });
-      }
-      
-      const category = categoryMap.get(categoryId)!;
-      category.total += 1;
-      if (isCorrect) {
-        category.correct += 1;
-      }
-    });
-    
-    const performance = Array.from(categoryMap.entries()).map(([id, data]) => ({
-      categoryId: id,
-      categoryName: data.name,
-      correct: data.correct,
-      total: data.total,
-      percentage: Math.round((data.correct / data.total) * 100)
-    }));
-    
-    setCategoryPerformance(performance);
-
-    const score = currentSession.score;
-    const total = currentSession.questions.length;
-    const percentage = Math.round((score / total) * 100);
-
-    // Animate score reveal with enhanced animations
     if (Platform.OS !== 'web') {
-      Animated.sequence([
-        // Initial score animation
-        Animated.parallel([
-          Animated.spring(scoreScale, {
-            toValue: 1.1,
-            tension: 60,
-            friction: 8,
-            useNativeDriver: true,
-          }),
-          Animated.timing(scoreOpacity, {
-            toValue: 1,
-            duration: 600,
-            useNativeDriver: true,
-          }),
-        ]),
-        // Settle to normal size
-        Animated.spring(scoreScale, {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
           toValue: 1,
-          tension: 100,
-          friction: 8,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.spring(celebrationScale, {
+          toValue: 1,
+          tension: 80,
+          friction: 6,
           useNativeDriver: true,
         }),
       ]).start();
 
-      // Show celebration for high scores
-      if (percentage >= 80) {
+      if (isHighScore) {
         setTimeout(() => {
-          Animated.parallel([
-            Animated.spring(celebrationScale, {
-              toValue: 1,
-              tension: 80,
-              friction: 6,
-              useNativeDriver: true,
-            }),
-            Animated.timing(celebrationOpacity, {
-              toValue: 1,
-              duration: 500,
-              useNativeDriver: true,
-            }),
-            // Confetti animation
-            Animated.timing(confettiAnim, {
-              toValue: 1,
-              duration: 2000,
-              useNativeDriver: true,
-            }),
-          ]).start();
-        }, 800);
+          Animated.timing(celebrationScale, {
+            toValue: 0.5,
+            duration: 300,
+            useNativeDriver: true,
+          }).start();
+        }, 2000);
       }
-
-      // Show details after score animation
-      setTimeout(() => {
-        Animated.timing(detailsOpacity, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }).start();
-      }, 1000);
     } else {
-      // Instant animation for web
-      scoreScale.setValue(1);
-      scoreOpacity.setValue(1);
-      detailsOpacity.setValue(1);
-      if (percentage >= 80) {
-        celebrationScale.setValue(1);
-        celebrationOpacity.setValue(1);
-        confettiAnim.setValue(1);
+      fadeAnim.setValue(1);
+      celebrationScale.setValue(1);
+      if (isHighScore) {
+        setTimeout(() => {
+          celebrationScale.setValue(0.5);
+        }, 2000);
       }
     }
-  }, [currentSession]);
+  }, [fadeAnim, celebrationScale, isHighScore]);
 
-  const getCategoryName = (categoryId: string) => {
-    const { categories } = useQuizStore.getState();
-    const category = categories.find(cat => cat.id === categoryId);
-    return category?.name || `Category ${categoryId}`;
-  };
-
-  if (!currentSession || !currentSession.isCompleted) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Stack.Screen 
-          options={{ 
-            title: 'Quiz Results',
-            headerBackVisible: false,
-            headerTintColor: Colors.dark.text,
-            headerStyle: {
-              backgroundColor: Colors.dark.background,
-            },
-          }} 
-        />
-        <LinearGradient
-          colors={[Colors.dark.background, `${Colors.dark.primary}10`]}
-          style={styles.gradient}
-        >
-          <View style={styles.errorContainer}>
-            <AlertCircle size={Dimensions.icon.xl} color={Colors.dark.textSecondary} />
-            <Text style={styles.errorText}>No Results Available</Text>
-            <Text style={styles.errorSubtext}>Complete a quiz to see your amazing results!</Text>
-            <Button
-              title="Start a Quiz"
-              onPress={() => router.push('/(tabs)/quiz')}
-              style={styles.loginButton}
-            />
-          </View>
-        </LinearGradient>
-      </SafeAreaView>
-    );
-  }
-
-  const score = currentSession.score;
-  const total = currentSession.questions.length;
-  const percentage = Math.round((score / total) * 100);
-  const mode = currentSession.mode || 'standard';
-  
-  // Mock achievement unlocked
-  const unlockedAchievement = percentage >= 80 ? achievements[1] : null;
-  
-  const getResultMessage = () => {
-    if (percentage >= 90) return "Outstanding!";
-    if (percentage >= 80) return "Excellent!";
-    if (percentage >= 70) return "Great job!";
-    if (percentage >= 50) return "Good effort!";
-    return "Keep practicing!";
-  };
-  
-  const getResultDescription = () => {
-    if (percentage >= 90) return "You're absolutely crushing it!";
-    if (percentage >= 80) return "You're mastering the material!";
-    if (percentage >= 70) return "You're making fantastic progress!";
-    if (percentage >= 50) return "You're building a solid foundation!";
-    return "Every expert was once a beginner!";
-  };
-
-  const getScoreIcon = () => {
-    if (percentage >= 90) return <Crown size={Dimensions.icon.xl} color={Colors.dark.background} />;
-    if (percentage >= 80) return <Trophy size={Dimensions.icon.xl} color={Colors.dark.background} />;
-    if (percentage >= 70) return <Star size={Dimensions.icon.xl} color={Colors.dark.background} />;
-    return <Zap size={Dimensions.icon.xl} color={Colors.dark.background} />;
-  };
-  
-  const handleRetakeQuiz = () => {
-    resetQuiz();
+  const handleBackPress = () => {
     router.push('/(tabs)/quiz');
   };
-  
-  const handleGoHome = () => {
-    resetQuiz();
-    router.push('/(tabs)');
-  };
-  
+
   const handleShare = () => {
-    // This would be implemented with the Share API in a real app
-    console.log('Sharing quiz results');
+    // Placeholder for share functionality
+    console.log("Share results");
   };
-  
+
+  const handleHomePress = () => {
+    router.push('/(tabs)/index');
+  };
+
+  const toggleCategoryExpansion = (categoryId: string) => {
+    setExpandedCategory(expandedCategory === categoryId ? null : categoryId);
+  };
+
+  // Mock category data for performance breakdown
+  const categories = [
+    { id: 'cat1', name: 'Anatomy', correct: 3, total: 5, questions: [
+      { id: 'q1', text: 'Question 1 text', correct: true },
+      { id: 'q2', text: 'Question 2 text', correct: false },
+      { id: 'q3', text: 'Question 3 text', correct: true },
+      { id: 'q4', text: 'Question 4 text', correct: false },
+      { id: 'q5', text: 'Question 5 text', correct: true },
+    ]},
+    { id: 'cat2', name: 'Physiology', correct: 2, total: 4, questions: [
+      { id: 'q6', text: 'Question 6 text', correct: true },
+      { id: 'q7', text: 'Question 7 text', correct: false },
+      { id: 'q8', text: 'Question 8 text', correct: true },
+      { id: 'q9', text: 'Question 9 text', correct: false },
+    ]},
+  ];
+
   return (
-    <SafeAreaView style={styles.container}>
-      <Stack.Screen 
-        options={{ 
-          title: 'Quiz Results',
-          headerBackVisible: false,
-          headerTintColor: Colors.dark.text,
-          headerStyle: {
-            backgroundColor: Colors.dark.background,
-          },
-        }} 
-      />
-      
+    <ScrollView style={styles.container}>
       <LinearGradient
-        colors={[Colors.dark.background, `${Colors.dark.primary}10`]}
-        style={styles.gradient}
+        colors={[Colors.dark.background, `${Colors.dark.primary}15`]}
+        style={styles.gradientBackground}
       >
-        {/* Celebration Confetti Animation */}
-        {Platform.OS !== 'web' && percentage >= 80 && (
-          <Animated.View
-            style={[
-              styles.confettiContainer,
-              {
-                opacity: celebrationOpacity,
-                transform: [{ scale: confettiAnim }],
-              },
-            ]}
-          >
-            <Text style={styles.confettiEmoji}>🎉</Text>
-            <Text style={styles.confettiEmoji}>✨</Text>
-            <Text style={styles.confettiEmoji}>🎊</Text>
-            <Text style={styles.confettiEmoji}>🌟</Text>
-            <Text style={styles.confettiEmoji}>💫</Text>
-          </Animated.View>
-        )}
+        <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+              <ArrowLeft size={Dimensions.icon.md} color={Colors.dark.text} />
+            </TouchableOpacity>
+            <Text style={styles.title}>Quiz Results</Text>
+            <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
+              <Share2 size={Dimensions.icon.md} color={Colors.dark.text} />
+            </TouchableOpacity>
+          </View>
 
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <Animated.View 
-            style={[
-              styles.resultContainer,
-              {
-                opacity: scoreOpacity,
-                transform: [{ scale: scoreScale }],
-              },
-            ]}
-          >
-            <LinearGradient
-              colors={percentage >= 80 ? 
-                [Colors.dark.primary, Colors.dark.secondary] :
-                percentage >= 60 ?
-                [Colors.dark.success, `${Colors.dark.success}80`] :
-                [Colors.dark.error, `${Colors.dark.error}80`]
-              }
-              style={styles.scoreCircle}
-            >
-              {getScoreIcon()}
-              <Text style={styles.scoreText}>{percentage}%</Text>
-              <Text style={styles.scoreDetail}>
-                {score}/{total} correct
-              </Text>
-            </LinearGradient>
-            
-            <Text style={styles.resultMessage}>{getResultMessage()}</Text>
-            <Text style={styles.resultDescription}>{getResultDescription()}</Text>
-            
-            {mode === 'timed' && (
-              <View style={styles.modeInfoContainer}>
-                <Clock size={Dimensions.icon.xs} color={Colors.dark.textSecondary} />
-                <Text style={styles.modeInfoText}>Timed Challenge Completed!</Text>
-              </View>
-            )}
-          </Animated.View>
-
-          {/* Celebration Message for High Scores */}
-          {percentage >= 80 && (
+          {isHighScore && (
             <Animated.View
               style={[
-                styles.celebrationMessage,
-                {
-                  opacity: celebrationOpacity,
-                  transform: [{ scale: celebrationScale }],
-                },
+                styles.celebrationContainer,
+                { transform: [{ scale: celebrationScale }] },
               ]}
             >
-              <Text style={styles.celebrationText}>
-                {percentage >= 90 ? "Perfect Score!" : "Fantastic Work!"}
-              </Text>
+              <Text style={styles.celebrationEmoji}>🎉</Text>
+              <Text style={styles.celebrationText}>Outstanding Performance!</Text>
             </Animated.View>
           )}
-          
-          <Animated.View style={{ opacity: detailsOpacity }}>
-            {categoryPerformance.length > 0 && (
-              <View style={styles.performanceContainer}>
-                <View style={styles.sectionHeader}>
-                  <Target size={Dimensions.icon.sm} color={Colors.dark.text} />
-                  <Text style={styles.sectionTitle}>Performance Breakdown</Text>
-                </View>
-                
-                {categoryPerformance.map((category) => (
-                  <View key={category.categoryId} style={styles.categoryPerformance}>
-                    <View style={styles.categoryHeader}>
-                      <Text style={styles.categoryName}>{category.categoryName}</Text>
-                      <Text style={styles.categoryScore}>
-                        {category.correct}/{category.total} ({category.percentage}%)
-                      </Text>
-                    </View>
-                    <ProgressBar 
-                      progress={category.percentage / 100}
-                      height={8}
-                      fillColor={
-                        category.percentage >= 80 ? Colors.dark.success :
-                        category.percentage >= 60 ? Colors.dark.primary :
-                        Colors.dark.error
-                      }
-                    />
+
+          <ResultsSummary
+            score={score}
+            totalQuestions={totalQuestions}
+            percentage={percentage}
+          />
+
+          <Text style={styles.resultMessage}>
+            {percentage > 80 ? "Excellent work! You're mastering this!" : 
+             percentage > 50 ? "Good job! Keep learning and improving!" : 
+             "Don't give up! Review and try again!"}
+          </Text>
+
+          <View style={styles.breakdownContainer}>
+            <Text style={styles.sectionTitle}>Performance Breakdown</Text>
+            {categories.map(category => (
+              <View key={category.id} style={styles.categoryContainer}>
+                <TouchableOpacity
+                  style={styles.categoryHeader}
+                  onPress={() => toggleCategoryExpansion(category.id)}
+                >
+                  <Text style={styles.categoryName}>{category.name}</Text>
+                  <Text style={styles.categoryScore}>
+                    {category.correct} / {category.total} Correct
+                  </Text>
+                </TouchableOpacity>
+                {expandedCategory === category.id && (
+                  <View style={styles.questionList}>
+                    {category.questions.map(question => (
+                      <View key={question.id} style={styles.questionItem}>
+                        <Text style={styles.questionText}>{question.text}</Text>
+                        <Text style={question.correct ? styles.correctText : styles.incorrectText}>
+                          {question.correct ? 'Correct' : 'Incorrect'}
+                        </Text>
+                      </View>
+                    ))}
                   </View>
-                ))}
+                )}
               </View>
-            )}
-            
-            {unlockedAchievement && (
-              <View style={styles.achievementContainer}>
-                <View style={styles.sectionHeader}>
-                  <Award size={Dimensions.icon.sm} color={Colors.dark.text} />
-                  <Text style={styles.sectionTitle}>Achievement Unlocked!</Text>
-                </View>
-                <AchievementCard 
-                  achievement={{
-                    ...unlockedAchievement,
-                    unlocked: true
-                  }} 
-                />
-              </View>
-            )}
-            
-            {!isAuthenticated && (
-              <View style={styles.loginPrompt}>
-                <Text style={styles.loginPromptText}>
-                  Log in to save your progress and unlock achievements!
-                </Text>
-                <Button
-                  title="Log In"
-                  onPress={() => router.push('/login')}
-                  style={styles.loginPromptButton}
-                />
-              </View>
-            )}
-            
-            <View style={styles.actionButtons}>
-              <Button
-                title="Share Results"
-                onPress={handleShare}
-                variant="outline"
-                style={styles.actionButton}
-                icon={<Share2 size={Dimensions.icon.sm} color={Colors.dark.primary} />}
-              />
-            </View>
-          </Animated.View>
-        </ScrollView>
-        
-        <View style={styles.footer}>
-          <Button
-            title="Try Again"
-            onPress={handleRetakeQuiz}
-            variant="outline"
-            style={styles.footerButton}
-            icon={<RotateCcw size={Dimensions.icon.sm} color={Colors.dark.primary} />}
-          />
-          <Button
-            title="Home"
-            onPress={handleGoHome}
-            style={styles.footerButton}
-            icon={<Home size={Dimensions.icon.sm} color={Colors.dark.background} />}
-          />
-        </View>
+            ))}
+          </View>
+
+          <TouchableOpacity
+            style={styles.homeButton}
+            onPress={handleHomePress}
+          >
+            <Home size={Dimensions.icon.sm} color={Colors.dark.background} />
+            <Text style={styles.homeButtonText}>Back to Home</Text>
+          </TouchableOpacity>
+        </Animated.View>
       </LinearGradient>
-    </SafeAreaView>
+    </ScrollView>
   );
 }
 
@@ -416,223 +179,129 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.dark.background,
   },
-  gradient: {
+  gradientBackground: {
     flex: 1,
-  },
-  confettiContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-    pointerEvents: 'none',
-  },
-  confettiEmoji: {
-    position: 'absolute',
-    fontSize: Typography.fontSize['4xl'],
-  },
-  scrollContent: {
     padding: Spacing.xl,
-    paddingBottom: 100,
   },
-  resultContainer: {
-    backgroundColor: Colors.dark.card,
-    borderRadius: Dimensions.borderRadius.xl,
-    padding: Spacing['4xl'],
+  content: {
+    flex: 1,
     alignItems: 'center',
-    marginBottom: Spacing['2xl'],
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-    elevation: 8,
-    shadowColor: Colors.dark.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
   },
-  scoreCircle: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    justifyContent: 'center',
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    width: '100%',
     marginBottom: Spacing.xl,
-    elevation: 8,
-    shadowColor: Colors.dark.primary,
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
   },
-  scoreText: {
-    ...Typography.styles.h1,
-    fontSize: 42,
-    color: Colors.dark.background,
-    marginTop: Spacing.sm,
+  backButton: {
+    padding: Spacing.sm,
+    borderRadius: Dimensions.borderRadius.full,
+    backgroundColor: Colors.dark.card,
   },
-  scoreDetail: {
-    ...Typography.styles.bodySmall,
-    color: Colors.dark.background,
-    opacity: 0.9,
-    fontWeight: Typography.fontWeight.semibold,
-  },
-  resultMessage: {
+  title: {
     ...Typography.styles.h2,
     color: Colors.dark.text,
-    marginBottom: Spacing.md,
     textAlign: 'center',
   },
-  resultDescription: {
-    ...Typography.styles.body,
-    color: Colors.dark.textSecondary,
-    textAlign: 'center',
-    marginBottom: Spacing.xl,
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
+  shareButton: {
+    padding: Spacing.sm,
+    borderRadius: Dimensions.borderRadius.full,
+    backgroundColor: Colors.dark.card,
   },
-  celebrationMessage: {
-    backgroundColor: `${Colors.dark.primary}20`,
-    borderRadius: Dimensions.borderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing['2xl'],
+  celebrationContainer: {
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: Colors.dark.primary,
+    marginBottom: Spacing.xl,
+  },
+  celebrationEmoji: {
+    fontSize: Typography.fontSize['5xl'],
+    marginBottom: Spacing.sm,
   },
   celebrationText: {
     ...Typography.styles.h3,
     color: Colors.dark.primary,
     textAlign: 'center',
   },
-  modeInfoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.dark.background,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    borderRadius: Dimensions.borderRadius.xl,
-    marginTop: Spacing.md,
-  },
-  modeInfoText: {
-    ...Typography.styles.bodySmall,
+  resultMessage: {
+    ...Typography.styles.bodyLarge,
     color: Colors.dark.textSecondary,
-    marginLeft: Spacing.sm,
-    fontWeight: Typography.fontWeight.semibold,
+    textAlign: 'center',
+    marginBottom: Spacing['2xl'],
+    paddingHorizontal: Spacing.lg,
   },
-  performanceContainer: {
+  breakdownContainer: {
+    width: '100%',
     backgroundColor: Colors.dark.card,
     borderRadius: Dimensions.borderRadius.lg,
-    padding: Spacing.xl,
+    padding: Spacing.lg,
     marginBottom: Spacing['2xl'],
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.lg,
   },
   sectionTitle: {
     ...Typography.styles.h4,
     color: Colors.dark.text,
-    marginLeft: Spacing.sm,
-  },
-  categoryPerformance: {
     marginBottom: Spacing.lg,
+    textAlign: 'center',
+  },
+  categoryContainer: {
+    marginBottom: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.dark.border,
   },
   categoryHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    paddingVertical: Spacing.md,
   },
   categoryName: {
     ...Typography.styles.body,
     color: Colors.dark.text,
     fontWeight: Typography.fontWeight.semibold,
-    flex: 1,
   },
   categoryScore: {
     ...Typography.styles.bodySmall,
     color: Colors.dark.textSecondary,
-    fontWeight: Typography.fontWeight.semibold,
   },
-  achievementContainer: {
-    backgroundColor: Colors.dark.card,
-    borderRadius: Dimensions.borderRadius.lg,
-    padding: Spacing.xl,
-    marginBottom: Spacing['2xl'],
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
+  questionList: {
+    paddingBottom: Spacing.md,
   },
-  actionButtons: {
-    marginBottom: Spacing.lg,
-  },
-  actionButton: {
-    marginBottom: Spacing.sm,
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: Spacing.xl,
-    backgroundColor: Colors.dark.background,
-    borderTopWidth: 1,
-    borderTopColor: Colors.dark.border,
+  questionItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: Spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: `${Colors.dark.border}50`,
   },
-  footerButton: {
+  questionText: {
+    ...Typography.styles.bodySmall,
+    color: Colors.dark.text,
     flex: 1,
-    marginHorizontal: Spacing.sm,
+    marginRight: Spacing.sm,
   },
-  errorContainer: {
-    flex: 1,
+  correctText: {
+    ...Typography.styles.bodySmall,
+    color: Colors.dark.success,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  incorrectText: {
+    ...Typography.styles.bodySmall,
+    color: Colors.dark.error,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  homeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
-    padding: Spacing.xl,
+    backgroundColor: Colors.dark.primary,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    borderRadius: Dimensions.borderRadius.md,
+    marginTop: Spacing.xl,
   },
-  errorText: {
-    ...Typography.styles.h3,
-    color: Colors.dark.text,
-    textAlign: 'center',
-    marginBottom: Spacing.md,
-  },
-  errorSubtext: {
-    ...Typography.styles.body,
-    color: Colors.dark.textSecondary,
-    textAlign: 'center',
-    marginBottom: Spacing['2xl'],
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
-  },
-  loginButton: {
-    marginTop: Spacing.lg,
-    width: 200,
-  },
-  loginPrompt: {
-    backgroundColor: Colors.dark.card,
-    borderRadius: Dimensions.borderRadius.lg,
-    padding: Spacing.xl,
-    marginBottom: Spacing['2xl'],
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-    alignItems: 'center',
-  },
-  loginPromptText: {
-    ...Typography.styles.body,
-    color: Colors.dark.text,
-    textAlign: 'center',
-    marginBottom: Spacing.lg,
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
-  },
-  loginPromptButton: {
-    width: 200,
+  homeButtonText: {
+    ...Typography.styles.button,
+    color: Colors.dark.background,
+    marginLeft: Spacing.sm,
   },
 });
