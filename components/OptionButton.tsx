@@ -145,7 +145,7 @@ export default function OptionButton({
     outputRange: [1, 2],
   });
 
-  const getGradientColors = () => {
+  const getGradientColors = (): [string, string] => {
     if (showResult && isCorrect !== null) {
       if (isCorrect) {
         return [Colors.dark.success, `${Colors.dark.success}CC`];

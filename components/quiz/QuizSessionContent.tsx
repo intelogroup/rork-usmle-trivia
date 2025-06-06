@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
     zIndex: 1001,
   },
   celebrationEmoji: {
-    fontSize: Typography.fontSize['6xl'],
+    fontSize: Typography.fontSize['5xl'],
     marginBottom: Spacing.xs,
   },
   celebrationText: {
