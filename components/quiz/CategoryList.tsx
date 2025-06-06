@@ -4,15 +4,7 @@ import CategoryListItem from './CategoryListItem';
 import Colors from '@/theme/colors';
 import Typography from '@/theme/typography';
 import Spacing from '@/theme/spacing';
-
-interface CategoryWithCount {
-  id: string;
-  name: string;
-  color: string;
-  questionCount: number;
-  grouping: string;
-  icon?: string;
-}
+import type { CategoryWithCount } from '@/store/quiz/quizStore';
 
 interface CategoryListProps {
   categories: CategoryWithCount[];

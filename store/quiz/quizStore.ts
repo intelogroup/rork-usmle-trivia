@@ -19,7 +19,17 @@ interface Category {
   updated_at: string;
 }
 
-interface CategoryWithCount extends UsmleCategory {
+interface CategoryWithCount {
+  id: string;
+  name: string;
+  description?: string;
+  question_count: number;
+  icon?: string;
+  color: string;
+  created_at: string;
+  updated_at: string;
+  parent_id: string | null;
+  grouping: string;
   questionCount: number;
 }
 
@@ -156,10 +166,19 @@ export const useQuizStore = create<QuizState>()(
           const validQuestions = Array.isArray(usmle_questions) ? usmle_questions : [];
 
           // Count questions for each category
-          const categoriesWithCounts = validCategories.map(category => {
+          const categoriesWithCounts: CategoryWithCount[] = validCategories.map(category => {
             const questionCount = validQuestions.filter(q => q.category_id === category.id).length;
             return {
-              ...category,
+              id: category.id,
+              name: category.name,
+              description: category.description,
+              question_count: category.question_count,
+              icon: category.icon,
+              color: category.color,
+              created_at: category.created_at,
+              updated_at: category.updated_at,
+              parent_id: category.parent_id,
+              grouping: category.grouping,
               questionCount
             };
           });
@@ -570,3 +589,5 @@ export const useQuizStore = create<QuizState>()(
     }
   )
 );
+
+export type { CategoryWithCount };

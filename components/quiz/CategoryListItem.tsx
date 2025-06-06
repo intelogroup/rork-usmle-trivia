@@ -4,15 +4,10 @@ import { ChevronRight } from 'lucide-react-native';
 import Colors from '@/theme/colors';
 import Typography from '@/theme/typography';
 import Spacing from '@/theme/spacing';
+import type { CategoryWithCount } from '@/store/quiz/quizStore';
 
 interface CategoryListItemProps {
-  category: {
-    id: string;
-    name: string;
-    color: string;
-    questionCount: number;
-    icon?: string;
-  };
+  category: CategoryWithCount;
   onPress: (categoryId: string) => void;
 }
 
