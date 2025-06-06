@@ -131,7 +131,7 @@ export const useQuizStore = create<QuizState>()(
 
           // Filter questions by categories and difficulty
           let filteredQuestions = validQuestions.filter(q => 
-            validCategoryIds.includes(q.category_id)
+            validCategoryIds.includes(q.category)
           );
 
           // Fix the difficulty filtering logic - check if difficulty is 'all' OR matches question difficulty
@@ -197,7 +197,7 @@ export const useQuizStore = create<QuizState>()(
 
           // Filter questions by categories and difficulty
           let filteredQuestions = validQuestions.filter(q => 
-            validCategoryIds.includes(q.category_id)
+            validCategoryIds.includes(q.category)
           );
 
           // Fix the difficulty filtering logic - check if difficulty is 'all' OR matches question difficulty
