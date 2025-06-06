@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
   },
   countdownNumber: {
-    fontSize: Typography.fontSize['6xl'],
+    fontSize: Typography.fontSize['5xl'],
     fontWeight: Typography.fontWeight.bold,
     color: Colors.dark.primary,
     textAlign: 'center',

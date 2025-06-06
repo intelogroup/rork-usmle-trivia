@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     top: '35%',
     left: '50%',
     transform: [{ translateX: -120 }],
-    borderRadius: Dimensions.borderRadius['2xl'],
+    borderRadius: Dimensions.borderRadius.xl,
     alignItems: 'center',
     shadowColor: Colors.dark.shadow,
     shadowOffset: { width: 0, height: 12 },
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
   feedbackGradient: {
     flex: 1,
     width: '100%',
-    borderRadius: Dimensions.borderRadius['2xl'],
+    borderRadius: Dimensions.borderRadius.xl,
     alignItems: 'center',
     justifyContent: 'center',
     padding: Spacing.xl,
