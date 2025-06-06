@@ -1,14 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import Colors from '@/theme/colors';
 import Typography from '@/theme/typography';
-import Spacing from '@/theme/spacing';
+import { Spacing } from '@/theme/spacing';
 import { Zap, Target, Brain } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function QuizIntroAnimation() {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const animValue = useRef(new Animated.Value(0)).current;
   const opacityValue = useRef(new Animated.Value(0)).current;
   const scaleValue = useRef(new Animated.Value(0.3)).current;
@@ -20,10 +21,18 @@ export default function QuizIntroAnimation() {
     } else {
       // Web fallback: directly navigate after a short delay
       setTimeout(() => {
-        router.push('/quiz-session');
+        navigateToQuizSession();
       }, 1500);
     }
   }, []);
+
+  const navigateToQuizSession = () => {
+    // Pass through all the quiz parameters
+    router.push({
+      pathname: '/quiz-session',
+      params: params,
+    });
+  };
 
   const startCountdown = () => {
     Animated.parallel([
@@ -98,7 +107,7 @@ export default function QuizIntroAnimation() {
       }),
     ]).start(() => {
       setTimeout(() => {
-        router.push('/quiz-session');
+        navigateToQuizSession();
       }, 800);
     });
   };

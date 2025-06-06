@@ -272,7 +272,7 @@ export default function QuizSessionContainer({
             totalQuestions={validQuestions.length}
             progress={progress}
             timeRemaining={currentSession.mode === 'timed' ? timer.timeRemaining : undefined}
-            mode={mode}
+            mode={mode || 'standard'}
             categoryName={categoryName}
           />
         )}

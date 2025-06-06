@@ -62,12 +62,6 @@ export default function ResultsSummary({ score, totalQuestions, percentage }: Re
   const performance = getPerformanceLevel();
   const IconComponent = performance.icon;
 
-  const circumference = 2 * Math.PI * 80;
-  const strokeDashoffset = progressAnim.interpolate({
-    inputRange: [0, 100],
-    outputRange: [circumference, 0],
-  });
-
   const iconRotation = iconRotateAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
@@ -88,40 +82,15 @@ export default function ResultsSummary({ score, totalQuestions, percentage }: Re
           {/* Background circle */}
           <View style={[styles.circle, styles.backgroundCircle]} />
           
-          {/* Progress circle */}
-          <Animated.View
-            style={[
-              styles.circle,
-              styles.progressCircleStyle,
-              {
-                borderColor: performance.color,
-                transform: [{ rotate: '-90deg' }],
-              },
-            ]}
-          >
-            <Animated.View
-              style={[
-                styles.progressMask,
-                {
-                  transform: [
-                    {
-                      rotate: progressAnim.interpolate({
-                        inputRange: [0, 100],
-                        outputRange: ['0deg', '360deg'],
-                      }),
-                    },
-                  ],
-                },
-              ]}
-            />
-          </Animated.View>
+          {/* Progress circle - simplified for web compatibility */}
+          <View style={[styles.circle, { borderColor: performance.color }]} />
           
           {/* Center content */}
           <View style={styles.centerContent}>
             <Animated.View
               style={[
                 styles.iconContainer,
-                { transform: [{ rotate: iconRotation }] },
+                Platform.OS !== 'web' ? { transform: [{ rotate: iconRotation }] } : {},
               ]}
             >
               <IconComponent size={Dimensions.icon.lg} color={performance.color} />
@@ -167,18 +136,6 @@ const styles = StyleSheet.create({
   },
   backgroundCircle: {
     borderColor: Colors.dark.border,
-  },
-  progressCircleStyle: {
-    borderColor: Colors.dark.primary,
-  },
-  progressMask: {
-    width: '50%',
-    height: '100%',
-    backgroundColor: Colors.dark.background,
-    position: 'absolute',
-    right: 0,
-    borderTopRightRadius: 100,
-    borderBottomRightRadius: 100,
   },
   centerContent: {
     position: 'absolute',
