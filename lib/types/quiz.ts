@@ -17,7 +17,7 @@ export interface QuizSession {
   id: string;
   user_id: string;
   category_id: string;
-  questions: Question[];
+  questions: UsmleQuestion[]; // Updated to use UsmleQuestion instead of Question
   answers: number[];
   currentQuestionIndex: number;
   score: number;
