@@ -104,7 +104,8 @@ export function useProfileStats() {
         if (userAchievements && userAchievements.length > 0) {
           // Use real achievements - fix the property access
           const realAchievements = userAchievements.map(ua => {
-            const achievement = ua.achievements;
+            // Type assertion to handle the joined data structure
+            const achievement = ua.achievements as any;
             if (achievement && typeof achievement === 'object' && !Array.isArray(achievement)) {
               return {
                 id: achievement.id || '',
@@ -118,10 +119,10 @@ export function useProfileStats() {
                 rarity: achievement.rarity || '',
                 unlocked: true,
                 unlocked_at: ua.unlocked_at,
-              };
+              } as Achievement;
             }
             return null;
-          }).filter(Boolean) as Achievement[];
+          }).filter((achievement): achievement is Achievement => achievement !== null);
           
           calculatedStats.achievements = realAchievements;
         } else {
