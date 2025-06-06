@@ -102,20 +102,27 @@ export function useProfileStats() {
         }
 
         if (userAchievements && userAchievements.length > 0) {
-          // Use real achievements
-          const realAchievements = userAchievements.map(ua => ({
-            id: ua.achievements?.id || '',
-            title: ua.achievements?.title || '',
-            description: ua.achievements?.description || '',
-            icon: ua.achievements?.icon || '',
-            category: ua.achievements?.category || '',
-            requirement_type: ua.achievements?.requirement_type || '',
-            requirement_value: ua.achievements?.requirement_value || 0,
-            points: ua.achievements?.points || 0,
-            rarity: ua.achievements?.rarity || '',
-            unlocked: true,
-            unlocked_at: ua.unlocked_at,
-          }));
+          // Use real achievements - fix the property access
+          const realAchievements = userAchievements.map(ua => {
+            const achievement = ua.achievements;
+            if (achievement && typeof achievement === 'object' && !Array.isArray(achievement)) {
+              return {
+                id: achievement.id || '',
+                title: achievement.title || '',
+                description: achievement.description || '',
+                icon: achievement.icon || '',
+                category: achievement.category || '',
+                requirement_type: achievement.requirement_type || '',
+                requirement_value: achievement.requirement_value || 0,
+                points: achievement.points || 0,
+                rarity: achievement.rarity || '',
+                unlocked: true,
+                unlocked_at: ua.unlocked_at,
+              };
+            }
+            return null;
+          }).filter(Boolean) as Achievement[];
+          
           calculatedStats.achievements = realAchievements;
         } else {
           // Fallback to mock achievements based on progress

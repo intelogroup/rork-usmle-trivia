@@ -67,7 +67,7 @@ export default function DashboardStats({
         {stats.map((stat, index) => (
           <View key={index} style={styles.statCard}>
             <View style={[styles.iconContainer, { backgroundColor: stat.backgroundColor }]}>
-              <stat.icon size={22} color={stat.color} />
+              <stat.icon size={24} color={Colors.dark.text} />
             </View>
             <Text style={styles.statValue}>{stat.value}</Text>
             <Text style={styles.statLabel}>{stat.label}</Text>

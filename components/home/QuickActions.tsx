@@ -53,7 +53,7 @@ export default function QuickActions({ onQuickQuiz }: QuickActionsProps) {
             onPress={action.onPress}
             activeOpacity={0.7}
           >
-            <action.icon size={24} color={action.color} />
+            <action.icon size={20} color={Colors.dark.text} />
             <Text style={styles.actionLabel}>{action.label}</Text>
           </TouchableOpacity>
         ))}
