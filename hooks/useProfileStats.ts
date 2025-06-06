@@ -12,6 +12,22 @@ interface ProfileStatsData {
   averageAccuracy: number;
 }
 
+// Type for the joined achievement data from Supabase
+interface UserAchievementWithDetails {
+  unlocked_at: string;
+  achievements: {
+    id: string;
+    title: string;
+    description: string;
+    icon: string;
+    category: string;
+    requirement_type: string;
+    requirement_value: number;
+    points: number;
+    rarity: string;
+  };
+}
+
 export function useProfileStats() {
   const { user, profile } = useAuthStore();
   const [stats, setStats] = useState<ProfileStatsData>({
@@ -102,27 +118,28 @@ export function useProfileStats() {
         }
 
         if (userAchievements && userAchievements.length > 0) {
-          // Use real achievements - fix the property access
-          const realAchievements = userAchievements.map(ua => {
-            // Type assertion to handle the joined data structure
-            const achievement = ua.achievements as any;
-            if (achievement && typeof achievement === 'object' && !Array.isArray(achievement)) {
-              return {
-                id: achievement.id || '',
-                title: achievement.title || '',
-                description: achievement.description || '',
-                icon: achievement.icon || '',
-                category: achievement.category || '',
-                requirement_type: achievement.requirement_type || '',
-                requirement_value: achievement.requirement_value || 0,
-                points: achievement.points || 0,
-                rarity: achievement.rarity || '',
-                unlocked: true,
-                unlocked_at: ua.unlocked_at,
-              } as Achievement;
-            }
-            return null;
-          }).filter((achievement): achievement is Achievement => achievement !== null);
+          // Use real achievements - properly type the joined data
+          const realAchievements = (userAchievements as UserAchievementWithDetails[])
+            .map(ua => {
+              const achievement = ua.achievements;
+              if (achievement && typeof achievement === 'object') {
+                return {
+                  id: achievement.id,
+                  title: achievement.title,
+                  description: achievement.description,
+                  icon: achievement.icon,
+                  category: achievement.category,
+                  requirement_type: achievement.requirement_type,
+                  requirement_value: achievement.requirement_value,
+                  points: achievement.points,
+                  rarity: achievement.rarity,
+                  unlocked: true,
+                  unlocked_at: ua.unlocked_at,
+                } as Achievement;
+              }
+              return null;
+            })
+            .filter((achievement): achievement is Achievement => achievement !== null);
           
           calculatedStats.achievements = realAchievements;
         } else {
