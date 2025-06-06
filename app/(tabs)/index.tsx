@@ -124,7 +124,7 @@ export default function HomeScreen() {
             <View style={styles.startQuizIcon}>
               <Zap size={24} color={Colors.dark.background} fill={Colors.dark.background} />
             </View>
-            <Text style={styles.startQuizText}>Start New Test 🚀</Text>
+            <Text style={styles.startQuizText}>Start New Quiz 🚀</Text>
           </View>
         </LinearGradient>
       </TouchableOpacity>
