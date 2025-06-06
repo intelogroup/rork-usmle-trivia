@@ -8,6 +8,7 @@ import { BarChart3, TrendingUp, Clock, Target, Calendar, Brain, Award, BookOpen,
 import { LinearGradient } from 'expo-linear-gradient';
 import Typography from '@/theme/typography';
 import Spacing from '@/theme/spacing';
+import { useQuizStore } from '@/store/quiz/quizStore';
 
 interface AnalyticsData {
   totalSessions: number;
@@ -23,6 +24,7 @@ interface AnalyticsData {
 
 export default function AnalyticsScreen() {
   const { user, profile } = useAuthStore();
+  const { categories } = useQuizStore();
   const [timeframe, setTimeframe] = useState<'week' | 'month' | 'quarter'>('month');
   const [analytics, setAnalytics] = useState<AnalyticsData>({
     totalSessions: 0,
@@ -95,13 +97,9 @@ export default function AnalyticsScreen() {
       // Calculate category breakdown with proper category names
       const categoryBreakdown: { [key: string]: { name: string; count: number } } = {};
       
-      // First, get all categories to map IDs to names
-      const { data: categories } = await supabase
-        .from('categories')
-        .select('id, name');
-      
+      // Use local categories for mapping
       const categoryMap = new Map();
-      if (categories) {
+      if (categories && Array.isArray(categories)) {
         categories.forEach(cat => categoryMap.set(cat.id, cat.name));
       }
       

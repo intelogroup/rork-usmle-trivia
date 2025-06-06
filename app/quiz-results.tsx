@@ -10,8 +10,8 @@ import { useQuizStore } from '@/store/quiz/quizStore';
 import ProgressBar from '@/components/ProgressBar';
 import type { Question } from '@/lib/types/quiz';
 import { useAuthStore } from '@/store/auth/authStore';
-import { categories } from '@/mocks/categories';
 import { LinearGradient } from 'expo-linear-gradient';
+import { UsmleQuestion } from '@/lib/types/usmle';
 
 export default function QuizResultsScreen() {
   const router = useRouter();
@@ -37,12 +37,12 @@ export default function QuizResultsScreen() {
     // Calculate performance by category
     const categoryMap = new Map<string, { name: string, correct: number, total: number }>();
     
-    currentSession.questions.forEach((question: Question, index: number) => {
-      const categoryId = question.category_id || question.category;
+    currentSession.questions.forEach((question: UsmleQuestion, index: number) => {
+      const categoryId = question.category_id;
       const categoryName = getCategoryName(categoryId);
-      const userAnswer = currentSession.answers[index];
-      const correctAnswer = question.correct_answer !== undefined ? question.correct_answer : question.correct;
-      const isCorrect = userAnswer === correctAnswer;
+      const userAnswerIndex = currentSession.answers[index];
+      const isCorrect = userAnswerIndex !== -1 && 
+        question.options[userAnswerIndex]?.id === question.correct_option_id;
       
       if (!categoryMap.has(categoryId)) {
         categoryMap.set(categoryId, { name: categoryName, correct: 0, total: 0 });
@@ -97,6 +97,7 @@ export default function QuizResultsScreen() {
   }, [currentSession]);
 
   const getCategoryName = (categoryId: string) => {
+    const { categories } = useQuizStore.getState();
     const category = categories.find(cat => cat.id === categoryId);
     return category?.name || `Category ${categoryId}`;
   };
