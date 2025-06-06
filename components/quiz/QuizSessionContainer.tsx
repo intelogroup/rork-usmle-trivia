@@ -107,7 +107,7 @@ export default function QuizSessionContainer({
   };
 
   const handleSubmitAnswer = () => {
-    if (currentSession && !currentSession.isAnswerSubmitted && currentSession.selectedAnswer !== undefined) {
+    if (currentSession && !currentSession.isAnswerSubmitted && currentSession.selectedAnswer !== undefined && currentSession.selectedAnswer !== -1) {
       timer.pauseTimer();
       submitAnswer();
     }
@@ -236,7 +236,7 @@ export default function QuizSessionContainer({
       );
     }
 
-    const selectedAnswer = currentSession.selectedAnswer !== undefined ? currentSession.selectedAnswer : null;
+    const selectedAnswer = currentSession.selectedAnswer !== undefined && currentSession.selectedAnswer !== -1 ? currentSession.selectedAnswer : null;
     const isAnswerSubmitted = currentSession.isAnswerSubmitted || false;
 
     return (
@@ -254,7 +254,7 @@ export default function QuizSessionContainer({
     ? (currentSession.currentQuestionIndex + 1) / validQuestions.length 
     : 0;
 
-  const footerSelectedAnswer = currentSession && currentSession.selectedAnswer !== undefined 
+  const footerSelectedAnswer = currentSession && currentSession.selectedAnswer !== undefined && currentSession.selectedAnswer !== -1
     ? currentSession.selectedAnswer 
     : null;
 

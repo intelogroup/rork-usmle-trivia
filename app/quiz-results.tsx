@@ -8,7 +8,6 @@ import { achievements } from '@/mocks/achievements';
 import AchievementCard from '@/components/AchievementCard';
 import { useQuizStore } from '@/store/quiz/quizStore';
 import ProgressBar from '@/components/ProgressBar';
-import type { Question } from '@/lib/types/quiz';
 import { useAuthStore } from '@/store/auth/authStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import { UsmleQuestion } from '@/lib/types/usmle';
@@ -42,6 +41,8 @@ export default function QuizResultsScreen() {
       const categoryName = getCategoryName(categoryId);
       const userAnswerIndex = currentSession.answers[index];
       const isCorrect = userAnswerIndex !== -1 && 
+        userAnswerIndex >= 0 &&
+        userAnswerIndex < question.options.length &&
         question.options[userAnswerIndex]?.id === question.correct_option_id;
       
       if (!categoryMap.has(categoryId)) {
@@ -280,7 +281,6 @@ export default function QuizResultsScreen() {
                 onPress={handleShare}
                 variant="outline"
                 style={styles.actionButton}
-                icon={<Share2 size={16} color={Colors.dark.text} />}
               />
             </View>
           </Animated.View>
@@ -292,13 +292,11 @@ export default function QuizResultsScreen() {
             onPress={handleRetakeQuiz}
             variant="outline"
             style={styles.footerButton}
-            icon={<RotateCcw size={16} color={Colors.dark.text} />}
           />
           <Button
             title="Go to Home"
             onPress={handleGoHome}
             style={styles.footerButton}
-            icon={<Home size={16} color={Colors.dark.text} />}
           />
         </View>
       </LinearGradient>
