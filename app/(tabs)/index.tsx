@@ -7,9 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import LevelProgress from '@/components/home/LevelProgress';
 import WeakestSubjects from '@/components/home/WeakestSubjects';
 import ReviewCard from '@/components/home/ReviewCard';
-import DashboardStats from '@/components/home/DashboardStats';
-import QuickActions from '@/components/home/QuickActions';
-import WeeklyProgress from '@/components/home/WeeklyProgress';
+import UnifiedDashboard from '@/components/home/UnifiedDashboard';
 import { useUserLevel } from '@/hooks/useUserLevel';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useWeakestCategories } from '@/hooks/useWeakestCategories';
@@ -139,17 +137,15 @@ export default function HomeScreen() {
         isLoading={isIncorrectLoading} 
       />
       
-      <DashboardStats
+      <UnifiedDashboard
         totalQuizzes={statsData.totalQuizzes}
         averageScore={statsData.averageScore}
         currentStreak={statsData.currentStreak}
         totalTimeSpent={statsData.totalTimeSpent}
         getStreakEmoji={statsData.getStreakEmoji}
+        weeklyProgress={statsData.weeklyProgress}
+        onQuickQuiz={handleQuickQuiz}
       />
-
-      <QuickActions onQuickQuiz={handleQuickQuiz} />
-      
-      <WeeklyProgress weeklyProgress={statsData.weeklyProgress} />
     </ScrollView>
   );
 }

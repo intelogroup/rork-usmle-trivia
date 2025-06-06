@@ -53,7 +53,7 @@ export default function QuickActions({ onQuickQuiz }: QuickActionsProps) {
             onPress={action.onPress}
             activeOpacity={0.7}
           >
-            <action.icon size={22} color={action.color} />
+            <action.icon size={24} color={action.color} />
             <Text style={styles.actionLabel}>{action.label}</Text>
           </TouchableOpacity>
         ))}
@@ -64,7 +64,7 @@ export default function QuickActions({ onQuickQuiz }: QuickActionsProps) {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
   },
   title: {
     fontSize: Typography.fontSize.lg,
@@ -84,8 +84,6 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
     minHeight: 70,
   },
   actionLabel: {

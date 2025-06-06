@@ -6,18 +6,42 @@ import DashboardStats from './DashboardStats';
 import QuickActions from './QuickActions';
 import WeeklyProgress from './WeeklyProgress';
 
-export default function UnifiedDashboard() {
+interface UnifiedDashboardProps {
+  totalQuizzes: number;
+  averageScore: number;
+  currentStreak: number;
+  totalTimeSpent: number;
+  getStreakEmoji: () => string;
+  weeklyProgress: number;
+  onQuickQuiz: () => void;
+}
+
+export default function UnifiedDashboard({
+  totalQuizzes,
+  averageScore,
+  currentStreak,
+  totalTimeSpent,
+  getStreakEmoji,
+  weeklyProgress,
+  onQuickQuiz,
+}: UnifiedDashboardProps) {
   return (
     <View style={styles.container}>
-      <DashboardStats />
+      <DashboardStats
+        totalQuizzes={totalQuizzes}
+        averageScore={averageScore}
+        currentStreak={currentStreak}
+        totalTimeSpent={totalTimeSpent}
+        getStreakEmoji={getStreakEmoji}
+      />
       
       <View style={styles.divider} />
       
-      <QuickActions />
+      <QuickActions onQuickQuiz={onQuickQuiz} />
       
       <View style={styles.divider} />
       
-      <WeeklyProgress />
+      <WeeklyProgress weeklyProgress={weeklyProgress} />
     </View>
   );
 }

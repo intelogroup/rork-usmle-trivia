@@ -2,11 +2,13 @@ const Colors = {
   light: {
     text: '#11181C',
     textSecondary: '#687076',
+    textTertiary: '#9CA3AF',
     background: '#FFFFFF',
     card: '#F8F9FA',
     cardHighlight: '#F1F3F4',
     border: '#E5E7EB',
     primary: '#1E3A8A', // Navy blue
+    primaryLight: '#3B82F6',
     secondary: '#3B82F6',
     accent: '#10B981',
     success: '#059669',
@@ -29,11 +31,13 @@ const Colors = {
   dark: {
     text: '#ECEDEE',
     textSecondary: '#9BA1A6',
+    textTertiary: '#6B7280',
     background: '#151718',
     card: '#1F2937',
     cardHighlight: '#374151',
     border: '#374151',
     primary: '#60A5FA', // Brighter blue for better contrast
+    primaryLight: '#93C5FD',
     secondary: '#93C5FD',
     accent: '#34D399',
     success: '#10B981',

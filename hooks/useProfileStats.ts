@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '@/store/auth/authStore';
 import { supabase } from '@/lib/supabase';
-import { Achievement } from '@/types';
+import { Achievement } from '@/lib/types/achievement';
 
 interface ProfileStatsData {
   questionsAnswered: number;
@@ -104,15 +104,15 @@ export function useProfileStats() {
         if (userAchievements && userAchievements.length > 0) {
           // Use real achievements
           const realAchievements = userAchievements.map(ua => ({
-            id: ua.achievements.id,
-            title: ua.achievements.title,
-            description: ua.achievements.description,
-            icon: ua.achievements.icon,
-            category: ua.achievements.category,
-            requirement_type: ua.achievements.requirement_type,
-            requirement_value: ua.achievements.requirement_value,
-            points: ua.achievements.points,
-            rarity: ua.achievements.rarity,
+            id: ua.achievements?.id || '',
+            title: ua.achievements?.title || '',
+            description: ua.achievements?.description || '',
+            icon: ua.achievements?.icon || '',
+            category: ua.achievements?.category || '',
+            requirement_type: ua.achievements?.requirement_type || '',
+            requirement_value: ua.achievements?.requirement_value || 0,
+            points: ua.achievements?.points || 0,
+            rarity: ua.achievements?.rarity || '',
             unlocked: true,
             unlocked_at: ua.unlocked_at,
           }));

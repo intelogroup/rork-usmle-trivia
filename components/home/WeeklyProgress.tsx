@@ -21,7 +21,7 @@ export default function WeeklyProgress({ weeklyProgress }: WeeklyProgressProps) 
           </Text>
         </View>
         <View style={styles.icon}>
-          <TrendingUp size={20} color={Colors.dark.text} />
+          <TrendingUp size={20} color={Colors.dark.primary} />
         </View>
       </View>
       <ProgressBar 
@@ -39,12 +39,7 @@ export default function WeeklyProgress({ weeklyProgress }: WeeklyProgressProps) 
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.dark.card,
-    borderRadius: 16,
-    padding: Spacing.lg,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
   },
   header: {
     flexDirection: 'row',
