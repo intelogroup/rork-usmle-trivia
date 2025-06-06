@@ -8,7 +8,7 @@ import { useRouter } from 'expo-router';
 import CategoryList from '@/components/quiz/CategoryList';
 import FullScreenLoader from '@/components/FullScreenLoader';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BookOpen } from 'lucide-react-native';
+import { BookOpen, Sparkles, Target } from 'lucide-react-native';
 
 export default function QuizScreen() {
   const router = useRouter();
@@ -31,13 +31,13 @@ export default function QuizScreen() {
   };
 
   if (isLoadingCategories) {
-    return <FullScreenLoader message="Loading categories..." />;
+    return <FullScreenLoader message="Loading categories... ✨" />;
   }
 
   if (categoriesError) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Unable to load categories</Text>
+        <Text style={styles.errorText}>Unable to load categories 😔</Text>
         <Text style={styles.errorSubtext}>{categoriesError}</Text>
       </View>
     );
@@ -51,12 +51,16 @@ export default function QuizScreen() {
       >
         <View style={styles.header}>
           <View style={styles.iconContainer}>
-            <BookOpen size={32} color={Colors.dark.primary} />
+            <Target size={32} color={Colors.dark.primary} />
           </View>
-          <Text style={styles.title}>Choose a Category 📚</Text>
+          <Text style={styles.title}>Choose Your Challenge 🎯</Text>
           <Text style={styles.subtitle}>
-            Select a topic to start your quiz journey! 🚀
+            Pick a topic and test your knowledge! 🧠✨
           </Text>
+          <View style={styles.motivationBadge}>
+            <Sparkles size={16} color={Colors.dark.primary} />
+            <Text style={styles.motivationText}>Ready to level up? 🚀</Text>
+          </View>
         </View>
 
         <CategoryList
@@ -83,24 +87,45 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.lg,
   },
   iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     backgroundColor: `${Colors.dark.primary}20`,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.lg,
+    borderWidth: 2,
+    borderColor: `${Colors.dark.primary}30`,
   },
   title: {
     fontSize: Typography.fontSize['2xl'],
     fontWeight: Typography.fontWeight.bold,
     color: Colors.dark.text,
     marginBottom: Spacing.sm,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: Typography.fontSize.base,
     color: Colors.dark.textSecondary,
     textAlign: 'center',
+    marginBottom: Spacing.md,
+    lineHeight: 24,
+  },
+  motivationBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: `${Colors.dark.primary}15`,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: `${Colors.dark.primary}30`,
+  },
+  motivationText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.dark.primary,
+    fontWeight: Typography.fontWeight.semibold,
+    marginLeft: Spacing.xs,
   },
   errorContainer: {
     flex: 1,

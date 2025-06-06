@@ -10,7 +10,7 @@ import QuizSettings from '@/components/quiz/QuizSettings';
 import AuthPrompt from '@/components/quiz/AuthPrompt';
 import Button from '@/components/Button';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Settings, AlertTriangle, Rocket } from 'lucide-react-native';
+import { Settings, AlertTriangle, Rocket, Target, Zap } from 'lucide-react-native';
 import type { QuizMode } from '@/lib/types/quiz';
 
 export default function QuizSetupScreen() {
@@ -104,10 +104,10 @@ export default function QuizSetupScreen() {
         />
         <View style={styles.errorContainer}>
           <AlertTriangle size={48} color={Colors.dark.textSecondary} />
-          <Text style={styles.errorText}>Category not found</Text>
-          <Text style={styles.errorSubtext}>Please select a valid category</Text>
+          <Text style={styles.errorText}>Category not found 😔</Text>
+          <Text style={styles.errorSubtext}>Please select a valid category to continue! 🎯</Text>
           <Button
-            title="Go Back"
+            title="Go Back 🔙"
             onPress={() => router.back()}
             style={styles.backButton}
           />
@@ -135,12 +135,16 @@ export default function QuizSetupScreen() {
         <ScrollView contentContainerStyle={styles.contentContainer}>
           <View style={styles.header}>
             <View style={[styles.iconContainer, { backgroundColor: selectedCategory.color }]}>
-              <Settings size={32} color={Colors.dark.background} />
+              <Target size={32} color={Colors.dark.background} />
             </View>
-            <Text style={styles.title}>{selectedCategory.name}</Text>
+            <Text style={styles.title}>{selectedCategory.name} 🎯</Text>
             <Text style={styles.subtitle}>
               {selectedCategory.questionCount} questions available 📚
             </Text>
+            <View style={styles.readyBadge}>
+              <Zap size={16} color={Colors.dark.primary} />
+              <Text style={styles.readyText}>Let's customize your challenge! ⚡</Text>
+            </View>
           </View>
 
           <AuthPrompt isAuthenticated={isAuthenticated} />
@@ -157,7 +161,7 @@ export default function QuizSetupScreen() {
           {!isCheckingAvailability && availableQuestionCount > 0 && (
             <View style={styles.availabilityInfo}>
               <Text style={styles.availabilityText}>
-                {availableQuestionCount} questions available for your selection ✅
+                ✅ {availableQuestionCount} questions ready for your challenge! 🚀
               </Text>
             </View>
           )}
@@ -179,7 +183,7 @@ export default function QuizSetupScreen() {
         
         <View style={styles.footer}>
           <Button
-            title={isLoading ? "Starting Quiz..." : "Start Quiz 🚀"}
+            title={isLoading ? "Preparing Quiz... ⏳" : "Start Quiz 🚀"}
             onPress={handleStartQuiz}
             disabled={isStartDisabled}
             style={styles.startButton}
@@ -207,12 +211,20 @@ const styles = StyleSheet.create({
     marginBottom: Spacing['2xl'],
   },
   iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.lg,
+    elevation: 4,
+    shadowColor: Colors.dark.shadow,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   title: {
     fontSize: Typography.fontSize['2xl'],
@@ -225,19 +237,37 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     color: Colors.dark.textSecondary,
     textAlign: 'center',
+    marginBottom: Spacing.md,
+  },
+  readyBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: `${Colors.dark.primary}15`,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: `${Colors.dark.primary}30`,
+  },
+  readyText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.dark.primary,
+    fontWeight: Typography.fontWeight.semibold,
+    marginLeft: Spacing.xs,
   },
   availabilityInfo: {
-    backgroundColor: `${Colors.dark.primary}15`,
-    borderRadius: 8,
+    backgroundColor: `${Colors.dark.success}15`,
+    borderRadius: 12,
     padding: Spacing.md,
     marginBottom: Spacing.lg,
-    borderLeftWidth: 3,
-    borderLeftColor: Colors.dark.primary,
+    borderLeftWidth: 4,
+    borderLeftColor: Colors.dark.success,
   },
   availabilityText: {
-    color: Colors.dark.text,
+    color: Colors.dark.success,
     fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.medium,
+    fontWeight: Typography.fontWeight.semibold,
+    textAlign: 'center',
   },
   errorContainer: {
     backgroundColor: `${Colors.dark.error}15`,
@@ -261,6 +291,7 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.sm,
     textAlign: 'center',
     marginBottom: Spacing.lg,
+    lineHeight: 20,
   },
   footer: {
     position: 'absolute',
@@ -271,9 +302,21 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.background,
     borderTopWidth: 1,
     borderTopColor: Colors.dark.border,
+    elevation: 8,
+    shadowColor: Colors.dark.shadow,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   startButton: {
     width: '100%',
+    paddingVertical: 16,
+    borderRadius: 16,
+    elevation: 4,
+    shadowColor: Colors.dark.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   backButton: {
     marginTop: Spacing.lg,

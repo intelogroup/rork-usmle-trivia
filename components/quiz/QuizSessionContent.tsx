@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
+import { View, Text, StyleSheet, Animated, Platform, ScrollView } from 'react-native';
 import Colors from '@/theme/colors';
 import OptionButton from '@/components/OptionButton';
 import type { UsmleQuestion } from '@/lib/types/usmle';
 import { LinearGradient } from 'expo-linear-gradient';
 import Typography from '@/theme/typography';
 import Spacing from '@/theme/spacing';
-import { ThumbsUp, ThumbsDown } from 'lucide-react-native';
+import { ThumbsUp, ThumbsDown, Lightbulb, CheckCircle, XCircle } from 'lucide-react-native';
 
 interface QuizSessionContentProps {
   question: UsmleQuestion;
@@ -15,9 +15,9 @@ interface QuizSessionContentProps {
   onOptionPress: (index: number) => void;
 }
 
-const FEEDBACK_EMOJIS = {
-  correct: ['✅', '🎉', '👍', '🌟', '💯'],
-  incorrect: ['❌', '🤔', '💭', '🔄', '📚'],
+const CELEBRATION_EMOJIS = {
+  correct: ['🎉', '✨', '🌟', '💫', '🎊', '🏆', '👏', '🔥'],
+  incorrect: ['💭', '🤔', '📚', '💡', '🎯', '🔄', '📖', '⚡'],
 };
 
 export default function QuizSessionContent({
@@ -27,68 +27,121 @@ export default function QuizSessionContent({
   onOptionPress,
 }: QuizSessionContentProps) {
   const feedbackOpacity = useRef(new Animated.Value(0)).current;
-  const feedbackScale = useRef(new Animated.Value(0.5)).current;
+  const feedbackScale = useRef(new Animated.Value(0.3)).current;
+  const feedbackTranslateY = useRef(new Animated.Value(-50)).current;
   const optionsOpacity = useRef(new Animated.Value(1)).current;
+  const celebrationOpacity = useRef(new Animated.Value(0)).current;
+  const celebrationScale = useRef(new Animated.Value(0.5)).current;
 
   useEffect(() => {
     if (isAnswerSubmitted && selectedAnswer !== null) {
-      // Fade out options slightly
+      const correctAnswerIndex = question.options.findIndex(opt => opt.id === question.correct_option_id);
+      const isCorrect = selectedAnswer === correctAnswerIndex;
+
+      // Dim options slightly
       Animated.timing(optionsOpacity, {
-        toValue: 0.6,
-        duration: 200,
+        toValue: 0.7,
+        duration: 300,
         useNativeDriver: true,
       }).start();
 
-      // Show feedback animation
+      // Show main feedback animation
       Animated.parallel([
         Animated.timing(feedbackOpacity, {
           toValue: 1,
-          duration: 300,
+          duration: 400,
           useNativeDriver: true,
         }),
         Animated.spring(feedbackScale, {
           toValue: 1,
-          tension: 100,
-          friction: 8,
+          tension: 80,
+          friction: 6,
+          useNativeDriver: true,
+        }),
+        Animated.spring(feedbackTranslateY, {
+          toValue: 0,
+          tension: 80,
+          friction: 6,
           useNativeDriver: true,
         }),
       ]).start();
 
-      // Hide feedback after 2 seconds
+      // Show celebration animation for correct answers
+      if (isCorrect) {
+        setTimeout(() => {
+          Animated.parallel([
+            Animated.timing(celebrationOpacity, {
+              toValue: 1,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+            Animated.spring(celebrationScale, {
+              toValue: 1,
+              tension: 100,
+              friction: 8,
+              useNativeDriver: true,
+            }),
+          ]).start();
+
+          // Hide celebration after 2 seconds
+          setTimeout(() => {
+            Animated.parallel([
+              Animated.timing(celebrationOpacity, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+              }),
+              Animated.timing(celebrationScale, {
+                toValue: 0.5,
+                duration: 300,
+                useNativeDriver: true,
+              }),
+            ]).start();
+          }, 2000);
+        }, 500);
+      }
+
+      // Hide main feedback after 3 seconds
       setTimeout(() => {
         Animated.parallel([
           Animated.timing(feedbackOpacity, {
             toValue: 0,
-            duration: 200,
+            duration: 300,
             useNativeDriver: true,
           }),
           Animated.timing(feedbackScale, {
-            toValue: 0.5,
-            duration: 200,
+            toValue: 0.3,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(feedbackTranslateY, {
+            toValue: -50,
+            duration: 300,
             useNativeDriver: true,
           }),
         ]).start();
-      }, 2000);
+      }, 3000);
     } else {
       // Reset animations
       feedbackOpacity.setValue(0);
-      feedbackScale.setValue(0.5);
+      feedbackScale.setValue(0.3);
+      feedbackTranslateY.setValue(-50);
       optionsOpacity.setValue(1);
+      celebrationOpacity.setValue(0);
+      celebrationScale.setValue(0.5);
     }
   }, [isAnswerSubmitted, selectedAnswer]);
 
-  const getFeedbackEmoji = () => {
-    if (selectedAnswer === null) return '';
-    const correctAnswerIndex = question.options.findIndex(opt => opt.id === question.correct_option_id);
-    const isCorrect = selectedAnswer === correctAnswerIndex;
-    const emojis = isCorrect ? FEEDBACK_EMOJIS.correct : FEEDBACK_EMOJIS.incorrect;
+  const getRandomEmoji = (type: 'correct' | 'incorrect') => {
+    const emojis = CELEBRATION_EMOJIS[type];
     return emojis[Math.floor(Math.random() * emojis.length)];
   };
 
   const correctAnswerIndex = question.options.findIndex(opt => opt.id === question.correct_option_id);
+  const isCorrect = selectedAnswer !== null && selectedAnswer === correctAnswerIndex;
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <LinearGradient
         colors={[Colors.dark.card, Colors.dark.background]}
         style={styles.questionContainer}
@@ -116,43 +169,79 @@ export default function QuizSessionContent({
         ))}
       </Animated.View>
 
-      {/* Feedback Animation */}
+      {/* Main Feedback Animation */}
       {Platform.OS !== 'web' && isAnswerSubmitted && selectedAnswer !== null && (
         <Animated.View
           style={[
             styles.feedbackContainer,
             {
               opacity: feedbackOpacity,
-              transform: [{ scale: feedbackScale }],
+              transform: [
+                { scale: feedbackScale },
+                { translateY: feedbackTranslateY }
+              ],
             },
           ]}
         >
           <LinearGradient
-            colors={selectedAnswer === correctAnswerIndex ? 
-              [Colors.dark.primary, Colors.dark.secondary] : 
-              [Colors.dark.error, `${Colors.dark.error}80`]}
+            colors={isCorrect ? 
+              [Colors.dark.success, `${Colors.dark.success}90`] : 
+              [Colors.dark.error, `${Colors.dark.error}90`]}
             style={styles.feedbackGradient}
           >
-            {selectedAnswer === correctAnswerIndex ? 
-              <ThumbsUp size={32} color={Colors.dark.background} /> : 
-              <ThumbsDown size={32} color={Colors.dark.background} />
-            }
-            <Text style={styles.feedbackEmoji}>{getFeedbackEmoji()}</Text>
+            <View style={styles.feedbackIcon}>
+              {isCorrect ? 
+                <CheckCircle size={28} color={Colors.dark.background} /> : 
+                <XCircle size={28} color={Colors.dark.background} />
+              }
+            </View>
+            <Text style={styles.feedbackEmoji}>{getRandomEmoji(isCorrect ? 'correct' : 'incorrect')}</Text>
             <Text style={styles.feedbackText}>
-              {selectedAnswer === correctAnswerIndex ? 'Correct!' : 'Try Again!'}
+              {isCorrect ? 'Excellent!' : 'Not quite!'}
+            </Text>
+            <Text style={styles.feedbackSubtext}>
+              {isCorrect ? 'You nailed it!' : 'Keep learning!'}
             </Text>
           </LinearGradient>
         </Animated.View>
       )}
 
-      {/* Show explanation after answer is submitted */}
+      {/* Celebration Animation for Correct Answers */}
+      {Platform.OS !== 'web' && isAnswerSubmitted && isCorrect && (
+        <Animated.View
+          style={[
+            styles.celebrationContainer,
+            {
+              opacity: celebrationOpacity,
+              transform: [{ scale: celebrationScale }],
+            },
+          ]}
+        >
+          <Text style={styles.celebrationEmoji}>🎉</Text>
+          <Text style={styles.celebrationText}>Amazing!</Text>
+        </Animated.View>
+      )}
+
+      {/* Explanation Section - Now at the bottom */}
       {isAnswerSubmitted && question.explanation && (
-        <View style={styles.explanationContainer}>
-          <Text style={styles.explanationTitle}>Explanation:</Text>
-          <Text style={styles.explanationText}>{question.explanation}</Text>
+        <View style={styles.explanationSection}>
+          <View style={styles.explanationHeader}>
+            <Lightbulb size={20} color={Colors.dark.primary} />
+            <Text style={styles.explanationTitle}>💡 Explanation</Text>
+          </View>
+          <View style={styles.explanationContainer}>
+            <Text style={styles.explanationText}>{question.explanation}</Text>
+          </View>
+          
+          {/* Additional learning tip */}
+          <View style={styles.learningTip}>
+            <Text style={styles.learningTipText}>
+              💭 Remember this concept for future questions!
+            </Text>
+          </View>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -165,14 +254,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: Spacing.xl,
     marginBottom: Spacing.xl,
-    elevation: 2,
+    elevation: 3,
     shadowColor: Colors.dark.shadow,
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
   questionText: {
     fontSize: Typography.fontSize.xl,
@@ -182,59 +271,111 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   optionsContainer: {
-    flex: 1,
     gap: Spacing.md,
+    marginBottom: Spacing.xl,
   },
   feedbackContainer: {
     position: 'absolute',
-    top: '40%',
+    top: '35%',
     left: '50%',
-    transform: [{ translateX: -100 }, { translateY: -60 }],
-    borderRadius: 20,
+    transform: [{ translateX: -120 }],
+    borderRadius: 24,
     alignItems: 'center',
     shadowColor: Colors.dark.shadow,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
-    width: 200,
-    padding: Spacing.md,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 12,
+    width: 240,
+    zIndex: 1000,
   },
   feedbackGradient: {
     flex: 1,
     width: '100%',
-    borderRadius: 20,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: Spacing.lg,
+    padding: Spacing.xl,
+  },
+  feedbackIcon: {
+    marginBottom: Spacing.sm,
   },
   feedbackEmoji: {
-    fontSize: 36,
-    marginVertical: Spacing.sm,
+    fontSize: 32,
+    marginBottom: Spacing.sm,
   },
   feedbackText: {
-    fontSize: Typography.fontSize.lg,
+    fontSize: Typography.fontSize.xl,
     fontWeight: Typography.fontWeight.bold,
     color: Colors.dark.background,
     textAlign: 'center',
+    marginBottom: Spacing.xs,
   },
-  explanationContainer: {
-    backgroundColor: Colors.dark.card,
-    borderRadius: 12,
-    padding: Spacing.lg,
+  feedbackSubtext: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.dark.background,
+    textAlign: 'center',
+    opacity: 0.9,
+  },
+  celebrationContainer: {
+    position: 'absolute',
+    top: '20%',
+    left: '50%',
+    transform: [{ translateX: -60 }],
+    alignItems: 'center',
+    zIndex: 1001,
+  },
+  celebrationEmoji: {
+    fontSize: 48,
+    marginBottom: Spacing.xs,
+  },
+  celebrationText: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.dark.primary,
+    textAlign: 'center',
+  },
+  explanationSection: {
     marginTop: Spacing.xl,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
+    paddingTop: Spacing.xl,
+    borderTopWidth: 1,
+    borderTopColor: Colors.dark.border,
+  },
+  explanationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.lg,
   },
   explanationTitle: {
     fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semibold,
+    fontWeight: Typography.fontWeight.bold,
     color: Colors.dark.text,
-    marginBottom: Spacing.sm,
+    marginLeft: Spacing.sm,
+  },
+  explanationContainer: {
+    backgroundColor: Colors.dark.card,
+    borderRadius: 16,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+    borderLeftWidth: 4,
+    borderLeftColor: Colors.dark.primary,
   },
   explanationText: {
     fontSize: Typography.fontSize.base,
-    color: Colors.dark.textSecondary,
+    color: Colors.dark.text,
     lineHeight: 24,
+  },
+  learningTip: {
+    backgroundColor: `${Colors.dark.primary}15`,
+    borderRadius: 12,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: `${Colors.dark.primary}30`,
+  },
+  learningTipText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.dark.textSecondary,
+    fontStyle: 'italic',
+    textAlign: 'center',
   },
 });

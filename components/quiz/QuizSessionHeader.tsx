@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import Colors from '@/theme/colors';
 import ProgressBar from '@/components/ProgressBar';
 import QuizTimer from './QuizTimer';
-import { X, BookOpenCheck } from 'lucide-react-native';
+import { X, BookOpenCheck, Target, Zap } from 'lucide-react-native';
 import Typography from '@/theme/typography';
 import Spacing from '@/theme/spacing';
 
@@ -31,6 +31,22 @@ export default function QuizSessionHeader({
 
   const isTimedMode = mode === 'timed';
 
+  const getModeEmoji = () => {
+    switch (mode) {
+      case 'timed': return '⏱️';
+      case 'practice': return '✍️';
+      default: return '📝';
+    }
+  };
+
+  const getModeText = () => {
+    switch (mode) {
+      case 'timed': return 'Timed Challenge';
+      case 'practice': return 'Practice Mode';
+      default: return 'Standard Quiz';
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Top Row: Category/Title and Close Button */}
@@ -38,11 +54,11 @@ export default function QuizSessionHeader({
         <View style={styles.titleSection}>
           {categoryName && (
             <Text style={styles.categoryText} numberOfLines={1}>
-              {categoryName} 📘
+              🎯 {categoryName}
             </Text>
           )}
           <Text style={styles.modeText}>
-            {mode === 'timed' ? 'Timed Quiz ⏱️' : mode === 'practice' ? 'Practice Mode ✍️' : 'Standard Quiz 📝'}
+            {getModeText()} {getModeEmoji()}
           </Text>
         </View>
         
@@ -60,7 +76,7 @@ export default function QuizSessionHeader({
       <View style={styles.middleRow}>
         <View style={styles.questionInfo}>
           <Text style={styles.questionCounter}>
-            Question {currentQuestion} of {totalQuestions}
+            Question {currentQuestion} of {totalQuestions} 📊
           </Text>
           <Text style={styles.progressText}>
             {Math.round(progress * 100)}% Complete 🌟
@@ -79,10 +95,22 @@ export default function QuizSessionHeader({
       <View style={styles.progressContainer}>
         <ProgressBar 
           progress={progress} 
-          height={6} 
+          height={8} 
           fillColor={Colors.dark.primary}
           backgroundColor={Colors.dark.cardHighlight}
         />
+      </View>
+
+      {/* Motivation Badge */}
+      <View style={styles.motivationContainer}>
+        <View style={styles.motivationBadge}>
+          <Zap size={14} color={Colors.dark.primary} />
+          <Text style={styles.motivationText}>
+            {progress < 0.3 ? "You've got this! 💪" : 
+             progress < 0.7 ? "Great progress! 🔥" : 
+             "Almost there! 🚀"}
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -96,6 +124,14 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.lg,
     borderBottomWidth: 1,
     borderBottomColor: Colors.dark.border,
+    elevation: 4,
+    shadowColor: Colors.dark.shadow,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   topRow: {
     flexDirection: 'row',
@@ -116,12 +152,12 @@ const styles = StyleSheet.create({
   modeText: {
     fontSize: Typography.fontSize.base,
     color: Colors.dark.textSecondary,
-    fontWeight: Typography.fontWeight.medium,
+    fontWeight: Typography.fontWeight.semibold,
   },
   closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: Colors.dark.card,
     alignItems: 'center',
     justifyContent: 'center',
@@ -130,7 +166,7 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 3,
   },
@@ -145,16 +181,36 @@ const styles = StyleSheet.create({
   },
   questionCounter: {
     fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semibold,
+    fontWeight: Typography.fontWeight.bold,
     color: Colors.dark.text,
     marginBottom: 2,
   },
   progressText: {
     fontSize: Typography.fontSize.sm,
     color: Colors.dark.textSecondary,
-    fontWeight: Typography.fontWeight.medium,
+    fontWeight: Typography.fontWeight.semibold,
   },
   progressContainer: {
     marginTop: Spacing.xs,
+    marginBottom: Spacing.sm,
+  },
+  motivationContainer: {
+    alignItems: 'center',
+  },
+  motivationBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: `${Colors.dark.primary}15`,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: `${Colors.dark.primary}30`,
+  },
+  motivationText: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.dark.primary,
+    fontWeight: Typography.fontWeight.bold,
+    marginLeft: Spacing.xs,
   },
 });

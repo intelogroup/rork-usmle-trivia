@@ -13,7 +13,7 @@ import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useWeakestCategories } from '@/hooks/useWeakestCategories';
 import { useIncorrectQuestions } from '@/hooks/useIncorrectQuestions';
 import { useQuizStore } from '@/store/quiz/quizStore';
-import { Play } from 'lucide-react-native';
+import { Play, Zap } from 'lucide-react-native';
 import Typography from '@/theme/typography';
 import Spacing from '@/theme/spacing';
 
@@ -69,7 +69,7 @@ export default function HomeScreen() {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Loading...</Text>
-        <Text style={styles.loadingSubtext}>Preparing your dashboard</Text>
+        <Text style={styles.loadingSubtext}>Preparing your dashboard ✨</Text>
       </View>
     );
   }
@@ -78,7 +78,7 @@ export default function HomeScreen() {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Redirecting...</Text>
-        <Text style={styles.loadingSubtext}>Taking you to login</Text>
+        <Text style={styles.loadingSubtext}>Taking you to login 🚀</Text>
       </View>
     );
   }
@@ -99,8 +99,8 @@ export default function HomeScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <View style={styles.welcomeSection}>
         <Text style={styles.greeting}>Welcome back,</Text>
-        <Text style={styles.username}>{getDisplayName()}</Text>
-        <Text style={styles.subtitle}>Ready to challenge yourself today?</Text>
+        <Text style={styles.username}>{getDisplayName()} 👋</Text>
+        <Text style={styles.subtitle}>Ready to challenge yourself today? 🎯</Text>
       </View>
 
       <LevelProgress 
@@ -122,9 +122,9 @@ export default function HomeScreen() {
         >
           <View style={styles.startQuizContent}>
             <View style={styles.startQuizIcon}>
-              <Play size={22} color={Colors.dark.background} fill={Colors.dark.background} />
+              <Zap size={24} color={Colors.dark.background} fill={Colors.dark.background} />
             </View>
-            <Text style={styles.startQuizText}>Start New Test</Text>
+            <Text style={styles.startQuizText}>Start New Test 🚀</Text>
           </View>
         </LinearGradient>
       </TouchableOpacity>
@@ -180,11 +180,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     marginBottom: Spacing['2xl'],
-    elevation: 4,
+    elevation: 8,
     shadowColor: Colors.dark.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
   },
   startQuizButton: {
     borderRadius: 16,
