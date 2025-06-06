@@ -5,6 +5,8 @@ import Colors from '@/theme/colors';
 import ProgressBar from '@/components/ProgressBar';
 import QuizTimer from './QuizTimer';
 import { X } from 'lucide-react-native';
+import Typography from '@/theme/typography';
+import Spacing from '@/theme/spacing';
 
 interface QuizSessionHeaderProps {
   currentQuestion: number;
@@ -73,7 +75,7 @@ export default function QuizSessionHeader({
         )}
       </View>
       
-      {/* Progress Bar - Wrapped in View for styling */}
+      {/* Progress Bar */}
       <View style={styles.progressContainer}>
         <ProgressBar 
           progress={progress} 
@@ -89,9 +91,9 @@ export default function QuizSessionHeader({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.dark.background,
-    paddingTop: 8,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingTop: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.lg,
     borderBottomWidth: 1,
     borderBottomColor: Colors.dark.border,
   },
@@ -99,27 +101,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   titleSection: {
     flex: 1,
-    marginRight: 12,
+    marginRight: Spacing.md,
   },
   categoryText: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
     color: Colors.dark.text,
     marginBottom: 2,
   },
   modeText: {
-    fontSize: 14,
+    fontSize: Typography.fontSize.base,
     color: Colors.dark.textSecondary,
-    fontWeight: '500',
+    fontWeight: Typography.fontWeight.medium,
   },
   closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: Colors.dark.card,
     alignItems: 'center',
     justifyContent: 'center',
@@ -136,23 +138,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   questionInfo: {
     flex: 1,
   },
   questionCounter: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
     color: Colors.dark.text,
     marginBottom: 2,
   },
   progressText: {
-    fontSize: 12,
+    fontSize: Typography.fontSize.sm,
     color: Colors.dark.textSecondary,
-    fontWeight: '500',
+    fontWeight: Typography.fontWeight.medium,
   },
   progressContainer: {
-    marginTop: 4,
+    marginTop: Spacing.xs,
   },
 });

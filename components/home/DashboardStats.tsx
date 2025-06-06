@@ -35,28 +35,28 @@ export default function DashboardStats({
       label: 'Quizzes',
       value: totalQuizzes.toString(),
       color: Colors.dark.primary,
-      backgroundColor: 'rgba(99, 102, 241, 0.2)',
+      backgroundColor: 'rgba(96, 165, 250, 0.15)',
     },
     {
       icon: Target,
       label: 'Avg Score',
       value: `${averageScore}%`,
       color: Colors.dark.success,
-      backgroundColor: 'rgba(34, 197, 94, 0.2)',
+      backgroundColor: 'rgba(16, 185, 129, 0.15)',
     },
     {
       icon: Zap,
       label: 'Streak',
       value: `${currentStreak} ${getStreakEmoji()}`,
       color: Colors.dark.warning,
-      backgroundColor: 'rgba(255, 215, 0, 0.2)',
+      backgroundColor: 'rgba(251, 191, 36, 0.15)',
     },
     {
       icon: Clock,
       label: 'Time',
       value: formatTime(totalTimeSpent),
       color: Colors.dark.secondary,
-      backgroundColor: 'rgba(168, 85, 247, 0.2)',
+      backgroundColor: 'rgba(147, 197, 253, 0.15)',
     },
   ];
 
@@ -67,7 +67,7 @@ export default function DashboardStats({
         {stats.map((stat, index) => (
           <View key={index} style={styles.statCard}>
             <View style={[styles.iconContainer, { backgroundColor: stat.backgroundColor }]}>
-              <stat.icon size={14} color={Colors.dark.text} />
+              <stat.icon size={16} color={Colors.dark.text} />
             </View>
             <Text style={styles.statValue}>{stat.value}</Text>
             <Text style={styles.statLabel}>{stat.label}</Text>
@@ -101,12 +101,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.dark.border,
-    minHeight: 70,
+    minHeight: 80,
   },
   iconContainer: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.xs,

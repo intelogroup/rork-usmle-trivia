@@ -3,6 +3,8 @@ import { View, Text, StyleSheet } from 'react-native';
 import Colors from '@/theme/colors';
 import ProgressBar from '@/components/ProgressBar';
 import { TrendingUp } from 'lucide-react-native';
+import Typography from '@/theme/typography';
+import Spacing from '@/theme/spacing';
 
 interface WeeklyProgressProps {
   weeklyProgress: number;
@@ -39,43 +41,43 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.dark.card,
     borderRadius: 16,
-    padding: 16,
+    padding: Spacing.lg,
     borderWidth: 1,
     borderColor: Colors.dark.border,
-    marginBottom: 16,
+    marginBottom: Spacing.xl,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   info: {
     flex: 1,
   },
   title: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
     color: Colors.dark.text,
-    marginBottom: 4,
+    marginBottom: Spacing.xs,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: Typography.fontSize.base,
     color: Colors.dark.textSecondary,
-    fontWeight: '500',
+    fontWeight: Typography.fontWeight.medium,
   },
   icon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(96, 165, 250, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   description: {
-    fontSize: 14,
+    fontSize: Typography.fontSize.sm,
     color: Colors.dark.textSecondary,
-    marginTop: 10,
-    fontWeight: '500',
+    marginTop: Spacing.sm,
+    fontWeight: Typography.fontWeight.medium,
   },
 });

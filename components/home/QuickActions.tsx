@@ -17,28 +17,28 @@ export default function QuickActions({ onQuickQuiz }: QuickActionsProps) {
       label: 'Timed Challenge',
       onPress: onQuickQuiz,
       color: Colors.dark.primary,
-      backgroundColor: 'rgba(30, 58, 138, 0.2)',
+      backgroundColor: 'rgba(96, 165, 250, 0.15)',
     },
     {
       icon: BookOpen,
       label: 'Browse Categories',
       onPress: () => router.push('/(tabs)/quiz'),
       color: Colors.dark.success,
-      backgroundColor: 'rgba(34, 197, 94, 0.2)',
+      backgroundColor: 'rgba(16, 185, 129, 0.15)',
     },
     {
       icon: Trophy,
       label: 'Leaderboard',
       onPress: () => router.push('/(tabs)/leaderboard'),
       color: Colors.dark.warning,
-      backgroundColor: 'rgba(255, 215, 0, 0.2)',
+      backgroundColor: 'rgba(251, 191, 36, 0.15)',
     },
     {
       icon: Target,
       label: 'Analytics',
       onPress: () => router.push('/(tabs)/analytics'),
       color: Colors.dark.secondary,
-      backgroundColor: 'rgba(6, 182, 212, 0.2)',
+      backgroundColor: 'rgba(147, 197, 253, 0.15)',
     },
   ];
 
@@ -53,7 +53,7 @@ export default function QuickActions({ onQuickQuiz }: QuickActionsProps) {
             onPress={action.onPress}
             activeOpacity={0.7}
           >
-            <action.icon size={18} color={Colors.dark.text} />
+            <action.icon size={20} color={Colors.dark.text} />
             <Text style={styles.actionLabel}>{action.label}</Text>
           </TouchableOpacity>
         ))}
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: Colors.dark.border,
-    minHeight: 60,
+    minHeight: 70,
   },
   actionLabel: {
     fontSize: Typography.fontSize.sm,

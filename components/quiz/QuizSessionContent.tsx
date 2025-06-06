@@ -4,6 +4,8 @@ import Colors from '@/theme/colors';
 import OptionButton from '@/components/OptionButton';
 import type { Question } from '@/lib/types/quiz';
 import { LinearGradient } from 'expo-linear-gradient';
+import Typography from '@/theme/typography';
+import Spacing from '@/theme/spacing';
 
 interface QuizSessionContentProps {
   question: Question;
@@ -146,12 +148,12 @@ export default function QuizSessionContent({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: Spacing.xl,
   },
   questionContainer: {
     borderRadius: 16,
-    padding: 24,
-    marginBottom: 24,
+    padding: Spacing.xl,
+    marginBottom: Spacing.xl,
     elevation: 2,
     shadowColor: Colors.dark.shadow,
     shadowOffset: {
@@ -162,15 +164,15 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   questionText: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
     color: Colors.dark.text,
-    lineHeight: 26,
+    lineHeight: 28,
     textAlign: 'center',
   },
   optionsContainer: {
     flex: 1,
-    gap: 12,
+    gap: Spacing.md,
   },
   feedbackContainer: {
     position: 'absolute',
@@ -179,7 +181,7 @@ const styles = StyleSheet.create({
     transform: [{ translateX: -75 }, { translateY: -50 }],
     backgroundColor: Colors.dark.card,
     borderRadius: 20,
-    padding: 20,
+    padding: Spacing.xl,
     alignItems: 'center',
     borderWidth: 2,
     borderColor: Colors.dark.primary,
@@ -192,31 +194,31 @@ const styles = StyleSheet.create({
   },
   feedbackEmoji: {
     fontSize: 32,
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   feedbackText: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
     color: Colors.dark.text,
     textAlign: 'center',
   },
   explanationContainer: {
     backgroundColor: Colors.dark.card,
     borderRadius: 12,
-    padding: 16,
-    marginTop: 16,
+    padding: Spacing.lg,
+    marginTop: Spacing.lg,
     borderWidth: 1,
     borderColor: Colors.dark.border,
   },
   explanationTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
     color: Colors.dark.text,
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   explanationText: {
-    fontSize: 14,
+    fontSize: Typography.fontSize.base,
     color: Colors.dark.textSecondary,
-    lineHeight: 20,
+    lineHeight: 24,
   },
 });

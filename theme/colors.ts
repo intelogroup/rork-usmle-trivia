@@ -33,19 +33,19 @@ const Colors = {
     card: '#1F2937',
     cardHighlight: '#374151',
     border: '#374151',
-    primary: '#3B82F6', // Changed to a brighter blue for better contrast
-    secondary: '#60A5FA',
-    accent: '#10B981',
-    success: '#059669',
-    warning: '#F59E0B',
-    error: '#DC2626',
+    primary: '#60A5FA', // Brighter blue for better contrast
+    secondary: '#93C5FD',
+    accent: '#34D399',
+    success: '#10B981',
+    warning: '#FBBF24',
+    error: '#F87171',
     shadow: '#000000',
     // New analytics-specific colors
     chart: {
-      primary: '#3B82F6',
-      secondary: '#60A5FA',
-      tertiary: '#93C5FD',
-      quaternary: '#BFDBFE',
+      primary: '#60A5FA',
+      secondary: '#93C5FD',
+      tertiary: '#BFDBFE',
+      quaternary: '#DBEAFE',
       success: '#34D399',
       warning: '#FBBF24',
       error: '#F87171',
@@ -54,3 +54,5 @@ const Colors = {
     },
   },
 };
+
+export default Colors;
