@@ -1,0 +1,135 @@
+import Colors from '@/theme/colors';
+
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  questionCount: number;
+  icon?: string;
+  color: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export const categories: Category[] = [
+  {
+    id: 'cardiology',
+    name: 'Cardiology',
+    description: 'Heart and cardiovascular system',
+    questionCount: 8,
+    icon: 'Heart',
+    color: '#e74c3c',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'pharmacology',
+    name: 'Pharmacology',
+    description: 'Drug mechanisms and interactions',
+    questionCount: 6,
+    icon: 'Pill',
+    color: '#3498db',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'pathology',
+    name: 'Pathology',
+    description: 'Disease processes and diagnosis',
+    questionCount: 6,
+    icon: 'Microscope',
+    color: '#9b59b6',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'biochemistry',
+    name: 'Biochemistry',
+    description: 'Molecular processes and metabolism',
+    questionCount: 6,
+    icon: 'Atom',
+    color: '#f39c12',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'microbiology',
+    name: 'Microbiology',
+    description: 'Bacteria, viruses, and infections',
+    questionCount: 6,
+    icon: 'Bug',
+    color: '#27ae60',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'anatomy',
+    name: 'Anatomy',
+    description: 'Body structure and systems',
+    questionCount: 6,
+    icon: 'User',
+    color: '#e67e22',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'physiology',
+    name: 'Physiology',
+    description: 'Body functions and processes',
+    questionCount: 6,
+    icon: 'Activity',
+    color: '#1abc9c',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'immunology',
+    name: 'Immunology',
+    description: 'Immune system and responses',
+    questionCount: 6,
+    icon: 'Shield',
+    color: '#34495e',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'neurology',
+    name: 'Neurology',
+    description: 'Nervous system and brain',
+    questionCount: 6,
+    icon: 'Brain',
+    color: '#8e44ad',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'endocrinology',
+    name: 'Endocrinology',
+    description: 'Hormones and glands',
+    questionCount: 6,
+    icon: 'Zap',
+    color: '#f1c40f',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'gastroenterology',
+    name: 'Gastroenterology',
+    description: 'Digestive system',
+    questionCount: 6,
+    icon: 'Circle',
+    color: '#95a5a6',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'nephrology',
+    name: 'Nephrology',
+    description: 'Kidney and urinary system',
+    questionCount: 6,
+    icon: 'Droplets',
+    color: '#2980b9',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+];

@@ -1,0 +1,199 @@
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
+import Colors from '@/theme/colors';
+import OptionButton from '@/components/OptionButton';
+import type { Question } from '@/lib/types/quiz';
+
+interface QuizSessionContentProps {
+  question: Question;
+  selectedAnswer: number | null;
+  isAnswerSubmitted: boolean;
+  onOptionPress: (index: number) => void;
+}
+
+const FEEDBACK_EMOJIS = {
+  correct: ['✅', '🎉', '👍', '🌟', '💯'],
+  incorrect: ['❌', '🤔', '💭', '🔄', '📚'],
+};
+
+export default function QuizSessionContent({
+  question,
+  selectedAnswer,
+  isAnswerSubmitted,
+  onOptionPress,
+}: QuizSessionContentProps) {
+  const feedbackOpacity = useRef(new Animated.Value(0)).current;
+  const feedbackScale = useRef(new Animated.Value(0.5)).current;
+
+  useEffect(() => {
+    if (isAnswerSubmitted && selectedAnswer !== null) {
+      // Show feedback animation
+      Animated.parallel([
+        Animated.timing(feedbackOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(feedbackScale, {
+          toValue: 1,
+          tension: 100,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      // Hide feedback after 2 seconds
+      setTimeout(() => {
+        Animated.parallel([
+          Animated.timing(feedbackOpacity, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+          Animated.timing(feedbackScale, {
+            toValue: 0.5,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }, 2000);
+    } else {
+      // Reset animation values
+      feedbackOpacity.setValue(0);
+      feedbackScale.setValue(0.5);
+    }
+  }, [isAnswerSubmitted, selectedAnswer]);
+
+  const getFeedbackEmoji = () => {
+    if (selectedAnswer === null) return '';
+    const correctAnswer = question.correct_answer !== undefined ? question.correct_answer : question.correct;
+    const isCorrect = selectedAnswer === correctAnswer;
+    const emojis = isCorrect ? FEEDBACK_EMOJIS.correct : FEEDBACK_EMOJIS.incorrect;
+    return emojis[Math.floor(Math.random() * emojis.length)];
+  };
+
+  const questionText = question.question_text || question.question;
+  const correctAnswer = question.correct_answer !== undefined ? question.correct_answer : question.correct;
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.questionContainer}>
+        <Text style={styles.questionText}>{questionText}</Text>
+      </View>
+      
+      <View style={styles.optionsContainer}>
+        {question.options.map((option, index) => (
+          <OptionButton
+            key={index}
+            label={option}
+            index={index}
+            selected={selectedAnswer === index}
+            onPress={() => onOptionPress(index)}
+            disabled={isAnswerSubmitted}
+            isCorrect={isAnswerSubmitted ? index === correctAnswer : null}
+            showResult={isAnswerSubmitted}
+          />
+        ))}
+      </View>
+
+      {/* Feedback Animation */}
+      {isAnswerSubmitted && selectedAnswer !== null && (
+        <Animated.View
+          style={[
+            styles.feedbackContainer,
+            {
+              opacity: feedbackOpacity,
+              transform: [{ scale: feedbackScale }],
+            },
+          ]}
+        >
+          <Text style={styles.feedbackEmoji}>{getFeedbackEmoji()}</Text>
+          <Text style={styles.feedbackText}>
+            {selectedAnswer === correctAnswer ? 'Correct!' : 'Try again!'}
+          </Text>
+        </Animated.View>
+      )}
+
+      {/* Show explanation after answer is submitted */}
+      {isAnswerSubmitted && question.explanation && (
+        <View style={styles.explanationContainer}>
+          <Text style={styles.explanationTitle}>Explanation:</Text>
+          <Text style={styles.explanationText}>{question.explanation}</Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  questionContainer: {
+    backgroundColor: Colors.dark.card,
+    borderRadius: 16,
+    padding: 24,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
+  },
+  questionText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.dark.text,
+    lineHeight: 26,
+    textAlign: 'center',
+  },
+  optionsContainer: {
+    flex: 1,
+    gap: 12,
+  },
+  feedbackContainer: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -75 }, { translateY: -50 }],
+    backgroundColor: Colors.dark.card,
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.dark.primary,
+    shadowColor: Colors.dark.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+    width: 150,
+  },
+  feedbackEmoji: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  feedbackText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.dark.text,
+    textAlign: 'center',
+  },
+  explanationContainer: {
+    backgroundColor: Colors.dark.card,
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
+  },
+  explanationTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.dark.text,
+    marginBottom: 8,
+  },
+  explanationText: {
+    fontSize: 14,
+    color: Colors.dark.textSecondary,
+    lineHeight: 20,
+  },
+});
