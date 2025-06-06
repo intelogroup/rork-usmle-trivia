@@ -1,16 +1,13 @@
 export interface Question {
   id: string;
-  category: string;
-  category_id?: string;
-  question: string;
-  question_text?: string;
+  question_text: string;
   options: string[];
-  correct: number;
-  correct_answer?: number;
+  correct_answer: number;
+  explanation: string;
+  category_id: string;
   difficulty: 'easy' | 'medium' | 'hard';
-  explanation?: string;
-  created_at?: string;
-  updated_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export type QuizMode = 'standard' | 'timed' | 'practice';
@@ -20,7 +17,7 @@ export interface QuizSession {
   user_id: string;
   category_id: string;
   questions: Question[];
-  answers: number[]; // Array of selected answer indices
+  answers: number[];
   currentQuestionIndex: number;
   score: number;
   total_questions: number;
@@ -51,7 +48,7 @@ export interface Category {
   description?: string;
   icon?: string;
   color: string;
-  questionCount: number;
+  question_count: number;
   created_at: string;
   updated_at: string;
 }

@@ -67,7 +67,7 @@ export default function DashboardStats({
         {stats.map((stat, index) => (
           <View key={index} style={styles.statCard}>
             <View style={[styles.iconContainer, { backgroundColor: stat.backgroundColor }]}>
-              <stat.icon size={16} color={Colors.dark.text} />
+              <stat.icon size={20} color={stat.color} />
             </View>
             <Text style={styles.statValue}>{stat.value}</Text>
             <Text style={styles.statLabel}>{stat.label}</Text>
@@ -104,15 +104,15 @@ const styles = StyleSheet.create({
     minHeight: 80,
   },
   iconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.xs,
   },
   statValue: {
-    fontSize: Typography.fontSize.base,
+    fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.bold,
     color: Colors.dark.text,
     marginBottom: 2,

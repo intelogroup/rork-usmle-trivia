@@ -4,17 +4,38 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/lib/supabase';
 import { categories } from '@/mocks/categories';
 import { questions } from '@/mocks/questions';
-import type { Question, QuizSession, QuizMode } from '@/lib/types/quiz';
+import type { Question } from '@/mocks/questions';
+import type { QuizMode } from '@/lib/types/quiz';
 
 interface Category {
   id: string;
   name: string;
   description?: string;
-  questionCount: number;
+  question_count: number;
   icon?: string;
   color: string;
   created_at: string;
   updated_at: string;
+}
+
+interface QuizSession {
+  id: string;
+  user_id: string;
+  category_id: string;
+  questions: Question[];
+  answers: number[];
+  currentQuestionIndex: number;
+  score: number;
+  total_questions: number;
+  correct_answers: number;
+  time_taken: number;
+  mode: QuizMode;
+  difficulty: string;
+  isCompleted: boolean;
+  isAnswerSubmitted: boolean;
+  selectedAnswer?: number;
+  started_at: string;
+  completed_at: string | null;
 }
 
 interface QuizState {
@@ -92,7 +113,7 @@ export const useQuizStore = create<QuizState>()(
               id: cat.id,
               name: cat.name,
               description: cat.description,
-              questionCount: cat.question_count || 0,
+              question_count: cat.question_count || 0,
               icon: cat.icon,
               color: cat.color,
               created_at: cat.created_at,
@@ -131,7 +152,7 @@ export const useQuizStore = create<QuizState>()(
 
           // Filter questions by categories and difficulty
           let filteredQuestions = validQuestions.filter(q => 
-            validCategoryIds.includes(q.category)
+            validCategoryIds.includes(q.category_id)
           );
 
           // Fix the difficulty filtering logic - check if difficulty is 'all' OR matches question difficulty
@@ -197,7 +218,7 @@ export const useQuizStore = create<QuizState>()(
 
           // Filter questions by categories and difficulty
           let filteredQuestions = validQuestions.filter(q => 
-            validCategoryIds.includes(q.category)
+            validCategoryIds.includes(q.category_id)
           );
 
           // Fix the difficulty filtering logic - check if difficulty is 'all' OR matches question difficulty
@@ -367,7 +388,7 @@ export const useQuizStore = create<QuizState>()(
         
         if (!currentQuestion) return;
         
-        const isCorrect = selectedAnswer === currentQuestion.correct;
+        const isCorrect = selectedAnswer === currentQuestion.correct_answer;
 
         // Update answers array
         const newAnswers = [...(Array.isArray(currentSession.answers) ? currentSession.answers : [])];
