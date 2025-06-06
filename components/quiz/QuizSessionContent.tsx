@@ -2,13 +2,13 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import Colors from '@/theme/colors';
 import OptionButton from '@/components/OptionButton';
-import type { Question } from '@/lib/types/quiz';
+import type { UsmleQuestion } from '@/lib/types/usmle';
 import { LinearGradient } from 'expo-linear-gradient';
 import Typography from '@/theme/typography';
 import Spacing from '@/theme/spacing';
 
 interface QuizSessionContentProps {
-  question: Question;
+  question: UsmleQuestion;
   selectedAnswer: number | null;
   isAnswerSubmitted: boolean;
   onOptionPress: (index: number) => void;
@@ -78,14 +78,13 @@ export default function QuizSessionContent({
 
   const getFeedbackEmoji = () => {
     if (selectedAnswer === null) return '';
-    const correctAnswer = question.correct_answer !== undefined ? question.correct_answer : question.correct;
-    const isCorrect = selectedAnswer === correctAnswer;
+    const correctAnswerIndex = question.options.findIndex(opt => opt.id === question.correct_option_id);
+    const isCorrect = selectedAnswer === correctAnswerIndex;
     const emojis = isCorrect ? FEEDBACK_EMOJIS.correct : FEEDBACK_EMOJIS.incorrect;
     return emojis[Math.floor(Math.random() * emojis.length)];
   };
 
-  const questionText = question.question_text || question.question;
-  const correctAnswer = question.correct_answer !== undefined ? question.correct_answer : question.correct;
+  const correctAnswerIndex = question.options.findIndex(opt => opt.id === question.correct_option_id);
 
   return (
     <View style={styles.container}>
@@ -93,7 +92,7 @@ export default function QuizSessionContent({
         colors={[Colors.dark.card, Colors.dark.background]}
         style={styles.questionContainer}
       >
-        <Text style={styles.questionText}>{questionText}</Text>
+        <Text style={styles.questionText}>{question.question_text}</Text>
       </LinearGradient>
       
       <Animated.View 
@@ -105,12 +104,12 @@ export default function QuizSessionContent({
         {question.options.map((option, index) => (
           <OptionButton
             key={index}
-            label={option}
+            label={option.text}
             index={index}
             selected={selectedAnswer === index}
             onPress={() => onOptionPress(index)}
             disabled={isAnswerSubmitted}
-            isCorrect={isAnswerSubmitted ? index === correctAnswer : null}
+            isCorrect={isAnswerSubmitted ? index === correctAnswerIndex : null}
             showResult={isAnswerSubmitted}
           />
         ))}
@@ -129,7 +128,7 @@ export default function QuizSessionContent({
         >
           <Text style={styles.feedbackEmoji}>{getFeedbackEmoji()}</Text>
           <Text style={styles.feedbackText}>
-            {selectedAnswer === correctAnswer ? 'Correct!' : 'Try again!'}
+            {selectedAnswer === correctAnswerIndex ? 'Correct!' : 'Try again!'}
           </Text>
         </Animated.View>
       )}

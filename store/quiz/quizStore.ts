@@ -397,7 +397,7 @@ export const useQuizStore = create<QuizState>()(
 
         // Update answers array
         const newAnswers = [...(Array.isArray(currentSession.answers) ? currentSession.answers : [])];
-        newAnswers[currentSession.currentQuestionIndex] = selectedAnswer || -1;
+        newAnswers[currentSession.currentQuestionIndex] = selectedAnswer !== undefined ? selectedAnswer : -1;
 
         set({
           isTimerActive: false,
