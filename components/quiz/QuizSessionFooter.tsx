@@ -2,8 +2,9 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Colors from '@/theme/colors';
 import Button from '@/components/Button';
-import { ArrowRight, ArrowLeft, Check, Zap, Trophy } from 'lucide-react-native';
+import { ArrowRight, Check, Zap, Trophy } from 'lucide-react-native';
 import Spacing from '@/theme/spacing';
+import { Dimensions } from '@/theme/spacing';
 
 interface QuizSessionFooterProps {
   selectedAnswer: number | null;
@@ -28,19 +29,24 @@ export default function QuizSessionFooter({
     if (!isAnswerSubmitted) {
       return (
         <Button
-          title="Submit Answer ⚡"
+          title="Submit Answer"
           onPress={onSubmit}
           disabled={selectedAnswer === null}
           style={[styles.button, styles.primaryButton]}
+          icon={<Check size={Dimensions.icon.sm} color={Colors.dark.background} />}
         />
       );
     }
 
     return (
       <Button
-        title={canGoNext ? "Next Question 🚀" : "See Results 🎉"}
+        title={canGoNext ? "Next Question" : "See Results"}
         onPress={onNext}
         style={[styles.button, styles.primaryButton]}
+        icon={canGoNext ? 
+          <ArrowRight size={Dimensions.icon.sm} color={Colors.dark.background} /> :
+          <Trophy size={Dimensions.icon.sm} color={Colors.dark.background} />
+        }
       />
     );
   };
@@ -57,8 +63,8 @@ export default function QuizSessionFooter({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.dark.background,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.lg,
     borderTopWidth: 1,
     borderTopColor: Colors.dark.border,
     elevation: 8,
@@ -73,8 +79,8 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    paddingVertical: 16,
-    borderRadius: 16,
+    paddingVertical: Spacing.lg,
+    borderRadius: Dimensions.borderRadius.lg,
   },
   primaryButton: {
     backgroundColor: Colors.dark.primary,

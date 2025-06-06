@@ -33,10 +33,15 @@ export default function QuizSessionContent({
   const celebrationOpacity = useRef(new Animated.Value(0)).current;
   const celebrationScale = useRef(new Animated.Value(0.5)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
+  const explanationOpacity = useRef(new Animated.Value(0)).current;
+  const explanationTranslateY = useRef(new Animated.Value(30)).current;
 
   useEffect(() => {
     // Reset slide animation for new question
     slideAnim.setValue(Platform.OS !== 'web' ? 100 : 0);
+    explanationOpacity.setValue(0);
+    explanationTranslateY.setValue(30);
+    
     if (Platform.OS !== 'web') {
       Animated.spring(slideAnim, {
         toValue: 0,
@@ -116,6 +121,23 @@ export default function QuizSessionContent({
           }, 500);
         }
 
+        // Show explanation after feedback
+        setTimeout(() => {
+          Animated.parallel([
+            Animated.timing(explanationOpacity, {
+              toValue: 1,
+              duration: 500,
+              useNativeDriver: true,
+            }),
+            Animated.spring(explanationTranslateY, {
+              toValue: 0,
+              tension: 80,
+              friction: 8,
+              useNativeDriver: true,
+            }),
+          ]).start();
+        }, 1000);
+
         // Hide main feedback after 3 seconds
         setTimeout(() => {
           Animated.parallel([
@@ -140,6 +162,8 @@ export default function QuizSessionContent({
         feedbackOpacity.setValue(1);
         feedbackScale.setValue(1);
         feedbackTranslateY.setValue(0);
+        explanationOpacity.setValue(1);
+        explanationTranslateY.setValue(0);
         if (isCorrect) {
           celebrationOpacity.setValue(1);
           celebrationScale.setValue(1);
@@ -162,6 +186,8 @@ export default function QuizSessionContent({
       optionsOpacity.setValue(1);
       celebrationOpacity.setValue(0);
       celebrationScale.setValue(0.5);
+      explanationOpacity.setValue(0);
+      explanationTranslateY.setValue(30);
     }
   }, [isAnswerSubmitted, selectedAnswer]);
 
@@ -261,9 +287,17 @@ export default function QuizSessionContent({
           </Animated.View>
         )}
 
-        {/* Explanation Section - Fixed positioning at bottom */}
+        {/* Explanation Section - Now properly positioned at bottom */}
         {isAnswerSubmitted && question.explanation && (
-          <View style={styles.explanationSection}>
+          <Animated.View 
+            style={[
+              styles.explanationSection,
+              {
+                opacity: explanationOpacity,
+                transform: [{ translateY: explanationTranslateY }],
+              },
+            ]}
+          >
             <View style={styles.explanationHeader}>
               <Lightbulb size={Dimensions.icon.sm} color={Colors.dark.primary} />
               <Text style={styles.explanationTitle}>Explanation</Text>
@@ -278,7 +312,7 @@ export default function QuizSessionContent({
                 Remember this concept for future questions!
               </Text>
             </View>
-          </View>
+          </Animated.View>
         )}
       </Animated.View>
     </ScrollView>
@@ -376,7 +410,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   explanationSection: {
-    marginTop: Spacing.xl,
+    marginTop: Spacing['2xl'],
     paddingTop: Spacing.xl,
     borderTopWidth: 1,
     borderTopColor: Colors.dark.border,

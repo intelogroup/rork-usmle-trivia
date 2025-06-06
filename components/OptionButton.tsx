@@ -27,6 +27,7 @@ export default function OptionButton({
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
   const shakeAnim = useRef(new Animated.Value(0)).current;
+  const borderGlowAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (showResult && Platform.OS !== 'web') {
@@ -46,6 +47,13 @@ export default function OptionButton({
             }),
           ])
         ).start();
+
+        // Border glow for correct answer
+        Animated.timing(borderGlowAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: false,
+        }).start();
       } else if (isCorrect === false && selected) {
         // Incorrect answer shake animation
         Animated.sequence([
@@ -74,6 +82,7 @@ export default function OptionButton({
     } else {
       glowAnim.setValue(0);
       shakeAnim.setValue(0);
+      borderGlowAnim.setValue(0);
     }
   }, [showResult, isCorrect, selected]);
 
@@ -135,6 +144,18 @@ export default function OptionButton({
     return {};
   };
 
+  const getAnimatedBorderStyle = () => {
+    if (showResult && isCorrect === true && Platform.OS !== 'web') {
+      return {
+        borderColor: borderGlowAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [Colors.dark.success, '#00FF88'],
+        }),
+      };
+    }
+    return { borderColor: getBorderColor() };
+  };
+
   return (
     <Animated.View
       style={[
@@ -147,76 +168,83 @@ export default function OptionButton({
         getGlowStyle(),
       ]}
     >
-      <TouchableOpacity
+      <Animated.View
         style={[
           styles.container,
           { 
-            backgroundColor: getBackgroundColor(), 
-            borderColor: getBorderColor(),
+            backgroundColor: getBackgroundColor(),
             borderWidth: getBorderWidth(),
-          }
+          },
+          getAnimatedBorderStyle(),
         ]}
-        onPress={handlePress}
-        disabled={disabled}
-        activeOpacity={0.8}
       >
-        <View style={styles.labelContainer}>
-          <View style={[
-            styles.indexBadge,
-            selected && !showResult ? styles.selectedIndexBadge : null,
-            isCorrect === true ? styles.correctIndexBadge : null,
-            isCorrect === false && selected ? styles.incorrectIndexBadge : null,
-          ]}>
-            <Text style={[
-              styles.indexText,
-              selected && !showResult ? styles.selectedIndexText : null,
-              isCorrect !== null ? styles.resultIndexText : null,
+        <TouchableOpacity
+          style={styles.touchable}
+          onPress={handlePress}
+          disabled={disabled}
+          activeOpacity={0.8}
+        >
+          <View style={styles.labelContainer}>
+            <View style={[
+              styles.indexBadge,
+              selected && !showResult ? styles.selectedIndexBadge : null,
+              isCorrect === true ? styles.correctIndexBadge : null,
+              isCorrect === false && selected ? styles.incorrectIndexBadge : null,
             ]}>
-              {getOptionLabel()}
+              <Text style={[
+                styles.indexText,
+                selected && !showResult ? styles.selectedIndexText : null,
+                isCorrect !== null ? styles.resultIndexText : null,
+              ]}>
+                {getOptionLabel()}
+              </Text>
+            </View>
+            <Text style={[
+              styles.labelText,
+              selected && !showResult ? styles.selectedLabelText : null,
+              isCorrect !== null ? styles.resultLabelText : null,
+            ]}>
+              {label}
             </Text>
           </View>
-          <Text style={[
-            styles.labelText,
-            selected && !showResult ? styles.selectedLabelText : null,
-            isCorrect !== null ? styles.resultLabelText : null,
-          ]}>
-            {label}
-          </Text>
-        </View>
-        
-        {showResult && isCorrect !== null && (
-          <View style={styles.resultIcon}>
-            {isCorrect ? (
-              <View style={styles.correctIcon}>
-                <Check size={Dimensions.icon.sm} color={Colors.dark.background} />
-              </View>
-            ) : selected ? (
-              <View style={styles.incorrectIcon}>
-                <X size={Dimensions.icon.sm} color={Colors.dark.background} />
-              </View>
-            ) : null}
-          </View>
-        )}
+          
+          {showResult && isCorrect !== null && (
+            <View style={styles.resultIcon}>
+              {isCorrect ? (
+                <View style={styles.correctIcon}>
+                  <Check size={Dimensions.icon.sm} color={Colors.dark.background} />
+                </View>
+              ) : selected ? (
+                <View style={styles.incorrectIcon}>
+                  <X size={Dimensions.icon.sm} color={Colors.dark.background} />
+                </View>
+              ) : null}
+            </View>
+          )}
 
-        {selected && !showResult && (
-          <View style={styles.selectedIndicator}>
-            <Zap size={Dimensions.icon.xs} color={Colors.dark.background} fill={Colors.dark.background} />
-          </View>
-        )}
-      </TouchableOpacity>
+          {selected && !showResult && (
+            <View style={styles.selectedIndicator}>
+              <Zap size={Dimensions.icon.xs} color={Colors.dark.background} fill={Colors.dark.background} />
+            </View>
+          )}
+        </TouchableOpacity>
+      </Animated.View>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    borderRadius: Dimensions.borderRadius.lg,
+    marginBottom: Spacing.md,
+    overflow: 'hidden',
+  },
+  touchable: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: Spacing.lg,
-    borderRadius: Dimensions.borderRadius.lg,
-    marginBottom: Spacing.md,
-    minHeight: Dimensions.touchTarget.large, // 56px touch target for accessibility
+    minHeight: Dimensions.touchTarget.large,
   },
   labelContainer: {
     flexDirection: 'row',

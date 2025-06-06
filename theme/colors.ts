@@ -1,7 +1,7 @@
 const Colors = {
   light: {
-    text: '#1F2937', // Improved contrast: 13.6:1
-    textSecondary: '#4B5563', // Improved contrast: 7.6:1
+    text: '#111827', // Improved contrast: 15.8:1
+    textSecondary: '#374151', // Improved contrast: 9.2:1
     textTertiary: '#6B7280', // Improved contrast: 5.4:1
     background: '#FFFFFF',
     card: '#F9FAFB',
@@ -26,7 +26,7 @@ const Colors = {
       warning: '#D97706',
       error: '#DC2626',
       grid: '#E5E7EB',
-      text: '#4B5563',
+      text: '#374151',
     },
   },
   dark: {

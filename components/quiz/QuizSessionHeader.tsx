@@ -4,9 +4,10 @@ import { router } from 'expo-router';
 import Colors from '@/theme/colors';
 import ProgressBar from '@/components/ProgressBar';
 import QuizTimer from './QuizTimer';
-import { X, BookOpenCheck, Target, Zap } from 'lucide-react-native';
+import { X, Target, Zap } from 'lucide-react-native';
 import Typography from '@/theme/typography';
 import Spacing from '@/theme/spacing';
+import { Dimensions } from '@/theme/spacing';
 
 interface QuizSessionHeaderProps {
   currentQuestion: number;
@@ -31,20 +32,18 @@ export default function QuizSessionHeader({
 
   const isTimedMode = mode === 'timed';
 
-  const getModeEmoji = () => {
-    switch (mode) {
-      case 'timed': return '⏱️';
-      case 'practice': return '✍️';
-      default: return '📝';
-    }
-  };
-
   const getModeText = () => {
     switch (mode) {
       case 'timed': return 'Timed Challenge';
       case 'practice': return 'Practice Mode';
       default: return 'Standard Quiz';
     }
+  };
+
+  const getMotivationText = () => {
+    if (progress < 0.3) return "You've got this!";
+    if (progress < 0.7) return "Great progress!";
+    return "Almost there!";
   };
 
   return (
@@ -54,11 +53,11 @@ export default function QuizSessionHeader({
         <View style={styles.titleSection}>
           {categoryName && (
             <Text style={styles.categoryText} numberOfLines={1}>
-              🎯 {categoryName}
+              {categoryName}
             </Text>
           )}
           <Text style={styles.modeText}>
-            {getModeText()} {getModeEmoji()}
+            {getModeText()}
           </Text>
         </View>
         
@@ -76,10 +75,10 @@ export default function QuizSessionHeader({
       <View style={styles.middleRow}>
         <View style={styles.questionInfo}>
           <Text style={styles.questionCounter}>
-            Question {currentQuestion} of {totalQuestions} 📊
+            Question {currentQuestion} of {totalQuestions}
           </Text>
           <Text style={styles.progressText}>
-            {Math.round(progress * 100)}% Complete 🌟
+            {Math.round(progress * 100)}% Complete
           </Text>
         </View>
         
@@ -104,11 +103,9 @@ export default function QuizSessionHeader({
       {/* Motivation Badge */}
       <View style={styles.motivationContainer}>
         <View style={styles.motivationBadge}>
-          <Zap size={14} color={Colors.dark.primary} />
+          <Target size={14} color={Colors.dark.primary} />
           <Text style={styles.motivationText}>
-            {progress < 0.3 ? "You've got this! 💪" : 
-             progress < 0.7 ? "Great progress! 🔥" : 
-             "Almost there! 🚀"}
+            {getMotivationText()}
           </Text>
         </View>
       </View>
@@ -203,7 +200,7 @@ const styles = StyleSheet.create({
     backgroundColor: `${Colors.dark.primary}15`,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
-    borderRadius: 16,
+    borderRadius: Dimensions.borderRadius.xl,
     borderWidth: 1,
     borderColor: `${Colors.dark.primary}30`,
   },
