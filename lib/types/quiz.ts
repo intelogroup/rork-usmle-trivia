@@ -1,13 +1,14 @@
 export interface Question {
   id: string;
   question_text: string;
-  options: string[];
-  correct_answer: number;
+  options: Array<{ id: string; text: string }> | string[];
+  correct_answer?: number;
+  correct_option_id?: string;
   explanation: string;
   category_id: string;
   difficulty: 'easy' | 'medium' | 'hard';
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export type QuizMode = 'standard' | 'timed' | 'practice';

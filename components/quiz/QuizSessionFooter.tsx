@@ -28,7 +28,7 @@ export default function QuizSessionFooter({
         <Button
           title="Submit Answer"
           onPress={onSubmit}
-          disabled={selectedAnswer === null}
+          disabled={selectedAnswer === -1}
           style={[styles.button, styles.primaryButton]}
         />
       );
