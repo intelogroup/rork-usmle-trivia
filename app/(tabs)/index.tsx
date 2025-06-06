@@ -3,12 +3,11 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { router } from 'expo-router';
 import { useAuthStore } from '@/store/auth/authStore';
 import Colors from '@/theme/colors';
-import DashboardStats from '@/components/home/DashboardStats';
+import { LinearGradient } from 'expo-linear-gradient';
 import LevelProgress from '@/components/home/LevelProgress';
-import QuickActions from '@/components/home/QuickActions';
-import WeeklyProgress from '@/components/home/WeeklyProgress';
 import WeakestSubjects from '@/components/home/WeakestSubjects';
 import ReviewCard from '@/components/home/ReviewCard';
+import UnifiedDashboard from '@/components/home/UnifiedDashboard';
 import { useUserLevel } from '@/hooks/useUserLevel';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useWeakestCategories } from '@/hooks/useWeakestCategories';
@@ -116,13 +115,24 @@ export default function HomeScreen() {
         experienceToNext={levelData.experienceToNext} 
       />
 
-      <TouchableOpacity style={styles.startQuizButton} onPress={handleStartQuiz}>
-        <View style={styles.startQuizContent}>
-          <View style={styles.startQuizIcon}>
-            <Play size={20} color={Colors.dark.background} fill={Colors.dark.background} />
+      <TouchableOpacity 
+        style={styles.startQuizButtonContainer} 
+        onPress={handleStartQuiz}
+        activeOpacity={0.9}
+      >
+        <LinearGradient
+          colors={[Colors.dark.primary, Colors.dark.secondary]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.startQuizButton}
+        >
+          <View style={styles.startQuizContent}>
+            <View style={styles.startQuizIcon}>
+              <Play size={22} color={Colors.dark.background} fill={Colors.dark.background} />
+            </View>
+            <Text style={styles.startQuizText}>Start New Quiz</Text>
           </View>
-          <Text style={styles.startQuizText}>Start New Quiz</Text>
-        </View>
+        </LinearGradient>
       </TouchableOpacity>
       
       <WeakestSubjects weakestCategories={weakestCategories} />
@@ -133,17 +143,15 @@ export default function HomeScreen() {
         isLoading={isIncorrectLoading} 
       />
       
-      <QuickActions onQuickQuiz={handleQuickQuiz} />
-      
-      <DashboardStats 
-        totalQuizzes={statsData.totalQuizzes} 
-        averageScore={statsData.averageScore} 
-        currentStreak={statsData.currentStreak} 
-        totalTimeSpent={statsData.totalTimeSpent} 
-        getStreakEmoji={statsData.getStreakEmoji} 
+      <UnifiedDashboard
+        totalQuizzes={statsData.totalQuizzes}
+        averageScore={statsData.averageScore}
+        currentStreak={statsData.currentStreak}
+        totalTimeSpent={statsData.totalTimeSpent}
+        getStreakEmoji={statsData.getStreakEmoji}
+        weeklyProgress={statsData.weeklyProgress}
+        onQuickQuiz={handleQuickQuiz}
       />
-      
-      <WeeklyProgress weeklyProgress={statsData.weeklyProgress} />
     </ScrollView>
   );
 }
@@ -154,7 +162,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.background,
   },
   contentContainer: {
-    padding: 16,
+    padding: 20,
   },
   welcomeSection: {
     marginBottom: 24,
@@ -174,11 +182,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.dark.textSecondary,
   },
-  startQuizButton: {
-    backgroundColor: Colors.dark.primary,
+  startQuizButtonContainer: {
     borderRadius: 16,
-    padding: 16,
+    overflow: 'hidden',
     marginBottom: 24,
+    elevation: 4,
+    shadowColor: Colors.dark.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  startQuizButton: {
+    borderRadius: 16,
+    padding: 18,
   },
   startQuizContent: {
     flexDirection: 'row',

@@ -65,7 +65,7 @@ export default function DashboardStats({
         {stats.map((stat, index) => (
           <View key={index} style={styles.statCard}>
             <View style={[styles.iconContainer, { backgroundColor: stat.backgroundColor }]}>
-              <stat.icon size={10} color={stat.color} />
+              <stat.icon size={14} color={Colors.dark.text} />
             </View>
             <Text style={styles.statValue}>{stat.value}</Text>
             <Text style={styles.statLabel}>{stat.label}</Text>
@@ -78,7 +78,7 @@ export default function DashboardStats({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 12,
+    marginBottom: 16,
   },
   title: {
     fontSize: 16,
@@ -89,35 +89,35 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 4,
+    gap: 8,
   },
   statCard: {
     flex: 1,
     backgroundColor: Colors.dark.card,
-    borderRadius: 8,
-    padding: 6,
+    borderRadius: 12,
+    padding: 10,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.dark.border,
-    minHeight: 60,
+    minHeight: 70,
   },
   iconContainer: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   statValue: {
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: '700',
     color: Colors.dark.text,
-    marginBottom: 1,
+    marginBottom: 2,
     textAlign: 'center',
   },
   statLabel: {
-    fontSize: 8,
+    fontSize: 10,
     color: Colors.dark.textSecondary,
     fontWeight: '500',
     textAlign: 'center',
