@@ -53,3 +53,6 @@ export interface Category {
   created_at: string;
   updated_at: string;
 }
+
+// Import UsmleQuestion to resolve the error
+import { UsmleQuestion } from './usmle';
