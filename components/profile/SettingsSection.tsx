@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import Colors from '@/theme/colors';
 import { Settings, Share2, HelpCircle, Shield, LogOut } from 'lucide-react-native';
 import { useAuthStore } from '@/store/auth/authStore';
-import { router } from 'expo-router';
 
 interface SettingsSectionProps {
   onShare: () => void;
@@ -24,27 +23,8 @@ export default function SettingsSection({ onShare }: SettingsSectionProps) {
         {
           text: 'Sign Out',
           style: 'destructive',
-          onPress: async () => {
-            try {
-              await logout();
-              // Navigate to home tab after successful logout
-              router.replace('/(tabs)');
-            } catch (error) {
-              const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-              Alert.alert(
-                'Sign Out Failed',
-                `Could not sign out completely. ${errorMessage}`,
-                [
-                  {
-                    text: 'OK',
-                    onPress: () => {
-                      // Even on failure, the state is cleared, so we should still navigate
-                      router.replace('/(tabs)');
-                    },
-                  },
-                ]
-              );
-            }
+          onPress: () => {
+            logout(); // Simply call the logout action from the store
           },
         },
       ]

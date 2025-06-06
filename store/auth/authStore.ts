@@ -405,41 +405,35 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
-        console.log('Logging out user');
-        set({ isLoading: true, error: null });
+        console.log('Attempting to sign out...');
+        set({ isLoading: true });
 
-        try {
-          const { error } = await supabase.auth.signOut();
-          if (error) {
-            console.error('Supabase signout error:', error);
-            throw error;
-          }
-          console.log('Supabase signout successful');
-        } catch (error: unknown) {
-          console.error('Supabase signout error:', error);
-          // Re-throw to allow UI to handle navigation in its own catch block
-          throw error; 
-        } finally {
-          // This 'finally' block ensures state is cleared even if signOut fails
-          console.log('Clearing local session and profile state');
-          set({ 
-            user: null, 
-            session: null, 
-            profile: null,
-            isAuthenticated: false,
-            isLoading: false,
-            error: null
-          });
-
-          // Clear any cached data
-          try {
-            await AsyncStorage.multiRemove(['auth-storage', 'quiz-storage']);
-            console.log('Local storage cleared successfully');
-          } catch (storageError: unknown) {
-            const errorMessage = storageError instanceof Error ? storageError.message : 'Unknown storage error';
-            console.error('Storage cleanup error:', errorMessage);
-          }
+        // Attempt to sign out from Supabase, but don't let it block state cleanup
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+          console.error('Error during Supabase signOut:', error.message);
         }
+
+        // ALWAYS clear the local state to log the user out of the app
+        set({
+          user: null,
+          session: null,
+          profile: null,
+          isAuthenticated: false,
+          isLoading: false,
+          error: null
+        });
+
+        // Clear any cached data
+        try {
+          await AsyncStorage.multiRemove(['auth-storage', 'quiz-storage']);
+          console.log('Local storage cleared successfully');
+        } catch (storageError: unknown) {
+          const errorMessage = storageError instanceof Error ? storageError.message : 'Unknown storage error';
+          console.error('Storage cleanup error:', errorMessage);
+        }
+
+        console.log('Local auth state cleared.');
       },
 
       updateProfile: async (updates: Partial<UserProfile>) => {
