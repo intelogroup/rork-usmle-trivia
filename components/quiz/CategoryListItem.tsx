@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { ChevronRight } from 'lucide-react-native';
+import { ChevronRight, BookOpen } from 'lucide-react-native';
 import Colors from '@/theme/colors';
 import Typography from '@/theme/typography';
 import Spacing from '@/theme/spacing';
@@ -20,16 +20,14 @@ export default function CategoryListItem({ category, onPress }: CategoryListItem
     >
       <View style={styles.content}>
         <View style={[styles.iconContainer, { backgroundColor: category.color }]}>
-          <Text style={styles.iconText}>
-            {category.name.charAt(0).toUpperCase()}
-          </Text>
+          <BookOpen size={24} color={Colors.dark.background} />
         </View>
         
         <View style={styles.textContainer}>
           <Text style={styles.categoryName}>{category.name}</Text>
           <View style={styles.questionBadge}>
             <Text style={styles.questionCount}>
-              {category.questionCount} Questions
+              {category.questionCount} Questions 📝
             </Text>
           </View>
         </View>

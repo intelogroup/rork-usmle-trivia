@@ -2,6 +2,8 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Colors from '@/theme/colors';
 import Button from '@/components/Button';
+import { ArrowRight, ArrowLeft, Check } from 'lucide-react-native';
+import Spacing from '@/theme/spacing';
 
 interface QuizSessionFooterProps {
   selectedAnswer: number | null;
@@ -26,7 +28,7 @@ export default function QuizSessionFooter({
     if (!isAnswerSubmitted) {
       return (
         <Button
-          title="Submit Answer"
+          title="Submit Answer ✅"
           onPress={onSubmit}
           disabled={selectedAnswer === null}
           style={[styles.button, styles.primaryButton]}
@@ -36,7 +38,7 @@ export default function QuizSessionFooter({
 
     return (
       <Button
-        title={canGoNext ? "Next Question" : "Finish Quiz"}
+        title={canGoNext ? "Next Question ➡️" : "Finish Quiz 🎉"}
         onPress={onNext}
         style={[styles.button, styles.primaryButton]}
       />
@@ -62,7 +64,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    gap: 12,
+    gap: Spacing.md,
   },
   button: {
     flex: 1,

@@ -10,7 +10,7 @@ import QuizSettings from '@/components/quiz/QuizSettings';
 import AuthPrompt from '@/components/quiz/AuthPrompt';
 import Button from '@/components/Button';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Settings, AlertTriangle } from 'lucide-react-native';
+import { Settings, AlertTriangle, Rocket } from 'lucide-react-native';
 import type { QuizMode } from '@/lib/types/quiz';
 
 export default function QuizSetupScreen() {
@@ -139,7 +139,7 @@ export default function QuizSetupScreen() {
             </View>
             <Text style={styles.title}>{selectedCategory.name}</Text>
             <Text style={styles.subtitle}>
-              {selectedCategory.questionCount} questions available
+              {selectedCategory.questionCount} questions available 📚
             </Text>
           </View>
 
@@ -157,7 +157,7 @@ export default function QuizSetupScreen() {
           {!isCheckingAvailability && availableQuestionCount > 0 && (
             <View style={styles.availabilityInfo}>
               <Text style={styles.availabilityText}>
-                {availableQuestionCount} questions available for your selection
+                {availableQuestionCount} questions available for your selection ✅
               </Text>
             </View>
           )}
@@ -179,7 +179,7 @@ export default function QuizSetupScreen() {
         
         <View style={styles.footer}>
           <Button
-            title={isLoading ? "Starting Quiz..." : "Start Quiz"}
+            title={isLoading ? "Starting Quiz..." : "Start Quiz 🚀"}
             onPress={handleStartQuiz}
             disabled={isStartDisabled}
             style={styles.startButton}

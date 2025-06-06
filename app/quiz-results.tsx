@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, SafeAreaView, ScrollView, Animated, Platform } 
 import { Stack, useRouter } from 'expo-router';
 import Colors from '@/theme/colors';
 import Button from '@/components/Button';
-import { Award, Home, RotateCcw, Share2, Clock, Target, AlertCircle } from 'lucide-react-native';
+import { Award, Home, RotateCcw, Share2, Clock, Target, AlertCircle, Trophy, Star } from 'lucide-react-native';
 import { achievements } from '@/mocks/achievements';
 import AchievementCard from '@/components/AchievementCard';
 import { useQuizStore } from '@/store/quiz/quizStore';
@@ -144,10 +144,10 @@ export default function QuizResultsScreen() {
   const unlockedAchievement = percentage >= 80 ? achievements[1] : null;
   
   const getResultMessage = () => {
-    if (percentage >= 90) return "Excellent!";
-    if (percentage >= 70) return "Great job!";
-    if (percentage >= 50) return "Good effort!";
-    return "Keep practicing!";
+    if (percentage >= 90) return "Excellent! 🎉";
+    if (percentage >= 70) return "Great job! 🌟";
+    if (percentage >= 50) return "Good effort! 👍";
+    return "Keep practicing! 📚";
   };
   
   const getResultDescription = () => {
@@ -200,6 +200,11 @@ export default function QuizResultsScreen() {
             ]}
           >
             <View style={styles.scoreCircle}>
+              {percentage >= 80 ? (
+                <Trophy size={48} color={Colors.dark.background} fill={Colors.dark.background} />
+              ) : (
+                <Star size={48} color={Colors.dark.background} />
+              )}
               <Text style={styles.scoreText}>{percentage}%</Text>
               <Text style={styles.scoreDetail}>
                 {score}/{total} correct
@@ -212,7 +217,7 @@ export default function QuizResultsScreen() {
             {mode === 'timed' && (
               <View style={styles.modeInfoContainer}>
                 <Clock size={16} color={Colors.dark.textSecondary} />
-                <Text style={styles.modeInfoText}>Timed Quiz</Text>
+                <Text style={styles.modeInfoText}>Timed Quiz ⏱️</Text>
               </View>
             )}
           </Animated.View>
@@ -222,7 +227,7 @@ export default function QuizResultsScreen() {
               <View style={styles.performanceContainer}>
                 <View style={styles.sectionHeader}>
                   <Target size={20} color={Colors.dark.text} />
-                  <Text style={styles.sectionTitle}>Performance by Category</Text>
+                  <Text style={styles.sectionTitle}>Performance by Category 📊</Text>
                 </View>
                 
                 {categoryPerformance.map((category) => (
@@ -251,7 +256,7 @@ export default function QuizResultsScreen() {
               <View style={styles.achievementContainer}>
                 <View style={styles.sectionHeader}>
                   <Award size={20} color={Colors.dark.text} />
-                  <Text style={styles.sectionTitle}>Achievement Unlocked!</Text>
+                  <Text style={styles.sectionTitle}>Achievement Unlocked! 🏆</Text>
                 </View>
                 <AchievementCard 
                   achievement={{
@@ -265,7 +270,7 @@ export default function QuizResultsScreen() {
             {!isAuthenticated && (
               <View style={styles.loginPrompt}>
                 <Text style={styles.loginPromptText}>
-                  Log in to track your progress and earn achievements!
+                  Log in to track your progress and earn achievements! 🔑
                 </Text>
                 <Button
                   title="Log In"
@@ -277,7 +282,7 @@ export default function QuizResultsScreen() {
             
             <View style={styles.actionButtons}>
               <Button
-                title="Share Results"
+                title="Share Results 📤"
                 onPress={handleShare}
                 variant="outline"
                 style={styles.actionButton}
@@ -288,13 +293,13 @@ export default function QuizResultsScreen() {
         
         <View style={styles.footer}>
           <Button
-            title="Retake Quiz"
+            title="Retake Quiz 🔄"
             onPress={handleRetakeQuiz}
             variant="outline"
             style={styles.footerButton}
           />
           <Button
-            title="Go to Home"
+            title="Go to Home 🏠"
             onPress={handleGoHome}
             style={styles.footerButton}
           />

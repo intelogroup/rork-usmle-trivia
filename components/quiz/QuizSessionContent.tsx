@@ -6,6 +6,7 @@ import type { UsmleQuestion } from '@/lib/types/usmle';
 import { LinearGradient } from 'expo-linear-gradient';
 import Typography from '@/theme/typography';
 import Spacing from '@/theme/spacing';
+import { ThumbsUp, ThumbsDown } from 'lucide-react-native';
 
 interface QuizSessionContentProps {
   question: UsmleQuestion;
@@ -126,10 +127,21 @@ export default function QuizSessionContent({
             },
           ]}
         >
-          <Text style={styles.feedbackEmoji}>{getFeedbackEmoji()}</Text>
-          <Text style={styles.feedbackText}>
-            {selectedAnswer === correctAnswerIndex ? 'Correct!' : 'Try again!'}
-          </Text>
+          <LinearGradient
+            colors={selectedAnswer === correctAnswerIndex ? 
+              [Colors.dark.primary, Colors.dark.secondary] : 
+              [Colors.dark.error, `${Colors.dark.error}80`]}
+            style={styles.feedbackGradient}
+          >
+            {selectedAnswer === correctAnswerIndex ? 
+              <ThumbsUp size={32} color={Colors.dark.background} /> : 
+              <ThumbsDown size={32} color={Colors.dark.background} />
+            }
+            <Text style={styles.feedbackEmoji}>{getFeedbackEmoji()}</Text>
+            <Text style={styles.feedbackText}>
+              {selectedAnswer === correctAnswerIndex ? 'Correct!' : 'Try Again!'}
+            </Text>
+          </LinearGradient>
         </Animated.View>
       )}
 
@@ -175,37 +187,42 @@ const styles = StyleSheet.create({
   },
   feedbackContainer: {
     position: 'absolute',
-    top: '50%',
+    top: '40%',
     left: '50%',
-    transform: [{ translateX: -75 }, { translateY: -50 }],
-    backgroundColor: Colors.dark.card,
+    transform: [{ translateX: -100 }, { translateY: -60 }],
     borderRadius: 20,
-    padding: Spacing.xl,
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: Colors.dark.primary,
     shadowColor: Colors.dark.shadow,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
     elevation: 8,
-    width: 150,
+    width: 200,
+    padding: Spacing.md,
+  },
+  feedbackGradient: {
+    flex: 1,
+    width: '100%',
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.lg,
   },
   feedbackEmoji: {
-    fontSize: 32,
-    marginBottom: Spacing.sm,
+    fontSize: 36,
+    marginVertical: Spacing.sm,
   },
   feedbackText: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.bold,
-    color: Colors.dark.text,
+    color: Colors.dark.background,
     textAlign: 'center',
   },
   explanationContainer: {
     backgroundColor: Colors.dark.card,
     borderRadius: 12,
     padding: Spacing.lg,
-    marginTop: Spacing.lg,
+    marginTop: Spacing.xl,
     borderWidth: 1,
     borderColor: Colors.dark.border,
   },

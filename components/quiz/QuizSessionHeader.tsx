@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import Colors from '@/theme/colors';
 import ProgressBar from '@/components/ProgressBar';
 import QuizTimer from './QuizTimer';
-import { X } from 'lucide-react-native';
+import { X, BookOpenCheck } from 'lucide-react-native';
 import Typography from '@/theme/typography';
 import Spacing from '@/theme/spacing';
 
@@ -38,11 +38,11 @@ export default function QuizSessionHeader({
         <View style={styles.titleSection}>
           {categoryName && (
             <Text style={styles.categoryText} numberOfLines={1}>
-              {categoryName}
+              {categoryName} 📘
             </Text>
           )}
           <Text style={styles.modeText}>
-            {mode === 'timed' ? 'Timed Quiz' : mode === 'practice' ? 'Practice Mode' : 'Standard Quiz'}
+            {mode === 'timed' ? 'Timed Quiz ⏱️' : mode === 'practice' ? 'Practice Mode ✍️' : 'Standard Quiz 📝'}
           </Text>
         </View>
         
@@ -63,7 +63,7 @@ export default function QuizSessionHeader({
             Question {currentQuestion} of {totalQuestions}
           </Text>
           <Text style={styles.progressText}>
-            {Math.round(progress * 100)}% Complete
+            {Math.round(progress * 100)}% Complete 🌟
           </Text>
         </View>
         

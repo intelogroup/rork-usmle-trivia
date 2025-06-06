@@ -53,9 +53,9 @@ export default function QuizScreen() {
           <View style={styles.iconContainer}>
             <BookOpen size={32} color={Colors.dark.primary} />
           </View>
-          <Text style={styles.title}>Choose a Category</Text>
+          <Text style={styles.title}>Choose a Category 📚</Text>
           <Text style={styles.subtitle}>
-            Select a topic to start your quiz
+            Select a topic to start your quiz journey! 🚀
           </Text>
         </View>
 
