@@ -2,9 +2,8 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Colors from '@/theme/colors';
 import Button from '@/components/Button';
-import { ArrowRight, Check, Zap, Trophy } from 'lucide-react-native';
-import Spacing from '@/theme/spacing';
-import { Dimensions } from '@/theme/spacing';
+import { ArrowRight, Check, Trophy } from 'lucide-react-native';
+import { Spacing, Dimensions } from '@/theme/spacing';
 
 interface QuizSessionFooterProps {
   selectedAnswer: number | null;

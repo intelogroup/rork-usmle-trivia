@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated, Platform } from 'react-native';
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
 import Colors from '@/theme/colors';
 import { Spacing } from '@/theme/spacing';
 
@@ -9,84 +9,36 @@ interface QuestionProgressDotsProps {
   correctAnswers: number[];
 }
 
-export default function QuestionProgressDots({ 
-  totalQuestions, 
-  currentIndex, 
-  correctAnswers 
+export default function QuestionProgressDots({
+  totalQuestions,
+  currentIndex,
+  correctAnswers,
 }: QuestionProgressDotsProps) {
-  const animatedValues = useRef(
-    Array.from({ length: totalQuestions }, () => new Animated.Value(0))
-  ).current;
-
-  useEffect(() => {
-    // Animate dots as questions are answered
-    animatedValues.forEach((animValue, index) => {
-      if (index < currentIndex) {
-        if (Platform.OS !== 'web') {
-          Animated.spring(animValue, {
-            toValue: 1,
-            tension: 80,
-            friction: 8,
-            useNativeDriver: true,
-          }).start();
-        } else {
-          animValue.setValue(1);
-        }
-      } else if (index === currentIndex) {
-        if (Platform.OS !== 'web') {
-          Animated.loop(
-            Animated.sequence([
-              Animated.timing(animValue, {
-                toValue: 1.2,
-                duration: 800,
-                useNativeDriver: true,
-              }),
-              Animated.timing(animValue, {
-                toValue: 1,
-                duration: 800,
-                useNativeDriver: true,
-              }),
-            ])
-          ).start();
-        } else {
-          animValue.setValue(1);
-        }
-      } else {
-        animValue.setValue(0.3);
-      }
-    });
-  }, [currentIndex, totalQuestions]);
-
-  const dots = Array.from({ length: totalQuestions }).map((_, index) => {
+  const renderDot = (index: number) => {
+    const isCurrent = index === currentIndex;
     const isAnswered = index < currentIndex;
     const isCorrect = correctAnswers.includes(index);
-    const isCurrent = index === currentIndex;
 
-    let dotColor = Colors.dark.border;
-    if (isAnswered) {
-      dotColor = isCorrect ? Colors.dark.success : Colors.dark.error;
-    } else if (isCurrent) {
-      dotColor = Colors.dark.primary;
+    let dotStyle = [styles.dot];
+    
+    if (isCurrent) {
+      dotStyle.push(styles.currentDot);
+    } else if (isAnswered) {
+      if (isCorrect) {
+        dotStyle.push(styles.correctDot);
+      } else {
+        dotStyle.push(styles.incorrectDot);
+      }
+    } else {
+      dotStyle.push(styles.futureDot);
     }
 
-    return (
-      <Animated.View
-        key={index}
-        style={[
-          styles.dot,
-          { 
-            backgroundColor: dotColor,
-            transform: Platform.OS !== 'web' ? [{ scale: animatedValues[index] }] : [],
-          },
-          isCurrent && styles.currentDot,
-        ]}
-      />
-    );
-  });
+    return <View key={index} style={dotStyle} />;
+  };
 
   return (
     <View style={styles.container}>
-      {dots}
+      {Array.from({ length: totalQuestions }, (_, index) => renderDot(index))}
     </View>
   );
 }
@@ -94,21 +46,29 @@ export default function QuestionProgressDots({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
     gap: Spacing.xs,
     paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: Colors.dark.border,
   },
   currentDot: {
+    backgroundColor: Colors.dark.primary,
     width: 12,
     height: 12,
     borderRadius: 6,
+  },
+  correctDot: {
+    backgroundColor: Colors.dark.success,
+  },
+  incorrectDot: {
+    backgroundColor: Colors.dark.error,
+  },
+  futureDot: {
+    backgroundColor: Colors.dark.border,
   },
 });

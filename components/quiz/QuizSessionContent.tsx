@@ -198,12 +198,9 @@ export default function QuizSessionContent({
           { transform: [{ translateX: slideAnim }] },
         ]}
       >
-        <LinearGradient
-          colors={[Colors.dark.card, Colors.dark.background]}
-          style={styles.questionContainer}
-        >
+        <View style={styles.questionContainer}>
           <Text style={styles.questionText}>{question.question_text}</Text>
-        </LinearGradient>
+        </View>
         
         <View style={styles.optionsContainer}>
           {question.options.map((option, index) => (
@@ -273,7 +270,7 @@ export default function QuizSessionContent({
           </Animated.View>
         )}
 
-        {/* Explanation Section - Now properly positioned at bottom */}
+        {/* Explanation Section */}
         {isAnswerSubmitted && question.explanation && (
           <Animated.View 
             style={[
@@ -292,7 +289,6 @@ export default function QuizSessionContent({
               <Text style={styles.explanationText}>{question.explanation}</Text>
             </View>
             
-            {/* Additional learning tip */}
             <View style={styles.learningTip}>
               <Text style={styles.learningTipText}>
                 Remember this concept for future questions!
@@ -308,23 +304,25 @@ export default function QuizSessionContent({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: Spacing.xl,
+    backgroundColor: Colors.dark.background,
   },
   contentWrapper: {
     flex: 1,
+    padding: Spacing.xl,
   },
   questionContainer: {
+    backgroundColor: Colors.dark.card,
     borderRadius: Dimensions.borderRadius.lg,
     padding: Spacing.xl,
     marginBottom: Spacing.xl,
-    elevation: 3,
+    elevation: 2,
     shadowColor: Colors.dark.shadow,
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 2,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   questionText: {
     ...Typography.styles.h4,
