@@ -145,15 +145,15 @@ export default function OptionButton({
     outputRange: [1, 2],
   });
 
-  const getGradientColors = (): [string, string] => {
+  const getGradientColors = () => {
     if (showResult && isCorrect !== null) {
       if (isCorrect) {
-        return [Colors.dark.success, `${Colors.dark.success}CC`];
+        return [Colors.dark.success, `${Colors.dark.success}CC`] as const;
       } else if (selected) {
-        return [Colors.dark.error, `${Colors.dark.error}CC`];
+        return [Colors.dark.error, `${Colors.dark.error}CC`] as const;
       }
     }
-    return ['transparent', 'transparent'];
+    return ['transparent', 'transparent'] as const;
   };
 
   const getIconColor = () => {
