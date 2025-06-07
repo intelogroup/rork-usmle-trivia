@@ -21,14 +21,14 @@ export default function QuestionProgressDots({
     const isAnswered = index < currentIndex;
     const isCorrect = correctAnswers.includes(index);
 
-    let dotStyle = styles.dot;
+    let dotStyle = [styles.dot];
     
     if (isCurrent) {
-      dotStyle = styles.currentDot;
+      dotStyle = [styles.dot, styles.currentDot];
     } else if (isAnswered) {
-      dotStyle = isCorrect ? styles.correctDot : styles.incorrectDot;
+      dotStyle = [styles.dot, isCorrect ? styles.correctDot : styles.incorrectDot];
     } else {
-      dotStyle = styles.futureDot;
+      dotStyle = [styles.dot, styles.futureDot];
     }
 
     return <View key={index} style={dotStyle} />;
@@ -63,21 +63,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.primary,
   },
   correctDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
     backgroundColor: Colors.dark.success,
   },
   incorrectDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
     backgroundColor: Colors.dark.error,
   },
   futureDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
     backgroundColor: Colors.dark.border,
   },
 });
