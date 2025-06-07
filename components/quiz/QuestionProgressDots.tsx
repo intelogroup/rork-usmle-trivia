@@ -24,15 +24,15 @@ export default function QuestionProgressDots({
     let dotStyle = [styles.dot];
     
     if (isCurrent) {
-      dotStyle.push(styles.currentDot);
+      dotStyle = [...dotStyle, styles.currentDot];
     } else if (isAnswered) {
       if (isCorrect) {
-        dotStyle.push(styles.correctDot);
+        dotStyle = [...dotStyle, styles.correctDot];
       } else {
-        dotStyle.push(styles.incorrectDot);
+        dotStyle = [...dotStyle, styles.incorrectDot];
       }
     } else {
-      dotStyle.push(styles.futureDot);
+      dotStyle = [...dotStyle, styles.futureDot];
     }
 
     return <View key={index} style={dotStyle} />;
