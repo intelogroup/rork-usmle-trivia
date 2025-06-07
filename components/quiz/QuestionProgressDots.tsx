@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import Colors from '@/theme/colors';
 import { Spacing } from '@/theme/spacing';
 
@@ -7,12 +7,14 @@ interface QuestionProgressDotsProps {
   totalQuestions: number;
   currentIndex: number;
   correctAnswers: number[];
+  style?: ViewStyle;
 }
 
 export default function QuestionProgressDots({
   totalQuestions,
   currentIndex,
   correctAnswers,
+  style,
 }: QuestionProgressDotsProps) {
   const renderDot = (index: number) => {
     const isCurrent = index === currentIndex;
@@ -37,7 +39,7 @@ export default function QuestionProgressDots({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       {Array.from({ length: totalQuestions }, (_, index) => renderDot(index))}
     </View>
   );

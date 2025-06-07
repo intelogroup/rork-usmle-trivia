@@ -29,6 +29,7 @@ export default function QuizSessionContent({
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const feedbackScale = useRef(new Animated.Value(0.3)).current;
   const feedbackTranslateY = useRef(new Animated.Value(-50)).current;
+  const feedbackOpacity = useRef(new Animated.Value(0)).current;
   const celebrationOpacity = useRef(new Animated.Value(0)).current;
   const celebrationScale = useRef(new Animated.Value(0.5)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;

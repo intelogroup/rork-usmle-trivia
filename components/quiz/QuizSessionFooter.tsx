@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import Colors from '@/theme/colors';
 import Button from '@/components/Button';
 import { ArrowRight, Check, Trophy, Flag, SkipForward } from 'lucide-react-native';
