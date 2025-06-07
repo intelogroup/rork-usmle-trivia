@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.xs,
     paddingVertical: Spacing.sm,
+    marginTop: Spacing.xs,
   },
   dot: {
     width: 8,

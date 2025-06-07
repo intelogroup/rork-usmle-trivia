@@ -95,7 +95,6 @@ export default function QuizSessionHeader({
             totalQuestions={totalQuestions}
             currentIndex={currentQuestion - 1}
             correctAnswers={[]}
-            style={styles.dots}
           />
         </View>
       </LinearGradient>
@@ -204,8 +203,5 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: Colors.dark.primary,
     borderRadius: 1.5,
-  },
-  dots: {
-    marginTop: Spacing.xs,
   },
 });
