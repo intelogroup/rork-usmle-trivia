@@ -26,7 +26,7 @@ export default function QuizSessionContent({
   isAnswerSubmitted,
   onOptionPress,
 }: QuizSessionContentProps) {
-  const feedbackOpacity = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
   const feedbackScale = useRef(new Animated.Value(0.3)).current;
   const feedbackTranslateY = useRef(new Animated.Value(-50)).current;
   const celebrationOpacity = useRef(new Animated.Value(0)).current;
@@ -40,14 +40,24 @@ export default function QuizSessionContent({
     slideAnim.setValue(Platform.OS !== 'web' ? 100 : 0);
     explanationOpacity.setValue(0);
     explanationTranslateY.setValue(30);
+    fadeAnim.setValue(0);
     
     if (Platform.OS !== 'web') {
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        tension: 80,
-        friction: 8,
-        useNativeDriver: true,
-      }).start();
+      Animated.parallel([
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 80,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      fadeAnim.setValue(1);
     }
   }, [question]);
 
@@ -195,7 +205,10 @@ export default function QuizSessionContent({
       <Animated.View
         style={[
           styles.contentWrapper,
-          { transform: [{ translateX: slideAnim }] },
+          { 
+            opacity: fadeAnim,
+            transform: [{ translateX: slideAnim }] 
+          },
         ]}
       >
         <View style={styles.questionContainer}>

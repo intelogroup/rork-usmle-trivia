@@ -4,6 +4,8 @@ import Colors from '@/theme/colors';
 import Typography from '@/theme/typography';
 import { Spacing } from '@/theme/spacing';
 import QuestionProgressDots from './QuestionProgressDots';
+import { Flag, Clock, Brain } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface QuizSessionHeaderProps {
   currentQuestion: number;
@@ -12,6 +14,7 @@ interface QuizSessionHeaderProps {
   timeRemaining?: number;
   mode: string;
   categoryName?: string;
+  flaggedQuestions?: number[];
 }
 
 export default function QuizSessionHeader({
@@ -21,10 +24,8 @@ export default function QuizSessionHeader({
   timeRemaining,
   mode,
   categoryName,
+  flaggedQuestions = [],
 }: QuizSessionHeaderProps) {
-  // Mock correct answers for now - in real implementation this would come from quiz state
-  const correctAnswers: number[] = [];
-
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -33,35 +34,71 @@ export default function QuizSessionHeader({
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.leftSection}>
-          <Text style={styles.questionNumber}>
-            Question {currentQuestion} of {totalQuestions}
-          </Text>
-          {categoryName && (
-            <Text style={styles.category}>{categoryName}</Text>
-          )}
-        </View>
-        
-        <View style={styles.rightSection}>
-          {mode === 'timed' && timeRemaining !== undefined && (
-            <View style={styles.timerContainer}>
-              <Text style={[
-                styles.timer,
-                timeRemaining <= 10 && styles.timerWarning
-              ]}>
-                {formatTime(timeRemaining)}
+      <LinearGradient
+        colors={[Colors.dark.background, `${Colors.dark.background}00`]}
+        style={styles.gradient}
+      >
+        <View style={styles.header}>
+          <View style={styles.leftSection}>
+            <Text style={styles.categoryName}>{categoryName}</Text>
+            <View style={styles.progressInfo}>
+              <Text style={styles.questionNumber}>
+                Question {currentQuestion} of {totalQuestions}
+              </Text>
+              {flaggedQuestions.length > 0 && (
+                <View style={styles.flaggedBadge}>
+                  <Flag size={12} color={Colors.dark.primary} />
+                  <Text style={styles.flaggedCount}>{flaggedQuestions.length}</Text>
+                </View>
+              )}
+            </View>
+          </View>
+          
+          <View style={styles.rightSection}>
+            <View style={styles.modeBadge}>
+              {mode === 'timed' ? (
+                <Clock size={14} color={Colors.dark.textSecondary} />
+              ) : (
+                <Brain size={14} color={Colors.dark.textSecondary} />
+              )}
+              <Text style={styles.modeText}>
+                {mode.charAt(0).toUpperCase() + mode.slice(1)}
               </Text>
             </View>
-          )}
+            
+            {mode === 'timed' && timeRemaining !== undefined && (
+              <View style={[
+                styles.timerContainer,
+                timeRemaining <= 10 && styles.timerWarning
+              ]}>
+                <Text style={[
+                  styles.timer,
+                  timeRemaining <= 10 && styles.timerWarningText
+                ]}>
+                  {formatTime(timeRemaining)}
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
-      </View>
-      
-      <QuestionProgressDots
-        totalQuestions={totalQuestions}
-        currentIndex={currentQuestion - 1}
-        correctAnswers={correctAnswers}
-      />
+        
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBar}>
+            <View 
+              style={[
+                styles.progressFill,
+                { width: `${progress * 100}%` }
+              ]} 
+            />
+          </View>
+          <QuestionProgressDots
+            totalQuestions={totalQuestions}
+            currentIndex={currentQuestion - 1}
+            correctAnswers={[]}
+            style={styles.dots}
+          />
+        </View>
+      </LinearGradient>
     </View>
   );
 }
@@ -69,40 +106,81 @@ export default function QuizSessionHeader({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.dark.card,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
     borderBottomWidth: 1,
     borderBottomColor: Colors.dark.border,
+  },
+  gradient: {
+    paddingTop: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.sm,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.sm,
+    alignItems: 'flex-start',
+    marginBottom: Spacing.md,
   },
   leftSection: {
     flex: 1,
   },
   rightSection: {
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  categoryName: {
+    ...Typography.styles.bodySmall,
+    color: Colors.dark.primary,
+    fontWeight: Typography.fontWeight.semibold,
+    marginBottom: 2,
+  },
+  progressInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
   },
   questionNumber: {
     ...Typography.styles.bodySmall,
     color: Colors.dark.textSecondary,
-    marginBottom: 2,
   },
-  category: {
-    ...Typography.styles.bodySmall,
-    fontWeight: Typography.fontWeight.semibold,
+  flaggedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: `${Colors.dark.primary}15`,
+    paddingHorizontal: Spacing.xs,
+    paddingVertical: 2,
+    borderRadius: 12,
+    gap: 4,
+  },
+  flaggedCount: {
+    ...Typography.styles.caption,
     color: Colors.dark.primary,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  modeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.dark.cardHighlight,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: 16,
+    gap: 4,
+  },
+  modeText: {
+    ...Typography.styles.caption,
+    color: Colors.dark.textSecondary,
   },
   timerContainer: {
-    backgroundColor: Colors.dark.background,
-    paddingHorizontal: Spacing.md,
+    backgroundColor: Colors.dark.cardHighlight,
+    paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
-    borderRadius: 20,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: Colors.dark.border,
+  },
+  timerWarning: {
+    backgroundColor: `${Colors.dark.error}15`,
+    borderColor: Colors.dark.error,
   },
   timer: {
     ...Typography.styles.bodySmall,
@@ -110,7 +188,24 @@ const styles = StyleSheet.create({
     color: Colors.dark.text,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
-  timerWarning: {
+  timerWarningText: {
     color: Colors.dark.error,
+  },
+  progressContainer: {
+    gap: Spacing.xs,
+  },
+  progressBar: {
+    height: 3,
+    backgroundColor: Colors.dark.border,
+    borderRadius: 1.5,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: Colors.dark.primary,
+    borderRadius: 1.5,
+  },
+  dots: {
+    marginTop: Spacing.xs,
   },
 });
