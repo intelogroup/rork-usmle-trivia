@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth/authStore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface DashboardStats {
   totalQuizzes: number;
@@ -45,20 +46,43 @@ export function useDashboardStats(): DashboardStatsReturn {
         return;
       }
 
-      // Use profile data from auth store with defensive programming
-      const totalQuizzes = Number(profile.total_quizzes) || 0;
-      const correctAnswers = Number(profile.correct_answers) || 0;
-      const currentStreak = Number(profile.current_streak) || 0;
-      const totalStudyTime = Number(profile.total_study_time) || 0;
+      // Load quiz sessions from local storage
+      const sessionsData = await AsyncStorage.getItem('quiz-sessions');
+      const sessions = sessionsData ? JSON.parse(sessionsData) : [];
 
-      const calculatedStats: DashboardStats = {
-        totalQuizzes: Math.max(0, totalQuizzes),
-        averageScore: totalQuizzes > 0 ? Math.round((correctAnswers / totalQuizzes) * 100) : 0,
-        currentStreak: Math.max(0, currentStreak),
-        totalTimeSpent: Math.max(0, totalStudyTime),
-        weeklyProgress: 0, // Calculate based on recent activity
-        recentAchievements: 0, // Load from achievements table
-      };
+      let calculatedStats: DashboardStats;
+
+      if (sessions.length > 0) {
+        // Use real session data
+        const totalQuizzes = sessions.length;
+        const totalCorrect = sessions.reduce((sum: number, s: any) => sum + (s.correct_answers || s.score || 0), 0);
+        const totalQuestions = sessions.reduce((sum: number, s: any) => sum + (s.total_questions || 0), 0);
+        const averageScore = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+
+        calculatedStats = {
+          totalQuizzes,
+          averageScore,
+          currentStreak: Number(profile.current_streak) || 0,
+          totalTimeSpent: Number(profile.total_study_time) || 0,
+          weeklyProgress: Math.min(100, Math.round((totalQuizzes / 7) * 100)), // Assume 7 quizzes per week goal
+          recentAchievements: Math.floor(totalQuizzes / 5), // 1 achievement per 5 quizzes
+        };
+      } else {
+        // Use profile data from auth store with defensive programming
+        const totalQuizzes = Number(profile.total_quizzes) || 0;
+        const correctAnswers = Number(profile.correct_answers) || 0;
+        const currentStreak = Number(profile.current_streak) || 0;
+        const totalStudyTime = Number(profile.total_study_time) || 0;
+
+        calculatedStats = {
+          totalQuizzes: Math.max(0, totalQuizzes),
+          averageScore: totalQuizzes > 0 ? Math.round((correctAnswers / totalQuizzes) * 100) : 0,
+          currentStreak: Math.max(0, currentStreak),
+          totalTimeSpent: Math.max(0, totalStudyTime),
+          weeklyProgress: 0, // Calculate based on recent activity
+          recentAchievements: 0, // Load from achievements table
+        };
+      }
 
       setStats(calculatedStats);
     } catch (error) {

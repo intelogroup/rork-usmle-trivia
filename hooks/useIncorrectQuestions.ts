@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth/authStore';
-import { supabase } from '@/lib/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function useIncorrectQuestions() {
   const { user, isAuthenticated } = useAuthStore();
@@ -15,20 +15,19 @@ export function useIncorrectQuestions() {
         return;
       }
 
-      // Query to count distinct questions the user got wrong
-      const { data, error } = await supabase
-        .from('quiz_attempts')
-        .select('question_id')
-        .eq('user_id', user.id)
-        .eq('is_correct', false);
+      // Load quiz sessions from local storage
+      const sessionsData = await AsyncStorage.getItem('quiz-sessions');
+      const sessions = sessionsData ? JSON.parse(sessionsData) : [];
 
-      if (error) {
-        throw error;
-      }
+      // Count incorrect answers from sessions
+      let incorrectAnswers = 0;
+      sessions.forEach((session: any) => {
+        const totalQuestions = session.total_questions || 0;
+        const correctAnswers = session.correct_answers || session.score || 0;
+        incorrectAnswers += (totalQuestions - correctAnswers);
+      });
 
-      // Count unique question IDs
-      const uniqueQuestions = new Set(data?.map(attempt => attempt.question_id)).size;
-      setIncorrectCount(uniqueQuestions);
+      setIncorrectCount(incorrectAnswers);
     } catch (error) {
       console.error('Error loading incorrect questions count (silently bypassed):', error);
       setIncorrectCount(0);
@@ -53,31 +52,14 @@ export function useIncorrectQuestions() {
         return;
       }
 
-      // Fetch distinct incorrect question IDs
-      const { data, error } = await supabase
-        .from('quiz_attempts')
-        .select('question_id')
-        .eq('user_id', user.id)
-        .eq('is_correct', false)
-        .limit(limit);
-
-      if (error) {
-        throw error;
-      }
-
-      if (!data || data.length === 0) {
-        console.log('No incorrect questions found for review');
-        return;
-      }
-
-      const questionIds = data.map(attempt => attempt.question_id);
+      // For local storage, we'll simulate review quiz functionality
+      console.log(`Starting review quiz with up to ${limit} questions`);
       
-      // Fetch full question data (mock implementation since we don't have a questions table in this code)
-      // In a real app, you'd join with the questions table
-      console.log(`Starting review quiz with ${questionIds.length} incorrect questions`);
+      // In a real implementation, you would:
+      // 1. Load specific incorrect questions from local storage
+      // 2. Start a quiz with those questions
+      // For now, we'll just log this action
       
-      // Navigate or start quiz with these question IDs
-      // This would be implemented with quizStore.startQuizWithSpecificQuestions(questionIds)
     } catch (error) {
       console.error('Error starting review quiz (silently bypassed):', error);
     } finally {

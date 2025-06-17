@@ -1,7 +1,5 @@
 import { StateCreator } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { supabase } from '@/lib/supabase';
 import { usmle_questions } from '@/mocks/usmle_questions';
 import type { QuizMode, QuizSession } from '@/lib/types/quiz';
 import type { UsmleQuestion } from '@/lib/types/usmle';
@@ -76,7 +74,7 @@ export const createQuizSessionSlice: StateCreator<QuizSessionState> = (set, get)
 
       const session: QuizSession = {
         id: Date.now().toString(),
-        user_id: 'temp-user',
+        user_id: 'local-user',
         category_id: validCategoryIds[0],
         questions: shuffledQuestions,
         answers: [], // Initialize empty answers array
@@ -139,7 +137,7 @@ export const createQuizSessionSlice: StateCreator<QuizSessionState> = (set, get)
 
       const session: QuizSession = {
         id: Date.now().toString(),
-        user_id: 'temp-user',
+        user_id: 'local-user',
         category_id: 'general',
         questions: shuffledQuestions,
         answers: [], // Initialize empty answers array
@@ -299,11 +297,10 @@ export const createQuizSessionSlice: StateCreator<QuizSessionState> = (set, get)
     if (!currentSession || !currentSession.isCompleted) return;
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
+      // Save to local storage instead of Supabase
       const sessionData = {
-        user_id: user.id,
+        id: currentSession.id,
+        user_id: 'local-user',
         category_id: currentSession.category_id,
         score: currentSession.score,
         total_questions: currentSession.total_questions,
@@ -315,13 +312,17 @@ export const createQuizSessionSlice: StateCreator<QuizSessionState> = (set, get)
         completed_at: currentSession.completed_at,
       };
 
-      const { error } = await supabase
-        .from('quiz_sessions')
-        .insert([sessionData]);
-
-      if (error) {
-        console.error('Error saving quiz session:', error);
-      }
+      // Get existing sessions
+      const existingSessionsData = await AsyncStorage.getItem('quiz-sessions');
+      const existingSessions = existingSessionsData ? JSON.parse(existingSessionsData) : [];
+      
+      // Add new session
+      existingSessions.push(sessionData);
+      
+      // Save back to storage
+      await AsyncStorage.setItem('quiz-sessions', JSON.stringify(existingSessions));
+      
+      console.log('Quiz session saved to local storage');
     } catch (error: unknown) {
       let errorMessage = 'Unknown error saving quiz session';
       if (error instanceof Error) {

@@ -1,5 +1,4 @@
 import { StateCreator } from 'zustand';
-import { supabase } from '@/lib/supabase';
 import { usmle_categories } from '@/mocks/usmle_categories';
 import { usmle_questions } from '@/mocks/usmle_questions';
 import type { UsmleCategory } from '@/lib/types/usmle';
@@ -43,40 +42,11 @@ export const createQuizSetupSlice: StateCreator<QuizSetupState> = (set, get) => 
     set({ isLoadingCategories: true, categoriesError: null });
     
     try {
-      // Try to load from Supabase first
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
-
-      if (error) {
-        throw error;
-      }
-
-      if (data && Array.isArray(data) && data.length > 0) {
-        // Map Supabase data to our Category interface
-        const mappedCategories = data.map(cat => ({
-          id: cat.id,
-          name: cat.name,
-          description: cat.description,
-          question_count: cat.question_count || 0,
-          icon: cat.icon,
-          color: cat.color || '#6366f1',
-          created_at: cat.created_at,
-          updated_at: cat.updated_at,
-          parent_id: cat.parent_id || null,
-          grouping: cat.grouping || 'Subject',
-          questionCount: cat.question_count || 0,
-        }));
-        set({ categories: mappedCategories, isLoadingCategories: false });
-      } else {
-        // Fallback to mock data if no data in Supabase
-        const validCategories = Array.isArray(usmle_categories) ? usmle_categories : [];
-        set({ categories: validCategories, isLoadingCategories: false });
-      }
+      // Use mock data directly (no database calls)
+      const validCategories = Array.isArray(usmle_categories) ? usmle_categories : [];
+      set({ categories: validCategories, isLoadingCategories: false });
     } catch (error: unknown) {
-      console.error('Error loading categories, using mock data:', error);
-      // Use mock data as fallback
+      console.error('Error loading categories:', error);
       const validCategories = Array.isArray(usmle_categories) ? usmle_categories : [];
       set({ 
         categories: validCategories,

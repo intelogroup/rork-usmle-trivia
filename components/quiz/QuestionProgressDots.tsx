@@ -1,42 +1,78 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Colors from '@/theme/colors';
-import { Spacing } from '@/theme/spacing';
 
 interface QuestionProgressDotsProps {
   totalQuestions: number;
-  currentIndex: number;
-  correctAnswers: number[];
-  style?: ViewStyle;
+  currentQuestionIndex: number;
+  answeredQuestions: boolean[];
 }
 
 export default function QuestionProgressDots({
   totalQuestions,
-  currentIndex,
-  correctAnswers,
-  style,
+  currentQuestionIndex,
+  answeredQuestions,
 }: QuestionProgressDotsProps) {
-  const renderDot = (index: number) => {
-    const isCurrent = index === currentIndex;
-    const isAnswered = index < currentIndex;
-    const isCorrect = correctAnswers.includes(index);
-
-    let dotStyle: ViewStyle[] = [styles.dot];
+  const maxDotsToShow = 10;
+  const shouldShowSubset = totalQuestions > maxDotsToShow;
+  
+  if (shouldShowSubset) {
+    // Show a subset of dots with current question in the middle
+    const halfRange = Math.floor(maxDotsToShow / 2);
+    let startIndex = Math.max(0, currentQuestionIndex - halfRange);
+    let endIndex = Math.min(totalQuestions - 1, startIndex + maxDotsToShow - 1);
     
-    if (isCurrent) {
-      dotStyle = [styles.dot, styles.currentDot];
-    } else if (isAnswered) {
-      dotStyle = [styles.dot, isCorrect ? styles.correctDot : styles.incorrectDot];
-    } else {
-      dotStyle = [styles.dot, styles.futureDot];
+    // Adjust if we're near the end
+    if (endIndex - startIndex < maxDotsToShow - 1) {
+      startIndex = Math.max(0, endIndex - maxDotsToShow + 1);
     }
-
-    return <View key={index} style={dotStyle} />;
-  };
-
+    
+    const visibleIndices = Array.from(
+      { length: endIndex - startIndex + 1 }, 
+      (_, i) => startIndex + i
+    );
+    
+    return (
+      <View style={styles.container}>
+        {startIndex > 0 && <View style={styles.ellipsis} />}
+        {visibleIndices.map((index) => {
+          const isCurrent = index === currentQuestionIndex;
+          const isAnswered = answeredQuestions[index];
+          
+          return (
+            <View
+              key={index}
+              style={[
+                styles.dot,
+                isCurrent && styles.currentDot,
+                isAnswered && styles.answeredDot,
+              ]}
+            />
+          );
+        })}
+        {endIndex < totalQuestions - 1 && <View style={styles.ellipsis} />}
+      </View>
+    );
+  }
+  
+  // Show all dots if total is manageable
   return (
-    <View style={[styles.container, style]}>
-      {Array.from({ length: totalQuestions }, (_, index) => renderDot(index))}
+    <View style={styles.container}>
+      {Array.from({ length: totalQuestions }, (_, index) => {
+        const isCurrent = index === currentQuestionIndex;
+        const isAnswered = answeredQuestions[index];
+        
+        return (
+          <View
+            key={index}
+            style={[
+              styles.dot,
+              isCurrent && styles.currentDot,
+              isAnswered && styles.answeredDot,
+            ]}
+          />
+        );
+      })}
     </View>
   );
 }
@@ -44,64 +80,31 @@ export default function QuestionProgressDots({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    gap: Spacing.xs,
-    paddingVertical: Spacing.md,
-    marginTop: Spacing.sm,
+    justifyContent: 'center',
+    paddingVertical: 16,
+    gap: 8,
   },
   dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: Colors.dark.border,
-    shadowColor: Colors.dark.text,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
   },
   currentDot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     backgroundColor: Colors.dark.primary,
-    shadowColor: Colors.dark.primary,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
   },
-  correctDot: {
+  answeredDot: {
     backgroundColor: Colors.dark.success,
-    shadowColor: Colors.dark.success,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 2,
   },
-  incorrectDot: {
-    backgroundColor: Colors.dark.error,
-    shadowColor: Colors.dark.error,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  futureDot: {
-    backgroundColor: Colors.dark.border,
-    opacity: 0.6,
+  ellipsis: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.dark.textSecondary,
+    marginHorizontal: 2,
   },
 });

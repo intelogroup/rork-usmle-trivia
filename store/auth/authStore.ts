@@ -1,13 +1,12 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { supabase } from '@/lib/supabase';
-import type { User, Session } from '@supabase/supabase-js';
+import { localAuth, type LocalUser, type LocalSession } from '@/lib/auth/localAuth';
 import type { UserProfile } from '@/lib/types/auth';
 
 interface AuthState {
-  user: User | null;
-  session: Session | null;
+  user: LocalUser | null;
+  session: LocalSession | null;
   profile: UserProfile | null;
   isLoading: boolean;
   isAuthenticated: boolean;
@@ -21,7 +20,7 @@ interface AuthState {
   register: (email: string, password: string, username: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
-  loadOrCreateProfile: (user: User) => Promise<void>;
+  loadOrCreateProfile: (user: LocalUser) => Promise<void>;
   clearError: () => void;
 }
 
@@ -39,18 +38,16 @@ export const useAuthStore = create<AuthState>()(
         set({ error: null });
       },
 
-      loadOrCreateProfile: async (user: User) => {
+      loadOrCreateProfile: async (user: LocalUser) => {
         try {
           console.log('Loading or creating profile for user:', user.id);
           
-          // Try to load existing profile first
-          const { data: existingProfile, error: fetchError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
+          // Try to load existing profile from local storage
+          const profileKey = `profile_${user.id}`;
+          const existingProfileData = await AsyncStorage.getItem(profileKey);
 
-          if (existingProfile && !fetchError) {
+          if (existingProfileData) {
+            const existingProfile = JSON.parse(existingProfileData);
             console.log('Existing profile loaded successfully');
             set({ profile: existingProfile });
             return;
@@ -60,7 +57,7 @@ export const useAuthStore = create<AuthState>()(
           // Create new profile if doesn't exist
           const newProfile: UserProfile = {
             id: user.id,
-            username: user.user_metadata?.username || user.email?.split('@')[0] || 'User',
+            username: user.username,
             level: 1,
             experience_points: 0,
             total_quizzes: 0,
@@ -72,25 +69,10 @@ export const useAuthStore = create<AuthState>()(
             updated_at: new Date().toISOString(),
           };
 
-          try {
-            const { data: createdProfile, error: createError } = await supabase
-              .from('profiles')
-              .insert([newProfile])
-              .select()
-              .single();
-
-            if (createdProfile && !createError) {
-              console.log('Profile created successfully in database');
-              set({ profile: createdProfile });
-            } else {
-              console.warn('Failed to create profile in database, using local profile:', createError);
-              set({ profile: newProfile });
-            }
-          } catch (dbError: unknown) {
-            const errorMessage = dbError instanceof Error ? dbError.message : 'Unknown database error';
-            console.warn('Database profile creation failed, using local profile:', errorMessage);
-            set({ profile: newProfile });
-          }
+          // Save profile to local storage
+          await AsyncStorage.setItem(profileKey, JSON.stringify(newProfile));
+          console.log('Profile created successfully in local storage');
+          set({ profile: newProfile });
 
         } catch (error: unknown) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error in profile creation';
@@ -98,7 +80,7 @@ export const useAuthStore = create<AuthState>()(
           // Create fallback profile
           const fallbackProfile: UserProfile = {
             id: user.id,
-            username: user.user_metadata?.username || user.email?.split('@')[0] || 'User',
+            username: user.username,
             level: 1,
             experience_points: 0,
             total_quizzes: 0,
@@ -118,34 +100,11 @@ export const useAuthStore = create<AuthState>()(
           console.log('Initializing auth store...');
           set({ isLoading: true, error: null });
           
-          // Get initial session with timeout
-          const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('Auth initialization timeout')), 10000);
-          });
-
-          const sessionPromise = supabase.auth.getSession();
+          // Get initial session
+          const { session } = await localAuth.getSession();
           
-          let sessionResult;
-          try {
-            sessionResult = await Promise.race([sessionPromise, timeoutPromise]);
-          } catch (timeoutError: unknown) {
-            const errorMessage = timeoutError instanceof Error ? timeoutError.message : 'Unknown timeout error';
-            console.warn('Session fetch timed out, continuing without auth:', errorMessage);
-            set({ isLoading: false, isAuthenticated: false, error: null });
-            return;
-          }
-
-          const { data: { session }, error } = sessionResult as any;
-          
-          if (error) {
-            console.error('Session error, continuing with fallback:', error);
-            set({ isLoading: false, isAuthenticated: false, error: null });
-            return;
-          }
-
           if (session?.user) {
             console.log('User session found, setting authenticated state');
-            // Set authenticated immediately with basic user data
             set({ 
               user: session.user, 
               session, 
@@ -154,7 +113,7 @@ export const useAuthStore = create<AuthState>()(
               error: null
             });
 
-            // Try to load or create profile in background
+            // Load or create profile in background
             setTimeout(async () => {
               try {
                 await get().loadOrCreateProfile(session.user);
@@ -169,8 +128,8 @@ export const useAuthStore = create<AuthState>()(
             set({ isLoading: false, isAuthenticated: false, error: null });
           }
 
-          // Listen for auth changes
-          supabase.auth.onAuthStateChange(async (event, session) => {
+          // Listen for auth changes (simplified for local auth)
+          localAuth.onAuthStateChange(async (event, session) => {
             try {
               console.log('Auth state change:', event);
               
@@ -226,72 +185,27 @@ export const useAuthStore = create<AuthState>()(
           console.log('Attempting to sign in user:', email);
           set({ isLoading: true, error: null });
           
-          const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('Sign in timeout')), 15000);
+          const { user, session } = await localAuth.signIn(email, password);
+
+          console.log('Sign in successful');
+          set({ 
+            user, 
+            session, 
+            isLoading: false, 
+            isAuthenticated: true,
+            error: null
           });
 
-          const signInPromise = supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-
-          const { data, error } = await Promise.race([signInPromise, timeoutPromise]) as any;
-
-          if (error) {
-            console.error('Sign in error:', error);
-            let errorMessage = 'Failed to sign in. Please try again.';
-            
-            switch (error.code || error.message) {
-              case 'invalid_credentials':
-              case 'Invalid login credentials':
-                errorMessage = 'Invalid email or password. Please check your credentials and try again.';
-                break;
-              case 'user_not_found':
-                errorMessage = 'No account found with this email. Please sign up first.';
-                break;
-              case 'too_many_requests':
-                errorMessage = 'Too many login attempts. Please wait a moment and try again.';
-                break;
-              case 'network_error':
-                errorMessage = 'Network error. Please check your internet connection and try again.';
-                break;
-              case 'email_not_confirmed':
-                errorMessage = 'Please check your email and confirm your account before signing in.';
-                break;
-              default:
-                if (error.message?.includes('timeout')) {
-                  errorMessage = 'Sign in timed out. Please check your connection and try again.';
-                } else if (error.message?.includes('network')) {
-                  errorMessage = 'Network error. Please check your internet connection.';
-                } else if (error.message) {
-                  errorMessage = error.message;
-                }
+          // Load or create profile in background
+          setTimeout(async () => {
+            try {
+              await get().loadOrCreateProfile(user);
+            } catch (profileError: unknown) {
+              const errorMessage = profileError instanceof Error ? profileError.message : 'Unknown profile setup error';
+              console.error('Sign in profile setup error:', errorMessage);
             }
-            
-            set({ isLoading: false, error: errorMessage });
-            throw new Error(errorMessage);
-          }
+          }, 100);
 
-          if (data.user) {
-            console.log('Sign in successful');
-            set({ 
-              user: data.user, 
-              session: data.session, 
-              isLoading: false, 
-              isAuthenticated: true,
-              error: null
-            });
-
-            // Load or create profile in background
-            setTimeout(async () => {
-              try {
-                await get().loadOrCreateProfile(data.user);
-              } catch (profileError: unknown) {
-                const errorMessage = profileError instanceof Error ? profileError.message : 'Unknown profile setup error';
-                console.error('Sign in profile setup error:', errorMessage);
-              }
-            }, 100);
-          }
         } catch (signInError: unknown) {
           console.error('Sign in error:', signInError);
           let errorMessage = 'Failed to sign in. Please try again.';
@@ -315,77 +229,27 @@ export const useAuthStore = create<AuthState>()(
           console.log('Attempting to sign up user:', email);
           set({ isLoading: true, error: null });
           
-          const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('Sign up timeout')), 20000);
+          const { user, session } = await localAuth.signUp(email, password, username);
+
+          console.log('Sign up successful');
+          set({ 
+            user, 
+            session, 
+            isLoading: false, 
+            isAuthenticated: true,
+            error: null
           });
 
-          const signUpPromise = supabase.auth.signUp({
-            email,
-            password,
-            options: {
-              data: {
-                username,
-              },
-            },
-          });
-
-          const { data, error } = await Promise.race([signUpPromise, timeoutPromise]) as any;
-
-          if (error) {
-            console.error('Sign up error:', error);
-            let errorMessage = 'Failed to create account. Please try again.';
-            
-            switch (error.code || error.message) {
-              case 'user_already_exists':
-              case 'User already registered':
-                errorMessage = 'An account with this email already exists. Please sign in instead.';
-                break;
-              case 'invalid_email':
-                errorMessage = 'Invalid email format. Please check your email address.';
-                break;
-              case 'weak_password':
-                errorMessage = 'Password is too weak. Please use at least 6 characters with a mix of letters and numbers.';
-                break;
-              case 'signup_disabled':
-                errorMessage = 'Account creation is currently disabled. Please try again later.';
-                break;
-              case 'network_error':
-                errorMessage = 'Network error. Please check your internet connection and try again.';
-                break;
-              default:
-                if (error.message?.includes('timeout')) {
-                  errorMessage = 'Sign up timed out. Please check your connection and try again.';
-                } else if (error.message?.includes('network')) {
-                  errorMessage = 'Network error. Please check your internet connection.';
-                } else if (error.message) {
-                  errorMessage = error.message;
-                }
+          // Create profile in background
+          setTimeout(async () => {
+            try {
+              await get().loadOrCreateProfile(user);
+            } catch (profileError: unknown) {
+              const errorMessage = profileError instanceof Error ? profileError.message : 'Unknown profile creation error';
+              console.error('Sign up profile creation error:', errorMessage);
             }
-            
-            set({ isLoading: false, error: errorMessage });
-            throw new Error(errorMessage);
-          }
+          }, 100);
 
-          if (data.user) {
-            console.log('Sign up successful');
-            set({ 
-              user: data.user, 
-              session: data.session, 
-              isLoading: false, 
-              isAuthenticated: true,
-              error: null
-            });
-
-            // Create profile in background
-            setTimeout(async () => {
-              try {
-                await get().loadOrCreateProfile(data.user);
-              } catch (profileError: unknown) {
-                const errorMessage = profileError instanceof Error ? profileError.message : 'Unknown profile creation error';
-                console.error('Sign up profile creation error:', errorMessage);
-              }
-            }, 100);
-          }
         } catch (signUpError: unknown) {
           console.error('Sign up error:', signUpError);
           let errorMessage = 'Failed to sign up. Please try again.';
@@ -408,15 +272,11 @@ export const useAuthStore = create<AuthState>()(
         console.log('Attempting to sign out...');
         set({ isLoading: true });
 
-        // Attempt to sign out from Supabase, but don't let it block state cleanup
         try {
-          const { error } = await supabase.auth.signOut();
-          if (error) {
-            console.error('Error during Supabase signOut:', error.message);
-          }
+          await localAuth.signOut();
         } catch (signOutError: unknown) {
           const errorMessage = signOutError instanceof Error ? signOutError.message : 'Unknown sign out error';
-          console.error('Supabase signOut failed:', errorMessage);
+          console.error('Local auth signOut failed:', errorMessage);
         }
 
         // ALWAYS clear the local state to log the user out of the app
@@ -443,27 +303,23 @@ export const useAuthStore = create<AuthState>()(
 
       updateProfile: async (updates: Partial<UserProfile>) => {
         try {
-          const { profile } = get();
-          if (!profile) throw new Error('No profile found');
+          const { profile, user } = get();
+          if (!profile || !user) throw new Error('No profile found');
 
           console.log('Updating profile with:', updates);
 
           const updatedProfile = {
+            ...profile,
             ...updates,
             updated_at: new Date().toISOString(),
           };
 
-          const { data, error } = await supabase
-            .from('profiles')
-            .update(updatedProfile)
-            .eq('id', profile.id)
-            .select()
-            .single();
-
-          if (error) throw error;
+          // Save to local storage
+          const profileKey = `profile_${user.id}`;
+          await AsyncStorage.setItem(profileKey, JSON.stringify(updatedProfile));
 
           console.log('Profile updated successfully');
-          set({ profile: data, error: null });
+          set({ profile: updatedProfile, error: null });
         } catch (updateError: unknown) {
           const errorMessage = updateError instanceof Error ? updateError.message : 'Failed to update profile';
           console.error('Update profile error:', errorMessage);

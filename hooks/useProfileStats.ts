@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '@/store/auth/authStore';
-import { supabase } from '@/lib/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Achievement } from '@/lib/types/achievement';
 
 interface ProfileStatsData {
@@ -10,22 +10,6 @@ interface ProfileStatsData {
   achievements: Achievement[];
   totalQuizzes: number;
   averageAccuracy: number;
-}
-
-// Type for the joined achievement data from Supabase
-interface UserAchievementWithDetails {
-  unlocked_at: string;
-  achievements: {
-    id: string;
-    title: string;
-    description: string;
-    icon: string;
-    category: string;
-    requirement_type: string;
-    requirement_value: number;
-    points: number;
-    rarity: string;
-  } | null; // Allow for null in case the join fails or data is missing
 }
 
 export function useProfileStats() {
@@ -51,32 +35,26 @@ export function useProfileStats() {
     setError(null);
 
     try {
-      // Fetch real quiz session data
-      const { data: sessionData, error: sessionError } = await supabase
-        .from('quiz_sessions')
-        .select('score, total_questions, correct_answers, category_id')
-        .eq('user_id', user.id);
-
-      if (sessionError) {
-        console.warn('Error fetching quiz sessions, using profile data:', sessionError);
-      }
+      // Load quiz sessions from local storage
+      const sessionsData = await AsyncStorage.getItem('quiz-sessions');
+      const sessionData = sessionsData ? JSON.parse(sessionsData) : [];
 
       let calculatedStats: ProfileStatsData;
 
       if (sessionData && sessionData.length > 0) {
         // Use real session data
         const totalQuizzes = sessionData.length;
-        const totalCorrect = sessionData.reduce((sum, s) => sum + (s.correct_answers || s.score || 0), 0);
-        const totalQuestions = sessionData.reduce((sum, s) => sum + (s.total_questions || 0), 0);
+        const totalCorrect = sessionData.reduce((sum: number, s: any) => sum + (s.correct_answers || s.score || 0), 0);
+        const totalQuestions = sessionData.reduce((sum: number, s: any) => sum + (s.total_questions || 0), 0);
         const averageAccuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
         
-        const perfectScores = sessionData.filter(s => {
+        const perfectScores = sessionData.filter((s: any) => {
           const score = s.correct_answers || s.score || 0;
           const total = s.total_questions || 0;
           return total > 0 && score === total;
         }).length;
 
-        const uniqueCategories = new Set(sessionData.map(s => s.category_id).filter(Boolean));
+        const uniqueCategories = new Set(sessionData.map((s: any) => s.category_id).filter(Boolean));
         const categoriesCompleted = uniqueCategories.size;
 
         calculatedStats = {
@@ -103,45 +81,13 @@ export function useProfileStats() {
         };
       }
 
-      // Fetch real achievements
+      // Load achievements from local storage
       try {
-        const { data: userAchievements, error: achievementError } = await supabase
-          .from('user_achievements')
-          .select(`
-            unlocked_at,
-            achievements (*)
-          `)
-          .eq('user_id', user.id);
+        const achievementsData = await AsyncStorage.getItem(`achievements_${user.id}`);
+        const userAchievements = achievementsData ? JSON.parse(achievementsData) : [];
 
-        if (achievementError) {
-          console.warn('Error fetching achievements, using mock data:', achievementError);
-        }
-
-        if (userAchievements && userAchievements.length > 0) {
-          // Use real achievements - properly type the joined data
-          const realAchievements = (userAchievements as UserAchievementWithDetails[])
-            .map(ua => {
-              const achievement = ua.achievements;
-              if (achievement && typeof achievement === 'object') {
-                return {
-                  id: achievement.id,
-                  title: achievement.title,
-                  description: achievement.description,
-                  icon: achievement.icon,
-                  category: achievement.category,
-                  requirement_type: achievement.requirement_type,
-                  requirement_value: achievement.requirement_value,
-                  points: achievement.points,
-                  rarity: achievement.rarity,
-                  unlocked: true,
-                  unlocked_at: ua.unlocked_at,
-                } as Achievement;
-              }
-              return null;
-            })
-            .filter((achievement): achievement is Achievement => achievement !== null);
-          
-          calculatedStats.achievements = realAchievements;
+        if (userAchievements.length > 0) {
+          calculatedStats.achievements = userAchievements;
         } else {
           // Fallback to mock achievements based on progress
           calculatedStats.achievements = [

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import { useAuthStore } from '@/store/auth/authStore';
-import { testSupabaseConnection } from '@/lib/supabase';
 
 // Keep splash screen visible during initialization
 SplashScreen.preventAutoHideAsync().catch((error: unknown) => {
@@ -27,39 +26,15 @@ export function useAppInitializer() {
         // Set a reasonable timeout for the entire initialization process
         const initializationTimeout = new Promise<never>((_, reject) => {
           setTimeout(() => {
-            reject(new Error('App initialization timed out. Please check your internet connection and try again.'));
-          }, 15000); // 15 second timeout
+            reject(new Error('App initialization timed out. Please restart the app.'));
+          }, 10000); // 10 second timeout
         });
 
         // Run initialization tasks
         const initializationTasks = async () => {
           try {
-            // Test Supabase connection first (non-blocking)
-            const connectionTest = testSupabaseConnection().catch((connectionError: unknown) => {
-              let errorMessage = 'Unknown connection error';
-              if (connectionError instanceof Error) {
-                errorMessage = connectionError.message;
-              } else if (typeof connectionError === 'string') {
-                errorMessage = connectionError;
-              }
-              console.warn('Supabase connection test failed (continuing anyway):', errorMessage);
-              return false; // Continue even if connection test fails
-            });
-
-            // Initialize auth state
-            const authInitialization = initialize().catch((authError: unknown) => {
-              let errorMessage = 'Unknown auth initialization error';
-              if (authError instanceof Error) {
-                errorMessage = authError.message;
-              } else if (typeof authError === 'string') {
-                errorMessage = authError;
-              }
-              console.warn('Auth initialization failed (continuing with fallback):', errorMessage);
-              // Don't throw here - let the app continue with unauthenticated state
-            });
-
-            // Wait for both tasks to complete
-            await Promise.all([connectionTest, authInitialization]);
+            // Initialize auth state (local auth is much faster)
+            await initialize();
             
             console.log('App initialization completed successfully');
           } catch (taskError: unknown) {
