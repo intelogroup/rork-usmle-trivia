@@ -1,18 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
-
-export interface LocalUser {
-  id: string;
-  email: string;
-  username: string;
-  created_at: string;
-}
-
-export interface LocalSession {
-  user: LocalUser;
-  access_token: string;
-  expires_at: number;
-}
+import type { LocalUser, LocalSession } from '@/lib/types/auth';
 
 class LocalAuthService {
   private storageKey = 'local-auth-users';
@@ -29,7 +17,7 @@ class LocalAuthService {
     return AsyncStorage;
   }
 
-  private async getUsers(): Promise<Record<string, LocalUser>> {
+  private async getUsers(): Promise<Record<string, LocalUser & { password: string }>> {
     try {
       const storage = await this.getStorage();
       const usersData = await storage.getItem(this.storageKey);
@@ -40,7 +28,7 @@ class LocalAuthService {
     }
   }
 
-  private async saveUsers(users: Record<string, LocalUser>): Promise<void> {
+  private async saveUsers(users: Record<string, LocalUser & { password: string }>): Promise<void> {
     try {
       const storage = await this.getStorage();
       await storage.setItem(this.storageKey, JSON.stringify(users));
@@ -79,21 +67,25 @@ class LocalAuthService {
       throw new Error('Password must be at least 6 characters');
     }
 
+    if (username.length < 2) {
+      throw new Error('Username must be at least 2 characters');
+    }
+
     // Create new user
     const user: LocalUser = {
       id: this.generateId(),
       email,
       username,
       created_at: new Date().toISOString(),
+      user_metadata: {
+        username,
+        avatar_url: undefined,
+      },
     };
 
-    // Save user with password (in real app, password would be hashed)
-    users[user.id] = user;
+    // Save user with password
+    users[user.id] = { ...user, password };
     await this.saveUsers(users);
-
-    // Save password separately (in real app, this would be hashed and stored securely)
-    const storage = await this.getStorage();
-    await storage.setItem(`password_${user.id}`, password);
 
     // Create session
     const session: LocalSession = {
@@ -103,6 +95,7 @@ class LocalAuthService {
     };
 
     // Save session
+    const storage = await this.getStorage();
     await storage.setItem(this.sessionKey, JSON.stringify(session));
 
     return { user, session };
@@ -112,17 +105,24 @@ class LocalAuthService {
     const users = await this.getUsers();
     
     // Find user by email
-    const user = Object.values(users).find(user => user.email === email);
-    if (!user) {
+    const userWithPassword = Object.values(users).find(user => user.email === email);
+    if (!userWithPassword) {
       throw new Error('Invalid login credentials');
     }
 
     // Check password
-    const storage = await this.getStorage();
-    const storedPassword = await storage.getItem(`password_${user.id}`);
-    if (storedPassword !== password) {
+    if (userWithPassword.password !== password) {
       throw new Error('Invalid login credentials');
     }
+
+    // Create clean user object without password
+    const user: LocalUser = {
+      id: userWithPassword.id,
+      email: userWithPassword.email,
+      username: userWithPassword.username,
+      created_at: userWithPassword.created_at,
+      user_metadata: userWithPassword.user_metadata,
+    };
 
     // Create session
     const session: LocalSession = {
@@ -132,6 +132,7 @@ class LocalAuthService {
     };
 
     // Save session
+    const storage = await this.getStorage();
     await storage.setItem(this.sessionKey, JSON.stringify(session));
 
     return { user, session };

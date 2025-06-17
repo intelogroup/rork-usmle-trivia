@@ -3,11 +3,10 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Modal, TextInpu
 import Colors from '@/theme/colors';
 import { Camera, Edit3, X, Check } from 'lucide-react-native';
 import { useAuthStore } from '@/store/auth/authStore';
-import type { User } from '@supabase/supabase-js';
-import type { UserProfile } from '@/lib/types/auth';
+import type { LocalUser, UserProfile } from '@/lib/types/auth';
 
 interface ProfileHeaderProps {
-  user: User;
+  user: LocalUser;
   profile?: UserProfile | null;
 }
 

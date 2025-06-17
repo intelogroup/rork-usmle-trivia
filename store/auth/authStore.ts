@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { localAuth, type LocalUser, type LocalSession } from '@/lib/auth/localAuth';
-import type { UserProfile } from '@/lib/types/auth';
+import { localAuth } from '@/lib/auth/localAuth';
+import type { LocalUser, LocalSession, UserProfile } from '@/lib/types/auth';
 
 interface AuthState {
   user: LocalUser | null;

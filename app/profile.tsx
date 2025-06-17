@@ -10,7 +10,6 @@ import ProfileStats from '@/components/profile/ProfileStats';
 import PerformanceOverview from '@/components/profile/PerformanceOverview';
 import RecentAchievements from '@/components/profile/RecentAchievements';
 import SettingsSection from '@/components/profile/SettingsSection';
-import DatabaseTestButton from '@/components/DatabaseTestButton';
 
 export default function ProfileScreen() {
   const { user, profile, isAuthenticated } = useAuthStore();
@@ -226,9 +225,6 @@ export default function ProfileScreen() {
         />
         
         <SettingsSection onShare={handleShare} />
-        
-        {/* Database Test Button for debugging */}
-        <DatabaseTestButton />
         
         <View style={styles.bottomSpacing} />
       </ScrollView>
