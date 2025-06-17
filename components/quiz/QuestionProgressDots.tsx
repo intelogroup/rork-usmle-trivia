@@ -98,6 +98,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.primary,
   },
   answeredDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: Colors.dark.success,
   },
   ellipsis: {
