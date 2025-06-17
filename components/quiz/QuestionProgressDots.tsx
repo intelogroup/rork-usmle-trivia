@@ -45,7 +45,7 @@ export default function QuestionProgressDots({
               style={[
                 styles.dot,
                 isCurrent && styles.currentDot,
-                isAnswered && styles.answeredDot,
+                isAnswered && !isCurrent && styles.answeredDot,
               ]}
             />
           );
@@ -68,7 +68,7 @@ export default function QuestionProgressDots({
             style={[
               styles.dot,
               isCurrent && styles.currentDot,
-              isAnswered && styles.answeredDot,
+              isAnswered && !isCurrent && styles.answeredDot,
             ]}
           />
         );
