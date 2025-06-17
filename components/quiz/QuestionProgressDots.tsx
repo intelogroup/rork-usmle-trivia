@@ -21,7 +21,7 @@ export default function QuestionProgressDots({
     const isAnswered = index < currentIndex;
     const isCorrect = correctAnswers.includes(index);
 
-    let dotStyle = [styles.dot];
+    let dotStyle: ViewStyle[] = [styles.dot];
     
     if (isCurrent) {
       dotStyle = [styles.dot, styles.currentDot];
@@ -47,28 +47,61 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: Spacing.xs,
-    paddingVertical: Spacing.sm,
-    marginTop: Spacing.xs,
+    paddingVertical: Spacing.md,
+    marginTop: Spacing.sm,
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: Colors.dark.border,
+    shadowColor: Colors.dark.text,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
   },
   currentDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     backgroundColor: Colors.dark.primary,
+    shadowColor: Colors.dark.primary,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
   },
   correctDot: {
     backgroundColor: Colors.dark.success,
+    shadowColor: Colors.dark.success,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 2,
   },
   incorrectDot: {
     backgroundColor: Colors.dark.error,
+    shadowColor: Colors.dark.error,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 2,
   },
   futureDot: {
     backgroundColor: Colors.dark.border,
+    opacity: 0.6,
   },
 });
