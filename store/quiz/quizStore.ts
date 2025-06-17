@@ -15,8 +15,12 @@ export const useQuizStore = create<QuizSetupState & QuizSessionState>()(
       name: 'quiz-storage',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
+        // Only persist essential data to avoid loading issues
         currentSession: state.currentSession || null,
       }),
+      onRehydrateStorage: () => (state) => {
+        console.log('Quiz store rehydrated');
+      },
     }
   )
 );

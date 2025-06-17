@@ -9,9 +9,9 @@ class LocalAuthService {
   private async getStorage() {
     if (Platform.OS === 'web') {
       return {
-        getItem: (key: string) => localStorage.getItem(key),
-        setItem: (key: string, value: string) => localStorage.setItem(key, value),
-        removeItem: (key: string) => localStorage.removeItem(key),
+        getItem: (key: string) => Promise.resolve(localStorage.getItem(key)),
+        setItem: (key: string, value: string) => Promise.resolve(localStorage.setItem(key, value)),
+        removeItem: (key: string) => Promise.resolve(localStorage.removeItem(key)),
       };
     }
     return AsyncStorage;
@@ -34,6 +34,7 @@ class LocalAuthService {
       await storage.setItem(this.storageKey, JSON.stringify(users));
     } catch (error) {
       console.error('Error saving users:', error);
+      throw error;
     }
   }
 
@@ -46,14 +47,6 @@ class LocalAuthService {
   }
 
   async signUp(email: string, password: string, username: string): Promise<{ user: LocalUser; session: LocalSession }> {
-    const users = await this.getUsers();
-    
-    // Check if user already exists
-    const existingUser = Object.values(users).find(user => user.email === email);
-    if (existingUser) {
-      throw new Error('User already registered');
-    }
-
     // Validate inputs
     if (!email || !password || !username) {
       throw new Error('All fields are required');
@@ -69,6 +62,14 @@ class LocalAuthService {
 
     if (username.length < 2) {
       throw new Error('Username must be at least 2 characters');
+    }
+
+    const users = await this.getUsers();
+    
+    // Check if user already exists
+    const existingUser = Object.values(users).find(user => user.email === email);
+    if (existingUser) {
+      throw new Error('User already registered');
     }
 
     // Create new user
@@ -102,6 +103,10 @@ class LocalAuthService {
   }
 
   async signIn(email: string, password: string): Promise<{ user: LocalUser; session: LocalSession }> {
+    if (!email || !password) {
+      throw new Error('Email and password are required');
+    }
+
     const users = await this.getUsers();
     
     // Find user by email
@@ -176,6 +181,9 @@ class LocalAuthService {
     // For simplicity, we'll just call the callback immediately with current session
     this.getSession().then(({ session }) => {
       callback(session ? 'SIGNED_IN' : 'SIGNED_OUT', session);
+    }).catch(error => {
+      console.error('Auth state change error:', error);
+      callback('SIGNED_OUT', null);
     });
 
     // Return unsubscribe function

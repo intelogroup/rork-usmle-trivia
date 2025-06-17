@@ -26,7 +26,7 @@ export default function FullScreenLoader({
         <Text style={styles.text}>{message}</Text>
         
         <Text style={styles.subText}>
-          Preparing your learning experience...
+          Setting up your learning experience...
         </Text>
       </View>
     </View>

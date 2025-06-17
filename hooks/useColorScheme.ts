@@ -1,5 +1,6 @@
 import { useColorScheme as useNativeColorScheme } from 'react-native';
 
 export function useColorScheme() {
-  return useNativeColorScheme() ?? 'dark';
+  // Always return 'dark' to avoid theme switching issues during initialization
+  return 'dark';
 }

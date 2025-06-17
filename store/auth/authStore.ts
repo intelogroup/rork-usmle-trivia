@@ -42,19 +42,17 @@ export const useAuthStore = create<AuthState>()(
         try {
           console.log('Loading or creating profile for user:', user.id);
           
-          // Try to load existing profile from local storage
           const profileKey = `profile_${user.id}`;
           const existingProfileData = await AsyncStorage.getItem(profileKey);
 
           if (existingProfileData) {
             const existingProfile = JSON.parse(existingProfileData);
-            console.log('Existing profile loaded successfully');
+            console.log('Existing profile loaded');
             set({ profile: existingProfile });
             return;
           }
 
-          console.log('Creating new profile for user');
-          // Create new profile if doesn't exist
+          console.log('Creating new profile');
           const newProfile: UserProfile = {
             id: user.id,
             username: user.username,
@@ -69,15 +67,13 @@ export const useAuthStore = create<AuthState>()(
             updated_at: new Date().toISOString(),
           };
 
-          // Save profile to local storage
           await AsyncStorage.setItem(profileKey, JSON.stringify(newProfile));
-          console.log('Profile created successfully in local storage');
+          console.log('Profile created successfully');
           set({ profile: newProfile });
 
         } catch (error: unknown) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error in profile creation';
-          console.error('Profile load/create error, using fallback:', errorMessage);
-          // Create fallback profile
+          console.error('Profile creation error:', error);
+          // Create fallback profile without throwing
           const fallbackProfile: UserProfile = {
             id: user.id,
             username: user.username,
@@ -100,123 +96,84 @@ export const useAuthStore = create<AuthState>()(
           console.log('Initializing auth store...');
           set({ isLoading: true, error: null });
           
-          // Get initial session
           const { session } = await localAuth.getSession();
           
           if (session?.user) {
-            console.log('User session found, setting authenticated state');
+            console.log('User session found');
             set({ 
               user: session.user, 
               session, 
-              isLoading: false, 
               isAuthenticated: true,
               error: null
             });
 
-            // Load or create profile in background
-            setTimeout(async () => {
-              try {
-                await get().loadOrCreateProfile(session.user);
-              } catch (profileError: unknown) {
-                const errorMessage = profileError instanceof Error ? profileError.message : 'Unknown profile setup error';
-                console.error('Background profile setup error:', errorMessage);
-              }
-            }, 100);
-
+            // Load profile synchronously to avoid hanging
+            await get().loadOrCreateProfile(session.user);
           } else {
             console.log('No user session found');
-            set({ isLoading: false, isAuthenticated: false, error: null });
+            set({ isAuthenticated: false, error: null });
           }
 
-          // Listen for auth changes (simplified for local auth)
+          // Set up auth state listener
           localAuth.onAuthStateChange(async (event, session) => {
-            try {
-              console.log('Auth state change:', event);
-              
-              if (event === 'SIGNED_IN' && session?.user) {
-                console.log('User signed in, updating state');
-                set({ 
-                  user: session.user, 
-                  session, 
-                  isAuthenticated: true,
-                  error: null
-                });
-
-                // Load or create profile in background
-                setTimeout(async () => {
-                  try {
-                    await get().loadOrCreateProfile(session.user);
-                  } catch (profileError: unknown) {
-                    const errorMessage = profileError instanceof Error ? profileError.message : 'Unknown auth state change error';
-                    console.error('Auth state change profile error:', errorMessage);
-                  }
-                }, 100);
-
-              } else if (event === 'SIGNED_OUT') {
-                console.log('User signed out, clearing state');
-                set({ 
-                  user: null, 
-                  session: null, 
-                  profile: null,
-                  isAuthenticated: false,
-                  error: null
-                });
-              }
-            } catch (stateChangeError: unknown) {
-              const errorMessage = stateChangeError instanceof Error ? stateChangeError.message : 'Unknown auth state change error';
-              console.error('Auth state change error:', errorMessage);
+            console.log('Auth state change:', event);
+            
+            if (event === 'SIGNED_IN' && session?.user) {
+              set({ 
+                user: session.user, 
+                session, 
+                isAuthenticated: true,
+                error: null
+              });
+              // Load profile in background
+              get().loadOrCreateProfile(session.user).catch(console.error);
+            } else if (event === 'SIGNED_OUT') {
+              set({ 
+                user: null, 
+                session: null, 
+                profile: null,
+                isAuthenticated: false,
+                error: null
+              });
             }
           });
 
         } catch (initError: unknown) {
-          const errorMessage = initError instanceof Error ? initError.message : 'Failed to initialize auth';
+          const errorMessage = initError instanceof Error ? initError.message : 'Auth initialization failed';
           console.error('Auth initialization error:', errorMessage);
           set({ 
-            isLoading: false, 
             isAuthenticated: false, 
             error: errorMessage
           });
-          throw new Error(errorMessage);
+        } finally {
+          set({ isLoading: false });
         }
       },
 
       signIn: async (email: string, password: string) => {
         try {
-          console.log('Attempting to sign in user:', email);
+          console.log('Signing in user:', email);
           set({ isLoading: true, error: null });
           
           const { user, session } = await localAuth.signIn(email, password);
 
-          console.log('Sign in successful');
           set({ 
             user, 
             session, 
-            isLoading: false, 
             isAuthenticated: true,
             error: null
           });
 
-          // Load or create profile in background
-          setTimeout(async () => {
-            try {
-              await get().loadOrCreateProfile(user);
-            } catch (profileError: unknown) {
-              const errorMessage = profileError instanceof Error ? profileError.message : 'Unknown profile setup error';
-              console.error('Sign in profile setup error:', errorMessage);
-            }
-          }, 100);
+          // Load profile in background
+          get().loadOrCreateProfile(user).catch(console.error);
 
         } catch (signInError: unknown) {
-          console.error('Sign in error:', signInError);
-          let errorMessage = 'Failed to sign in. Please try again.';
-          if (signInError instanceof Error) {
-            errorMessage = signInError.message;
-          }
-          set({ 
-            isLoading: false,
-            error: errorMessage
-          });
+          const errorMessage = signInError instanceof Error ? signInError.message : 'Sign in failed';
+          console.error('Sign in error:', errorMessage);
+          set({ error: errorMessage });
           throw signInError;
+        } finally {
+          set({ isLoading: false });
         }
       },
 
@@ -226,41 +183,28 @@ export const useAuthStore = create<AuthState>()(
 
       signUp: async (email: string, password: string, username: string) => {
         try {
-          console.log('Attempting to sign up user:', email);
+          console.log('Signing up user:', email);
           set({ isLoading: true, error: null });
           
           const { user, session } = await localAuth.signUp(email, password, username);
 
-          console.log('Sign up successful');
           set({ 
             user, 
             session, 
-            isLoading: false, 
             isAuthenticated: true,
             error: null
           });
 
           // Create profile in background
-          setTimeout(async () => {
-            try {
-              await get().loadOrCreateProfile(user);
-            } catch (profileError: unknown) {
-              const errorMessage = profileError instanceof Error ? profileError.message : 'Unknown profile creation error';
-              console.error('Sign up profile creation error:', errorMessage);
-            }
-          }, 100);
+          get().loadOrCreateProfile(user).catch(console.error);
 
         } catch (signUpError: unknown) {
-          console.error('Sign up error:', signUpError);
-          let errorMessage = 'Failed to sign up. Please try again.';
-          if (signUpError instanceof Error) {
-            errorMessage = signUpError.message;
-          }
-          set({ 
-            isLoading: false,
-            error: errorMessage
-          });
+          const errorMessage = signUpError instanceof Error ? signUpError.message : 'Sign up failed';
+          console.error('Sign up error:', errorMessage);
+          set({ error: errorMessage });
           throw signUpError;
+        } finally {
+          set({ isLoading: false });
         }
       },
 
@@ -269,17 +213,16 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
-        console.log('Attempting to sign out...');
+        console.log('Signing out...');
         set({ isLoading: true });
 
         try {
           await localAuth.signOut();
-        } catch (signOutError: unknown) {
-          const errorMessage = signOutError instanceof Error ? signOutError.message : 'Unknown sign out error';
-          console.error('Local auth signOut failed:', errorMessage);
+        } catch (signOutError) {
+          console.error('Sign out error:', signOutError);
         }
 
-        // ALWAYS clear the local state to log the user out of the app
+        // Always clear local state
         set({
           user: null,
           session: null,
@@ -289,16 +232,12 @@ export const useAuthStore = create<AuthState>()(
           error: null
         });
 
-        // Clear any cached data
+        // Clear cached data
         try {
           await AsyncStorage.multiRemove(['auth-storage', 'quiz-storage']);
-          console.log('Local storage cleared successfully');
-        } catch (storageError: unknown) {
-          const errorMessage = storageError instanceof Error ? storageError.message : 'Unknown storage error';
-          console.error('Storage cleanup error:', errorMessage);
+        } catch (storageError) {
+          console.error('Storage cleanup error:', storageError);
         }
-
-        console.log('Local auth state cleared - user should be redirected to login');
       },
 
       updateProfile: async (updates: Partial<UserProfile>) => {
@@ -306,26 +245,20 @@ export const useAuthStore = create<AuthState>()(
           const { profile, user } = get();
           if (!profile || !user) throw new Error('No profile found');
 
-          console.log('Updating profile with:', updates);
-
           const updatedProfile = {
             ...profile,
             ...updates,
             updated_at: new Date().toISOString(),
           };
 
-          // Save to local storage
           const profileKey = `profile_${user.id}`;
           await AsyncStorage.setItem(profileKey, JSON.stringify(updatedProfile));
 
-          console.log('Profile updated successfully');
           set({ profile: updatedProfile, error: null });
         } catch (updateError: unknown) {
-          const errorMessage = updateError instanceof Error ? updateError.message : 'Failed to update profile';
+          const errorMessage = updateError instanceof Error ? updateError.message : 'Profile update failed';
           console.error('Update profile error:', errorMessage);
-          set({
-            error: errorMessage
-          });
+          set({ error: errorMessage });
           throw updateError;
         }
       },

@@ -48,7 +48,7 @@ export const useStatsStore = create<StatsState>()(
 
       loadStats: () => {
         // Stats are automatically loaded from persistence
-        // This could be extended to fetch from API
+        console.log('Stats loaded');
       },
 
       updateStats: (quizResult) => {
@@ -113,6 +113,9 @@ export const useStatsStore = create<StatsState>()(
     {
       name: 'stats-storage',
       storage: createJSONStorage(() => AsyncStorage),
+      onRehydrateStorage: () => (state) => {
+        console.log('Stats store rehydrated');
+      },
     }
   )
 );
