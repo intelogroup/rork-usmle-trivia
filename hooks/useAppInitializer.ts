@@ -26,7 +26,8 @@ export function useAppInitializer() {
         // Set a reasonable timeout for the entire initialization process
         const initializationTimeout = new Promise<never>((_, reject) => {
           setTimeout(() => {
-            reject(new Error('App initialization timed out. Please restart the app.'));
+            console.warn('Initialization timeout reached, proceeding anyway.');
+            reject(new Error('App initialization timed out. Proceeding with default state.'));
           }, 10000); // 10 second timeout
         });
 
@@ -35,7 +36,6 @@ export function useAppInitializer() {
           try {
             // Initialize auth state (local auth is much faster)
             await initialize();
-            
             console.log('App initialization completed successfully');
           } catch (taskError: unknown) {
             // Handle any errors from the initialization tasks
@@ -50,12 +50,22 @@ export function useAppInitializer() {
         };
 
         // Race between initialization and timeout
-        await Promise.race([initializationTasks(), initializationTimeout]);
-        
+        await Promise.race([initializationTasks(), initializationTimeout]).catch((initError) => {
+          // Even on timeout or error, we want to proceed with default state
+          let processedError: Error;
+          if (initError instanceof Error) {
+            processedError = initError;
+          } else if (typeof initError === 'string') {
+            processedError = new Error(initError);
+          } else {
+            processedError = new Error('An unexpected error occurred during app startup. Proceeding anyway.');
+          }
+          console.error('App initialization failed but proceeding:', processedError.message);
+          setError(processedError);
+        });
       } catch (initError: unknown) {
-        // Properly handle the error with type guards
+        // Catch any unexpected errors outside the race
         let processedError: Error;
-        
         if (initError instanceof Error) {
           processedError = initError;
         } else if (typeof initError === 'string') {
@@ -63,13 +73,11 @@ export function useAppInitializer() {
         } else {
           processedError = new Error('An unexpected error occurred during app startup. Please restart the app.');
         }
-        
-        console.error('App initialization failed:', processedError.message);
+        console.error('Critical app initialization failed:', processedError.message);
         setError(processedError);
       } finally {
-        // Always hide splash screen and set loading to false
+        // Always hide splash screen and set loading to false, no matter what
         setIsLoading(false);
-        
         try {
           await SplashScreen.hideAsync();
           console.log('Splash screen hidden successfully');
